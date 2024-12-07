@@ -1,0 +1,280 @@
+﻿@model FoodieHub.MVC.Models.Article.ArticleViewModel
+
+@using FoodieHub.MVC.Models.Response
+@inject IConfiguration config
+@{
+    ViewData["Title"] = "Articles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+}
+
+<div class="container my-5">
+    <div class="row">
+        <h1 class="text-center my-5">Articles</h1>
+
+        <!-- Feature Article Section -->
+        <div class="col-md-5">
+            @if (Model.FeatureArticle != null)
+            {
+                <img src="@($"{url}/images/{Model.FeatureArticle.MainImage}")"
+                     alt="Feature Article Image"
+                     class="recipe-image" />
+                <p class="my-3" style="color: #A18F7A;">FAVORITE ARTICLE</p>
+                <h2 class="my-3">
+                    <a asp-action="Detail" asp-route-id="@Model.FeatureArticle.ArticleID">@Model.FeatureArticle.Title</a>
+                </h2>
+            }
+            else
+            {
+                <p>No favorite article available.</p>
+            }
+        </div>
+
+        <div class="col-md-1"></div>
+
+        <!-- Top Articles Section -->
+        <div class="col-md-6 bg-light p-4">
+            <h2 class="my-4 text-center">Top Articles</h2>
+            @if (Model.TopArticlesByFavourite != null && Model.TopArticlesByFavourite.Any())
+            {
+                <ul class="ChuLi">
+                    @foreach (var article in Model.TopArticlesByFavourite.Select((value, index) => new { value, index }))
+                    {
+                        <li>
+                            <span>@(article.index + 1).</span>
+                            <a asp-action="Detail" asp-route-id="@article.value.ArticleID">@article.value.Title</a>
+                            <p class="ms-2">(Lượt yêu thích: @article.value.TotalFavorites)</p>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No top articles available.</p>
+            }
+        </div>
+    </div>
+
+    <div class="ngancach"></div>
+
+    <!-- Article News Section -->
+    <div class="row">
+        <h2>Article News</h2>
+
+        <!-- Latest Article -->
+        <div class="col-md-5 my-3">
+            @if (Model.LatestArticle != null)
+            {
+                <img src="@($"{url}/images/{Model.LatestArticle.MainImage}")"
+                     alt="Article News Image"
+                     class="recipe-image" />
+                <p class="my-2" style="color: #A18F7A;">@Model.LatestArticle.UpdatedAt.ToString("dd/MM/yyyy/hh:mm:ss")</p>
+                <h2 class="my-3">
+                    <a asp-action="Detail" asp-route-id="@Model.LatestArticle.ArticleID">@Model.LatestArticle.Title</a>
+                </h2>
+            }
+            else
+            {
+                <p>No latest article available.</p>
+            }
+        </div>
+
+        <div class="col-md-1"></div>
+
+        <!-- Latest Articles List -->
+        <div class="col-md-6 my-3">
+            <div class="col d-flex justify-content-between">
+                <h2 style="font-style: italic;">Latest</h2>
+                <a asp-action="ViewAll" style="color: #A18F7A; font-style: italic; text-decoration: none;">VIEW ALL ></a>
+            </div>
+
+            @if (Model.LatestArticlesList != null && Model.LatestArticlesList.Any())
+            {
+                @foreach (var article in Model.LatestArticlesList)
+                {
+                    <div class="latest-recipe d-flex align-items-center mb-4">
+                        <div class="col-8">
+                            <p class="my-2" style="color: #A18F7A;">@article.UpdatedAt.ToString("dd/MM/yyyy/hh:mm:ss")</p>
+                            <h4>
+                                <a asp-action="Detail" asp-route-id="@article.ArticleID">@article.Title</a>
+                            </h4>
+                        </div>
+                        <div class="col-4">
+                            <img src="@($"{url}/images/{article.MainImage}")"
+                                 alt="Article Image"
+                                 class="latest-recipe-image" />
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No latest articles available.</p>
+            }
+        </div>
+    </div>
+</div>
+
+
+<div class="ngancach"></div>
+<!-- Meet Our Residents Section -->
+<div class="text-center">
+    <h1 class="page-title">Meet Our Residents</h1>
+    <p class="description">The ultimate dream team—our residents will share everything you've ever wanted to know about dinner-wrangling, dessert-whispering, and more.</p>
+</div>
+
+<div class="profile-grid">
+    <div class="profile-card">
+        <img src="~/images/profile.jpg" alt="Resident" class="profile-image">
+        <div class="info-box">
+            <p class="username">Tên người dùng</p>
+            <p class="view-profile">VIEW PROFILE >></p>
+        </div>
+    </div>
+
+    <div class="profile-card">
+        <img src="~/images/profile.jpg" alt="Resident" class="profile-image">
+        <div class="info-box">
+            <p class="username">Tên người dùng</p>
+            <p class="view-profile">VIEW PROFILE >></p>
+        </div>
+    </div>
+
+    <div class="profile-card">
+        <img src="~/images/profile.jpg" alt="Resident" class="profile-image">
+        <div class="info-box">
+            <p class="username">Tên người dùng</p>
+            <p class="view-profile">VIEW PROFILE >></p>
+        </div>
+    </div>
+
+    <div class="profile-card">
+        <img src="~/images/profile.jpg" alt="Resident" class="profile-image">
+        <div class="info-box">
+            <p class="username">Tên người dùng</p>
+            <p class="view-profile">VIEW PROFILE >></p>
+        </div>
+    </div>
+</div>
+
+<button class="view-more-btn">View More</button>
+
+<!-- CSS Styling -->
+<style>
+    .recipe-image {
+        background-size: cover;
+        background-position: center;
+        height: 300px;
+    }
+
+    .latest-recipe {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .latest-recipe-image {
+        width: 124px;
+        height: 85px;
+        background-size: cover;
+        background-position: center;
+        margin-left: 1rem;
+    }
+
+    /* Top Article List Styling */
+    .ChuLi {
+        padding-left: 0;
+        list-style: none;
+    }
+
+        .ChuLi li {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+
+            .ChuLi li span {
+                font-weight: bold;
+                width: 30px;
+                margin-right: 10px;
+            }
+
+    /* Meet Our Residents Section */
+    .page-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 35px;
+        font-style: italic;
+        font-weight: 500;
+        line-height: 42px;
+        color: #333;
+        margin: 40px 0 20px;
+    }
+
+    .description {
+        max-width: 700px;
+        margin: 0 auto 60px;
+        color: #666;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .profile-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .profile-card {
+        width: 220px;
+        text-align: center;
+    }
+
+    .profile-image {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin: 0 auto 15px;
+        object-fit: cover;
+    }
+
+    .info-box {
+        background-color: #F7F7F7;
+        padding: 20px;
+        border-radius: 4px;
+        border: 1px solid #EAEAEA;
+        margin-top: -30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .username {
+        color: #333;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .view-profile {
+        color: #998675;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+    }
+
+    .view-more-btn {
+        display: block;
+        background-color: #998675;
+        color: white;
+        padding: 10px 30px;
+        border-radius: 4px;
+        margin: 40px auto;
+        width: fit-content;
+        cursor: pointer;
+    }
+</style>

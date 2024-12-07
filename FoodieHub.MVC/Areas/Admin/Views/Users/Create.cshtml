@@ -1,0 +1,67 @@
+﻿@using FoodieHub.MVC.Models.User
+@{
+    ViewData["Title"] = "Create User";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+@model CreateUser
+
+<div class="container py-4">
+    <h2>Create User</h2>
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        @* Full Name *@
+        <div class="mb-3">
+            <label asp-for="Fullname" class="form-label">Full Name</label>
+            <input class="form-control" asp-for="Fullname" />
+            <span asp-validation-for="Fullname" class="text-danger"></span>
+        </div>
+
+        @* Email *@
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email</label>
+            <input class="form-control" asp-for="Email" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        @* Bio *@
+        <div class="mb-3">
+            <label asp-for="Bio" class="form-label">Bio</label>
+            <textarea class="form-control" asp-for="Bio"></textarea>
+            <span asp-validation-for="Bio" class="text-danger"></span>
+        </div>
+
+        @* Avatar (File Upload) *@
+        <div class="mb-3">
+            <label asp-for="File" class="form-label">Upload Avatar</label>
+            <input type="file" accept="image/*" class="form-control" asp-for="File" />
+            <span asp-validation-for="File" class="text-danger"></span>
+        </div>
+
+        @* Role *@
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label">Role</label>
+            <select class="form-select" asp-for="Role">
+                <option selected value="User">User</option>
+                <option value="Admin">Admin</option>
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
+
+        @* Password *@
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label">Password</label>
+            <input type="password" class="form-control" asp-for="Password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        @* IsActive *@
+        <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" asp-for="IsActive" />
+            <label asp-for="IsActive" class="form-check-label">Is Active</label>
+        </div>
+
+        @* Buttons *@
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+    </form>
+</div>
+

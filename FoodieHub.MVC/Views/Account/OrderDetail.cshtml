@@ -1,0 +1,267 @@
+﻿@model FoodieHub.MVC.Models.Order.GetDetailOrder
+@inject IConfiguration config
+@{
+    ViewData["Title"] = "Order Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+}
+
+<link rel="stylesheet" href="~/css/profile.css">
+<div class="container py-5">
+    <div class="row align-items-start">
+        <div>
+            <h5>Account / Order</h5>
+        </div>
+        @await Html.PartialAsync("_NavigationForProfile")
+        <div class="col-md-1"></div>
+        <!-- Main Content -->
+        <div class="col-md-8 OrderDetail-content mt-3">
+            <h5 class="text-secondary m-4">
+                Order <strong class="text-primary">@Model.OrderID</strong> was placed on
+                <strong class="text-primary">@Model.OrderedAt.ToString("HH:mm:ss dd/MM/yyyy")</strong> and is currently
+                <span class="text-success">@Model.Status</span>.
+            </h5>
+
+            <!-- Order Detail Section -->
+            <div class="row">
+                <div class="col-md-8">
+                    <h5 class="fw-bold m-2">ORDER DETAILS</h5>
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ProductForOrder)
+                                {
+                                    <tr>
+                                        <td class="align-middle" style="width: 70%;">
+                                            <div class="d-flex align-items-center">
+                                                <img src=@($"{url}/images/{item.ProductImage}") alt="Product Image" class="img-thumbnail" style="width:50px;height:50px" />
+                                                <div class="ms-2">
+                                                    <strong>@item.ProductName</strong> x <span class="text-muted">@item.Quantity</span><br>
+                                                    <small>Unit Price: @item.UnitPrice $</small><br>
+                                                    <small>Discount: @item.Discount $</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-end align-middle">@item.TotalPrice $</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">AMOUNT</span>
+                        <span class="fw-bold">@Model.TotalAmount $</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">Discount</span>
+                        <span class="fw-bold">@Model.Discount $</span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        @if (Model.Coupon != null)
+                        {
+                            <span>Coupon Code: <strong>@Model.Coupon.CouponCode</strong></span>                        
+                            <span>Discount: @Model.DiscountOfCoupon $</span>
+                        }
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">TOTAL AMOUNT</span>
+                        <span class="fw-bold">@(Model.TotalAmount - (Model.Discount ?? 0) - (Model.DiscountOfCoupon ?? 0)) $</span>
+                    </div>
+                    <hr>
+                </div>
+
+                <!-- Vertical Separator -->
+                <div class="col-md-1 d-flex justify-content-center">
+                    <div class="vertical-separator"></div>
+                </div>
+
+                <!-- Payment Address Section -->
+                <div class="col-md-3 mt-3">
+                    <h6 class="fw-bold mb-3">Payment Address</h6>
+                    <p class="mb-2">@Model.Fullname</p>
+                    <p class="mb-2" style="font-style: italic;">@Model.PhoneNumber</p>
+                    <p class="mb-2">@Model.ShippingAddress</p>
+
+                    <!-- QR Code Section -->
+                    @if (Model.QRCode != null)
+                    {
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <h5>Order QR Code</h5>
+                                <img src=@(url+"/"+Model.QRCode) alt="QR Code" class="img-fluid" />
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Status == "CANCELED" || Model.Status == "COMPLETED")
+                    {
+                        <a class="button button-dark rounded-2" asp-controller="Cart" asp-action="AddOrderItemsToCart" asp-route-id="@Model.OrderID">Order Again</a>
+                    }
+                    @if (Model.Status == "COMPLETED")
+                    {
+                        <br>
+                        <span class="text-success mt-2 fw-bold">Remember feedback for us!</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Payment Method and Note Section -->
+            <div class="row mt-1">
+                <div class="col-12">
+                    <p><strong>Payment Method:</strong> @(Model.PaymentMethod ? "Card" : "Cash")</p>
+                    <p><strong>Payment Status:</strong> @(Model.PaymentStatus ? "Paid" : "Unpaid")</p>
+                    @if (Model.Payment != null)
+                    {
+                        <p><strong>Payment Method:</strong> @Model.Payment.PaymentMethod</p>
+                        <p><strong>Payment Date:</strong> @Model.Payment?.PaymentDate.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                    }
+                    
+                    <p><strong>Note:</strong> @Model.Note</p>
+                </div>
+            </div>
+
+            @if (Model.PaymentMethod && !Model.PaymentStatus)
+            {
+                <a href=@("/payment/orders/"+Model.OrderID) class="button button-dark">PAYMENT</a>
+
+                <a class="button button-light">CANCEL</a>
+            }
+
+            @if (!Model.PaymentMethod && Model.Status.ToUpperInvariant()== "PENDING")
+            {
+                <button class="button rounded-2 bg-danger text-light" onclick="setOrderId(@Model.OrderID)" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">Cancel</button>
+            }
+
+
+
+            @if (Model.OrderCancel != null)
+            {
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6 class="fw-bold text-danger">Order Cancelled</h6>
+                        <p>Cancelled Date: @Model.OrderCancel.CancelledDate.ToString("dd/MM/yyyy")</p>
+                        <p>Reason: @Model.OrderCancel.Reason</p>
+                    </div>
+                </div>
+            }
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h5 class="fw-bold">Order Status History</h5>
+                    <div class="progress-bar-container">
+                        @foreach (var status in Model.OrderStatues.OrderBy(s => s.ChangeDate))
+                        {
+                            <div class="status-item">
+                                <div class="status-circle @(status.Status.ToUpperInvariant() == "CANCELED" ? "status-cancel" : "")">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="status-info">
+                                    <h6 class="status-title">@status.Status</h6>
+                                    <p class="status-date">@status.ChangeDate.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                                </div>
+                            </div>
+                            @if (status != Model.OrderStatues.LastOrDefault())
+                            {
+                                <div class="progress-arrow">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+
+    </div>
+</div>
+    <!-- Modal for Order Cancellation Reason -->
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="cancelOrderForm" method="post" action="@Url.Action("CancelOrder", "Account")">
+                        <input type="hidden" id="orderID" name="orderID" />
+                        <div class="mb-3">
+                            <label for="cancellationReason" class="form-label">Reason for Cancellation</label>
+                            <textarea id="cancellationReason" class="form-control" name="cancellationReason" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger" form="cancelOrderForm">Confirm Cancellation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function setOrderId(orderId) {
+            document.getElementById('orderID').value = orderId;
+        }
+    </script>
+<style>
+        .progress-bar-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            text-align: center;
+        }
+
+        .status-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #28a745; /* Default background color */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .status-cancel {
+            background-color: #dc3545; /* Red background for Cancel */
+        }
+
+        .status-info h6 {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .status-info p {
+            font-size: 12px;
+            margin: 0;
+            color: #6c757d;
+        }
+
+        .progress-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #6c757d;
+        }
+
+</style>

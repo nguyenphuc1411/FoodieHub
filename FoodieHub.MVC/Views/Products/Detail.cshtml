@@ -1,0 +1,1020 @@
+﻿﻿@using FoodieHub.MVC.Service.Implementations
+@using FoodieHub.MVC.Service.Interfaces
+@using FoodieHub.MVC.Models.Product.TimeHelper
+@model FoodieHub.MVC.Models.Response.APIResponse<FoodieHub.MVC.Models.GetProductDTO>
+@inject IProductImageService _imgService;
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@inject IReviewService _reviewService;
+@inject IProductService _productService;
+@inject IOrderService _orderService;
+@inject IGetCurrentUserID _currentUserIdService;
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Lấy danh sách hình ảnh sản phẩm
+    var listProductImages = await _imgService.GetAllImg();
+
+    // Lấy đường dẫn cơ sở từ cấu hình
+    var apiUrl = Configuration["BaseHost"];
+
+    var listOrderDetails = await _orderService.GetOrderDetailsWithProductID();
+
+    var listOrder = await _orderService.GetOrderWithUserId();
+
+    var productID = Model.Data.ProductID;
+
+    bool hasOrder = false;
+    var currentUserId = _currentUserIdService.GetCurrentUserId();
+
+    var listProduct = await _productService.GetAll();
+
+    var randomProducts = listProduct
+        .Where(item => item.IsActive == true && item.StockQuantity > 0) // Lọc sản phẩm còn hoạt động và có hàng
+        .OrderBy(_ => Guid.NewGuid()) // Trộn ngẫu nhiên danh sách
+        .Take(8) // Lấy 8 sản phẩm
+        .ToList(); // Đảm bảo danh sách đã sắp xếp
+
+    // // Lấy danh sách đánh giá
+    var listReview = await _reviewService.GetListReview(productID);
+
+    // Lọc danh sách đánh giá theo ProductID của sản phẩm hiện tại
+
+    int averageRating = 0;
+    if (listReview.Data.Any())
+    {
+        double totalRate = listReview.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
+        double avgRate = totalRate / listReview.Data.Count;  // Trung bình rate
+
+        // Làm tròn: nếu avgRate >= 3.5, làm tròn lên, nếu < 3.5, làm tròn xuống
+        averageRating = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
+    }
+  
+}
+
+<div class="container mt-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Products" class="text-decoration-none">Shop</a></li>
+            <li class="breadcrumb-item active">@Model.Data.ProductName</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="main-image mb-3">
+                <img id="mainImage" src="@($"{apiUrl}Images/{@Model.Data.MainImage}")" alt="Stackable Bodega Glass" class="img-fluid rounded">
+            </div>
+
+
+            <div class="thumbnails">
+                <div class="row g-2">
+                    <div class="col-3">
+                        <img src="@($"{apiUrl}Images/{@Model.Data.MainImage}")"
+                             alt="Thumbnail"
+                             class="rounded border thumbnail-image"
+                             height="80"
+                             width="100"
+                             onclick="changeMainImage(this)">
+                    </div>
+                    @foreach (var item in listProductImages)
+                    {
+                        if (item.ProductID == Model.Data.ProductID)
+                        {
+
+                            <div class="col-3">
+                                <img src="@($"{apiUrl}Images/{item.ImageURL}")"
+                                     alt="Thumbnail"
+                                     class="rounded border thumbnail-image"
+                                     height="80"
+                                     width="100"
+                                     onclick="changeMainImage(this)">
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <h1 class="mb-3">@Model.Data.ProductName</h1>
+
+            <!-- Price -->
+            @{
+                var discountedPriceMain = (Model.Data.Price - (Model.Data.Price * Model.Data.Discount / 100)).ToString("0.00");
+            }
+            <div class="price-section mb-3">
+
+                @if(Model.Data.Discount == 0)
+                {
+                    <span class="h2 text-danger">$@Model.Data.Price.ToString("0.00")</span>
+                }
+                else
+                {
+                    <span class="h2 text-danger">$@discountedPriceMain</span>
+                    <span class="text-decoration-line-through text-muted ms-2">$@Model.Data.Price.ToString("0.00")</span>
+                    <span class="discount-percent-text mx-2">-@Model.Data.Discount.ToString("0") %</span>
+                }
+               
+            </div>
+
+            <!-- Ratings -->
+            <div class="ratings mb-3">
+               
+                <span class="ms-2">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if(averageRating == 0)
+                        {
+                            <i class="fa-solid fa-star text-mute "></i>
+                        }
+
+                        else if (i <= averageRating)
+                        {
+                            <!-- Sao đầy -->
+                            <i class="fa-solid fa-star text-mute text-warning"></i>
+                        }
+                        else
+                        {
+                            <!-- Sao rỗng -->
+                            <i class="fa-solid fa-star text-muted "></i>
+
+                        }
+                    }
+                </span>
+                <a class="ms-2 text-decoration-none" href="#tolistreview">View @listReview.Data.Count() reviews</a>
+            </div>
+
+            <div class="mb-2">
+                <span>Stock left: 
+                    @if(Model.Data.StockQuantity > 0)
+                    {
+                        <span class="text-success"> @Model.Data.StockQuantity Pcs</span>
+                    }
+                    else
+                    {
+                        <span class="text-danger"> @Model.Data.StockQuantity Pcs</span>
+                    }
+                </span>
+            </div>
+
+            <div class="purchase-section mb-4">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <label class="form-label" for="quantity">Quantity:</label>
+                        <input id="quantity" name="quantity" type="number" class="form-control" value="1" min="1" style="width: 70px;">
+                    </div>
+                    <div class="col">
+                        @if (Model.Data.StockQuantity <= 0)
+                        {
+                            <a class="btn btn-primary w-100 text-danger" style="background-color: transparent; margin-top: 2em;" disabled>
+                                Out of stock
+                            </a>
+                        }
+                        else
+                        {
+                            <a id="addToCartButton"
+                               href="@Url.Action("AddToCart", "Cart", new { productId = Model.Data.ProductID, quantity = 1 })"
+                               class="btn btn-primary w-100"
+                               style="background-color: #2d4356; margin-top: 2em;">
+                                ADD TO CART
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="contactModalLabel">Contact Us</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>The quantity exceeds available stock. Please provide your contact details to proceed.</p>
+                            <form id="contactForm" asp-controller="Contact" asp-action="AddContact" method="post">
+                                <div class="mb-3">
+                                    <label for="fullName" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="fullName" name="FullName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" name="Email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phoneNumber" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phoneNumber" name="PhoneNumber"
+                                           maxlength="11" required pattern="^(84|0[35789])[0-9]{8}$"
+                                           title="Phone number must start with 84 or 0 followed by 3, 5, 7, 8, 9, and have 8 more digits.">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="note" class="form-label">Note (Optional)</label>
+                                    <textarea class="form-control" id="note" name="Note"></textarea>
+                                </div>
+                                <input type="hidden" id="productID" name="ProductID" value="@Model.Data.ProductID">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+           
+
+
+            <!-- Details Section -->
+            <div class="details-section">
+                <h5 class="mb-3">DETAILS</h5>
+               <p>@Model.Data.Description</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="ngancach mt-2"></div>
+
+
+
+<!-- Similar Style Section -->
+<div class="container my-5">
+    <h3 class="text-center mb-4">Similar Style</h3>
+    <div class="row">
+        @foreach (var item in randomProducts)
+        {
+
+            @if (item.IsActive == true && item.StockQuantity > 0)
+            {
+                <div class="col-md-3 mb-4">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="@($"{apiUrl}Images/{item.MainImage}")" alt="Product Image">
+                        </div>
+                        <div class="product-title">@item.ProductName</div>
+
+                        <!-- Price and Rating Row -->
+                        @{
+                            var listReviewOrther = await _reviewService.GetListReview(item.ProductID);
+
+
+                            int averageRatingOther = 0;
+                            if (listReviewOrther.Data.Any())
+                            {
+                                double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
+                                double avgRate = totalRate / listReviewOrther.Data.Count;  // Trung bình rate
+
+                                // Làm tròn: nếu avgRate >= 3.5, làm tròn lên, nếu < 3.5, làm tròn xuống
+                                averageRatingOther = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
+                            }
+                        }
+                        @if(item.Discount == 0)
+                        {
+                            <div class="d-flex justify-content-between align-items-center">
+                               
+                                <div class="product-price">$@item.Price.ToString("0.00")</div>
+                                <div class="product-rating"> @averageRatingOther⭐</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex justify-content-between align-items-center">
+                                @{
+                                    var discountedPrice = (item.Price - (item.Price * item.Discount / 100)).ToString("0.00");
+                                }
+                                <div class="d-flex">
+                                    <div class="product-price">$@discountedPrice</div>
+                                    <div class="product-original-price mx-2">$@item.Price.ToString("0.00")</div>
+                                    <span class="discount-percent-text-list-product" >-@item.Discount.ToString("0")%</span>
+                                </div>
+
+                                <div class="product-rating">@averageRatingOther⭐</div>
+                            </div>
+                            <!-- Original Price Row -->
+                           
+                        }
+                      
+
+                        
+
+                        <div class="d-flex justify-content-between mt-3">
+                            @if (@item.StockQuantity <= 0)
+                            {
+                                <a enable class="btn text-danger btn-sm">Out of stock</a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("AddToCart", "Cart", new { productId = item.ProductID, quantity = 1 })" class="btn button-light btn-sm">Add to card</a>
+                            }
+
+                            <a asp-action="Detail" asp-controller="Products" asp-route-id="@item.ProductID" class="btn button-dark btn-sm">Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+
+
+
+<div class="ngancach"></div>
+<!-- Reviews Section -->
+<div class="container my-5 col-md-12">
+    <h3>Reviews</h3>
+    <div class="d-flex col-sm-7">
+        <p class="text-muted mt-2">Filter Reviews</p>
+
+        @{
+            bool showButtonFeedBack = false; // Biến để kiểm soát hiển thị nút review
+            bool hasReviewed = false; // Biến để kiểm tra xem đã review chưa
+
+            if (listOrder?.Data != null && listOrderDetails?.Data != null)
+            {
+                foreach (var order in listOrder.Data)
+                {
+                    if (order.Status == "COMPLETED" && order.UserID == currentUserId.Result.Id)
+                    {
+                        // Kiểm tra thời gian còn lại để review
+                        if ((DateTime.Now - order.OrderedAt).TotalDays <= 30)
+                        {
+                            foreach (var orderDt in listOrderDetails.Data.Where(od => od.OrderID == order.OrderID))
+                            {
+                                if (orderDt.ProductID == productID)
+                                {
+                                    // Kiểm tra xem đã review sản phẩm này trong vòng 30 ngày chưa
+                                    hasReviewed = listReview?.Data.Any(r =>
+                                    r.ProductID == productID &&
+                                    r.Id == currentUserId.Result.Id &&
+                                    r.ReviewedAt >= order.OrderedAt &&  // Đảm bảo review thuộc về lần mua này
+                                    r.ReviewedAt <= order.OrderedAt.AddDays(r.ShelfLife) // Nằm trong khoảng thời gian 30 ngày
+                                    ) ?? false;
+
+                                    if (!hasReviewed)
+                                    {
+                                        showButtonFeedBack = true; // Chỉ hiển thị nút nếu chưa review
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (showButtonFeedBack) break;
+                    }
+                }
+            }
+            else
+            {
+                <p>No orders or order details available.</p>
+            }
+        }
+
+        @if (showButtonFeedBack)
+        {
+            <a class="btn btn-dark text-white mx-2 mb-2" data-bs-toggle="modal" data-bs-target="#newReviewModal">
+                We need your feedback. Let's do it!
+            </a>
+        }
+    </div>
+
+    
+
+    <div class="row mb-4">
+        <ul class="nav nav-pills gap-3">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="pill" href="#allstar">All</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#fivestars"> 5  <i class="fa-solid fa-star"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#fourstars"> 4  <i class="fa-solid fa-star"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#threestars"> 3  <i class="fa-solid fa-star"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#twostars"> 2  <i class="fa-solid fa-star"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#onestar"> 1  <i class="fa-solid fa-star"></i></a>
+            </li>
+        </ul>
+      
+    </div>
+    <div class="tab-content" id="tolistreview">
+
+        <div class="tab-pane container active" id="allstar">
+            <div id="review-list-all" class="collapse">
+                @foreach (var item in listReview.Data)
+                {
+                    var ratingValue = item.RatingValue;
+                    var reviewDate = item.ReviewedAt;
+                    var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
+
+                    <div class="review-card">
+                        <div class="row">
+                            <div class="col-6 review-rating">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= ratingValue)
+                                    {
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-star text-muted"></i>
+                                    }
+                                }
+                            </div>
+                            <div class="col-6 text-end text-muted">@timeAgo</div>
+                        </div>
+
+
+                        <div class="review-author">
+                            <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
+                            <span>@item.UserName</span>
+                        </div>
+
+
+                        <div class="review-body">@item.ReviewContent</div>
+
+  
+                        @if (item.Id == currentUserId.Result.Id) 
+                        {
+                            <div class="text-end mt-2">
+                                @if ((DateTime.Now - reviewDate).TotalDays <= 30) 
+                                {
+                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+            </div>
+            <div class="text-center">
+                <button class="btn btn-dark mt-2" data-bs-toggle="collapse" data-bs-target="#review-list-all" aria-expanded="false" aria-controls="review-list-all">
+                    View More
+                </button>
+            </div>
+        </div>
+
+        <div class="tab-pane container fade" id="fivestars">
+            <div id="review-list-five" class="collapse">
+                @foreach (var item in listReview.Data)
+                {
+                    @if (item.RatingValue == 5)
+                    {
+                        var ratingValue = item.RatingValue;
+                        var reviewDate = item.ReviewedAt;
+                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
+                        <div class="review-card">
+                            <div class="row">
+                                <div class="col-6 review-rating">
+                                    @for (int i = 1; i <= ratingValue; i++)
+                                    {
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                    }
+                                </div>
+                                <div class="col-6 text-end text-muted">@timeAgo</div>
+                            </div>
+                            <div class="review-author">
+                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar">
+                                @item.UserName
+                            </div>
+                            <div class="review-body">@item.ReviewContent</div>
+
+                            @if (item.Id == currentUserId.Result.Id)
+                            {
+                                <div class="text-end mt-2">
+                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <div class="text-center">
+                <button class="btn btn-dark mt-2" data-bs-toggle="collapse" data-bs-target="#review-list-five" aria-expanded="false" aria-controls="review-list-five">
+                    View More
+                </button>
+            </div>
+        </div>
+
+        <div class="tab-pane container fade" id="fourstars">
+            <div id="review-list-four" class="collapse">
+                @foreach (var item in listReview.Data)
+                {
+                    @if (item.RatingValue == 4)
+                    {
+                        var ratingValue = item.RatingValue;
+                        var reviewDate = item.ReviewedAt;
+                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
+                        <div class="review-card">
+                            <!-- Star Rating and Timestamp Row -->
+                            <div class="row">
+                                <div class="col-6 review-rating">
+                                    @for (int i = 1; i <= ratingValue; i++)
+                                    {
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                    }
+                                </div>
+                                <div class="col-6 text-end text-muted">@timeAgo</div>
+                            </div>
+
+                            <!-- Avatar and Reviewer Name Row -->
+                            <div class="review-author">
+                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar">
+                                @item.UserName
+                            </div>
+
+                            <!-- Review Content -->
+                            <div class="review-body">@item.ReviewContent</div>
+
+
+                            @if (item.Id == currentUserId.Result.Id)
+                            {
+                                <div class="text-end mt-2">
+                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <div class="text-center">
+                <button class="btn btn-dark mt-2" data-bs-toggle="collapse" data-bs-target="#review-list-four" aria-expanded="false" aria-controls="review-list-four">
+                    View More
+                </button>
+            </div>
+        </div>
+
+
+        <div class="tab-pane container fade" id="threestars">
+            <div id="review-list-three" class="collapse">
+                @foreach (var item in listReview.Data)
+                {
+                    @if (item.RatingValue == 3)
+                    {
+                        var ratingValue = item.RatingValue;
+                        var reviewDate = item.ReviewedAt;
+                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
+                        <div class="review-card">
+                            <div class="row">
+                                <div class="col-6 review-rating">
+                                    @for (int i = 1; i <= ratingValue; i++)
+                                    {
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                    }
+                                </div>
+                                <div class="col-6 text-end text-muted">@timeAgo</div>
+                            </div>
+                            <div class="review-author">
+                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
+                                <span>@item.UserName</span>
+                            </div>
+                            <div class="review-body">@item.ReviewContent</div>
+
+                            @if (item.Id == currentUserId.Result.Id)
+                            {
+                                <div class="text-end mt-2">
+                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <div class="text-center">
+                <button class="btn btn-dark mt-2" data-bs-toggle="collapse" data-bs-target="#review-list-three" aria-expanded="false" aria-controls="review-list-three">
+                    View More
+                </button>
+            </div>
+        </div>
+
+        <div class="tab-pane container fade" id="twostars">
+            <div id="review-list-two" class="collapse">
+                @foreach (var item in listReview.Data)
+                {
+                    @if (item.RatingValue == 2)
+                    {
+                        var ratingValue = item.RatingValue;
+                        var reviewDate = item.ReviewedAt;
+                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
+                        <div class="review-card">
+                            <div class="row">
+                                <div class="col-6 review-rating">
+                                    @for (int i = 1; i <= ratingValue; i++)
+                                    {
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                    }
+                                </div>
+                                <div class="col-6 text-end text-muted">@timeAgo</div>
+                            </div>
+                            <div class="review-author">
+                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
+                                <span>@item.UserName</span>
+                            </div>
+                            <div class="review-body">@item.ReviewContent</div>
+
+                            @if (item.Id == currentUserId.Result.Id)
+                            {
+                                <div class="text-end mt-2">
+                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <div class="text-center">
+                <button class="btn btn-dark mt-2" data-bs-toggle="collapse" data-bs-target="#review-list-two" aria-expanded="false" aria-controls="review-list-two">
+                    View More
+                </button>
+            </div>
+        </div>
+
+        <div class="tab-pane container fade" id="onestar">
+            <div id="review-list-one" class="collapse">
+                @foreach (var item in listReview.Data)
+                {
+                    @if (item.RatingValue == 1)
+                    {
+                        var ratingValue = item.RatingValue;
+                        var reviewDate = item.ReviewedAt;
+                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
+                        <div class="review-card">
+                            <div class="row">
+                                <div class="col-6 review-rating">
+                                    @for (int i = 1; i <= ratingValue; i++)
+                                    {
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                    }
+                                </div>
+                                <div class="col-6 text-end text-muted">@timeAgo</div>
+                            </div>
+                            <div class="review-author">
+                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
+                                <span>@item.UserName</span>
+                            </div>
+                            <div class="review-body">@item.ReviewContent</div>
+
+                            @if (item.Id == currentUserId.Result.Id)
+                            {
+                                <div class="text-end mt-2">
+                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <div class="text-center">
+                <button class="btn btn-dark mt-2" data-bs-toggle="collapse" data-bs-target="#review-list-one" aria-expanded="false" aria-controls="review-list-one">
+                    View More
+                </button>
+            </div>
+        </div>
+
+
+
+
+    </div>
+    
+
+
+
+
+    <!-- New Review Modal -->
+    <div class="modal fade" id="newReviewModal" tabindex="-1" aria-labelledby="newReviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newReviewModalLabel">Add New Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="AddNewReview" asp-controller="Review" method="post">
+                    <div class="modal-body">
+
+                        <!-- RatingValue Select Box -->
+                        <div class="mb-3">
+                            <label for="ratingValue" class="form-label">Rating:  <i class="fa-solid fa-star text-warning"></i></label>
+                            <select class="form-select" id="ratingValue" name="RatingValue" required>
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <option value="@i">@i  </option>
+                                }
+                            </select>
+
+                        </div>
+
+                        <!-- ReviewContent -->
+                        <div class="mb-3">
+                            <label for="reviewContent" class="form-label">Review Content</label>
+                            <textarea class="form-control" id="reviewContent" name="ReviewContent" rows="3" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <input type="hidden" id="ProductID" name="ProductID" value="@Model.Data.ProductID" />
+
+                        </div>
+
+                       
+
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </div>
+               
+                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Review Modal -->
+    @foreach (var item in listReview.Data)
+    {
+
+        <div class="modal fade" id="updateReviewModal(@item.ReviewID)" tabindex="-1" aria-labelledby="updateReviewModalLabel(@item.ReviewID)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateReviewModalLabel-@item.ReviewID">Update review</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" asp-action="UpdateReview" asp-controller="Review">
+                            <!-- Input ẩn chứa ReviewID -->
+                            <input type="hidden" name="ReviewID" value="@item.ReviewID">
+                            <input type="hidden" name="ProductID" value="@item.ProductID">
+                            <!-- Trường Rating -->
+                            <div class="mb-3">
+                                <label for="ratingValue-@item.ReviewID" class="form-label">
+                                    Rating: <i class="fa-solid fa-star text-warning"></i>
+                                </label>
+                                <select class="form-select" id="ratingValue-@item.ReviewID" name="RatingValue" required>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <option value="@i">@i  </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Input cho nội dung review -->
+                            <div class="mb-3">
+                                <label for="reviewContent-@item.ReviewID" class="form-label">Review Content</label>
+                                <textarea class="form-control" id="reviewContent-@item.ReviewID" name="ReviewContent" rows="3" required>@item.ReviewContent</textarea>
+                            </div>
+
+                          
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+   
+
+    
+</div>
+<style>
+    /* Global Styling */
+    body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    /* Product Detail Section */
+    .stars {
+        color: #ffc107;
+    }
+
+    .price-section .text-muted {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+
+    .thumbnails img {
+        cursor: pointer;
+        transition: opacity 0.3s ease, transform 0.2s ease;
+    }
+
+        .thumbnails img:hover {
+            opacity: 0.85;
+            transform: scale(1.05);
+        }
+
+    .main-image img {
+        width: 100%;
+        height: 50vh;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Custom Button Styling */
+    .btn-primary {
+        background-color: #2d4356;
+        border-color: #2d4356;
+        color: #fff;
+        padding: 0.6rem 1.2rem;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #1f2937;
+            border-color: #1f2937;
+        }
+
+    /* Breadcrumb Styling */
+    .breadcrumb a {
+        color: #6c757d;
+        transition: color 0.3s ease;
+    }
+
+        .breadcrumb a:hover {
+            color: #2d4356;
+        }
+
+    /* Product Card Styling (Similar Products) */
+    .product-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        transition: box-shadow 0.3s ease;
+    }
+
+        .product-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+    .product-image img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+
+        .product-image img:hover {
+            transform: scale(1.05);
+        }
+
+    .product-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-top: 15px;
+        color: #2d4356;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #e63946;
+    }
+
+    .product-rating {
+        font-size: 1rem;
+        color: #ffc107;
+    }
+
+    .product-original-price {
+        font-size: 0.9rem;
+        text-decoration: line-through;
+        color: #6c757d;
+    }
+
+    /* Reviews Section */
+    .review-card {
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        background-color: #fafafa;
+        transition: background-color 0.3s ease;
+    }
+
+        .review-card:hover {
+            background-color: #f0f0f0;
+        }
+
+    .review-rating {
+        font-size: 1.2rem;
+        color: #ffc107;
+    }
+
+    .review-author {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+        .review-author img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid #ddd;
+        }
+
+    .review-body {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    /* Màu nền và chữ mặc định */
+    .nav-pills .nav-link {
+        background-color: transparent;
+        color: #f1c40f; /* Màu chữ đen */
+        border: 1px solid #ddd; /* Đường viền sáng */
+    }
+
+        /* Màu nền và chữ khi tab active */
+        .nav-pills .nav-link.active {
+            background-color: #f1c40f; /* Vàng nhạt */
+            color: white; /* Màu chữ trắng */
+            border-color: #f1c40f; /* Viền vàng */
+        }
+
+        /* Thêm hiệu ứng hover */
+        .nav-pills .nav-link:hover {
+            background-color: #f8f9fa;
+            color: black;
+        }
+
+    .discount-percent-text{
+        background-color: red;
+        font-size: 16px;
+        color: white;
+        padding: 3px;
+        border-radius: 6px;
+    }
+
+    .discount-percent-text-list-product{
+
+        font-size: 13px;
+        color: red;
+        padding: 1px;
+        border-radius: 3px;
+        height: auto;
+    }
+
+    .modal-content {
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+</style>
+
+
+<script>
+    function changeMainImage(thumbnail) {
+        const mainImage = document.getElementById("mainImage");
+        mainImage.src = thumbnail.src; // Cập nhật nguồn hình lớn bằng hình thumbnail
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const quantityInput = document.getElementById('quantity');
+        const addToCartButton = document.getElementById('addToCartButton');
+        const stockQuantity = @Model.Data.StockQuantity; // Inject số lượng tồn kho từ Razor
+        const contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
+
+        // Cập nhật URL khi giá trị trong ô nhập thay đổi
+        quantityInput.addEventListener('input', function () {
+            let quantity = parseInt(quantityInput.value) || 1; // Giá trị nhập vào, mặc định là 1 nếu rỗng
+
+            // Kiểm tra nếu vượt quá số lượng tồn kho
+            if (quantity > stockQuantity) {
+                alert(`The maximum available stock is ${stockQuantity}.`);
+                contactModal.show();
+                quantity = stockQuantity; // Đặt lại giá trị tối đa
+                quantityInput.value = stockQuantity; // Cập nhật giá trị trong ô input
+            } else if (quantity < 1) {
+                quantity = 1; // Đảm bảo giá trị nhỏ nhất là 1
+                quantityInput.value = 1;
+            }
+
+            const productId = '@Model.Data.ProductID'; // Inject từ Razor
+            addToCartButton.href = `/Cart/AddToCart?productId=${productId}&quantity=${quantity}`;
+        });
+    });
+</script>
+

@@ -1,0 +1,45 @@
+﻿@using FoodieHub.MVC.Models.Request
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+@model LoginVM
+<form asp-action="Login" method="post" class="form bg-white py-4 px-5 rounded p-4">
+    <h1>Login</h1>
+
+
+    <div class="form-group mt-5 ">
+        <span asp-validation-for="Email" class="text-danger d-block"></span>
+        <div class="d-flex column-gap-4 justify-content-between align-items-center">
+            <i class="fa-solid fa-envelope"></i>
+            <input asp-for="Email" class="w-100" type="text" placeholder="Enter your email">
+        </div>
+    </div>
+    <div class="form-group mt-4">
+        <span asp-validation-for="Password" class="text-danger d-block"></span>
+        <div class="d-flex column-gap-4 justify-content-between align-items-center">
+            <i class="fa-solid fa-lock"></i>
+            <input asp-for="Password" class="w-100" type="password" placeholder="Enter your  password">
+        </div>
+    </div>
+    <div class="my-3 text-end">
+        <a href="/account/forgotpassword" class="text-primary">
+            Forgot Password
+        </a>
+    </div>
+
+
+    <button class="button button-dark w-100">Login</button>
+
+    <p class="mt-4 mb-3 text-center">
+        Not a member? <a href="/account/register" class="text-primary">Signup Now</a>
+    </p>
+
+    <a href="/account/logingoogle" class="google button w-100 mb-2">
+        <img class="google-icon" src="/images/google.jpg" alt="">
+        Login
+        With Google
+    </a>
+</form>
+

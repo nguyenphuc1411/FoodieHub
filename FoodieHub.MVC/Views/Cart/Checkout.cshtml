@@ -1,0 +1,229 @@
+﻿@using FoodieHub.MVC.Models.Cart
+@inject IConfiguration config
+@{
+    ViewData["Title"] = "Checkout";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+    var cartItems = ViewBag.CartItems as List<GetCartDTO>; // Retrieve cart items from ViewBag
+}
+
+<style>
+    .cart-detail {
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 5px;
+        height: 80vh; /* Set a fixed height */
+        overflow-y: auto; /* Enable vertical scrolling */
+    }
+
+    .cart-item {
+        background-color: #f8f9fa;
+    }
+
+    .product-name {
+        font-size: 1rem;
+    }
+
+    .order-summary {
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+    }
+
+    .remove-btn {
+        border: none;
+        background: none;
+        color: #dc3545;
+    }
+
+    .billing-detail, .cart-detail {
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    .button-dark {
+        background-color: #343a40;
+        color: #ffffff;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .button-dark:hover {
+            background-color: #495057;
+        }
+</style>
+
+<div class="container my-5" style="width: 1200px;">
+    <h2 class="text-center mb-5">Checkout</h2>
+
+    <div class="row">
+        <!-- Billing Details Section -->
+        <div class="col-md-6">
+            <div class="billing-detail">
+                <h4>Billing Detail</h4>
+                <div class="d-flex justify-content-between">
+                    <h5>Address Detail</h5>
+                    <button id="getLocationButton" class="btn btn-primary mt-3">Get Current Location</button>
+                </div>
+      
+                <form asp-action="PlaceOrder" method="post" id="orderForm">
+                    <div class="mb-3">
+                        <label for="province" class="form-label">Province / City *</label>
+                        <select id="province" name="Province" class="form-select" required>
+                            <option value="">Select</option>
+                        </select>
+                        <span class="text-danger" id="province-error" style="display:none;">Province / City is required.</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="district" class="form-label">District *</label>
+                        <select id="district" name="District" class="form-select" required>
+                            <option value="">Select</option>
+                        </select>
+                        <span class="text-danger" id="district-error" style="display:none;">District is required.</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ward" class="form-label">Ward/Commune *</label>
+                        <select id="ward" name="Ward" class="form-select" required>
+                            <option value="">Select</option>
+                        </select>
+                        <span class="text-danger" id="ward-error" style="display:none;">Ward/Commune is required.</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Street Address *</label>
+                        <textarea id="address" name="ShippingAddress" class="form-control" required></textarea>
+                        <span class="text-danger" id="address-error" style="display:none;">Street Address is required.</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number *</label>
+                        <input type="tel" id="phone" name="PhoneNumber" class="form-control"
+                               required pattern="^(84|0[3|5|7|8|9])([0-9]{8})$"
+                               title="Phone number must start with 84 or 03, 05, 07, 08, 09 and have 10 or 11 digits">
+                        <span class="text-danger" id="phone-error" style="display:none;">Invalid phone number format.</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="paymentMethod" class="form-label">Payment Method *</label>
+                        <select id="paymentMethod" name="PaymentMethod" class="form-select" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="false">Cash</option>
+                            <option value="true">Card</option>
+                        </select>
+                    </div>
+
+                    <!-- Always visible message -->
+                    <p class="text-info">Paying by card receives a 10% discount and is non-refundable.</p>
+
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea id="notes" name="Note" class="form-control"></textarea>
+                    </div>
+
+                    <input type="hidden" id="couponID" name="CouponID">
+
+                    <button type="submit" name="PaymentMethod" value="Cash" class="button-dark w-100 mt-3">PLACE ORDER</button>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- Cart Details Section -->
+        <div class="col-md-6">
+            <div class="cart-detail">
+                <h4>Your Cart</h4>
+                @if (cartItems != null && cartItems.Any())
+                {
+                    <table class="table table-hover mb-3">
+                        <tbody>
+                            @foreach (var item in cartItems)
+                            {
+                                <tr>
+                                    <!-- Hình ảnh sản phẩm -->
+                                    <td class="align-middle">
+                                        <img src="@($"{url}/images/{item.MainImage}")" alt="Product Image" class="img-fluid rounded" style="width: 100px;">
+                                    </td>
+                                    <td class="align-middle">
+                                        <!-- Tên sản phẩm và số lượng -->
+                                        <h5 class="product-name mb-2" style="word-break: break-word; white-space: normal; max-width: 200px;" title="@item.ProductName">
+                                            @item.ProductName
+                                        </h5>
+
+                                        <!-- Số lượng -->
+
+                                        <form method="post" action="@Url.Action("UpdateCartItem")" class="update-cart-form d-flex justify-content-center">
+                                            <input type="hidden" name="productId" value="@item.ProductID" />
+                                            <div class="input-group" style="width: 120px;">
+                                                <button type="button" class="btn btn-outline-secondary decrease-quantity">-</button>
+                                                <input readonly type="number" name="quantity" class="form-control text-center quantity-input" value="@item.Quantity" min="1">
+                                                <button type="button" class="btn btn-outline-secondary increase-quantity">+</button>
+                                            </div>
+                                        </form>
+                                    </td>
+
+                                    <!-- Giá gốc -->
+                                    <td class="align-middle text-right">
+                                        <span class="text-decoration-line-through">@item.Price.ToString("0.00")</span>
+                                    </td>
+
+                                    <!-- Giá sau giảm -->
+                                    <td class="align-middle text-right">
+                                        <span class="price">@($"${(item.Price - (item.Price * item.Discount / 100)).ToString("0.00")}")</span>
+                                    </td>
+
+                                    <!-- Tổng giá sau giảm -->
+                                    <td class="align-middle text-right">
+                                        <strong>@($"${((item.Price - (item.Price * item.Discount / 100)) * item.Quantity).ToString("0.00")}")</strong>
+                                    </td>
+
+                                    <!-- Nút xóa sản phẩm -->
+                                    <td class="align-middle text-center">
+                                        <a asp-action="RemoveFromCart" asp-route-id="@item.ProductID" class="btn btn-outline-danger btn-sm remove-btn">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <!-- Coupon Input -->
+                    <div class="mb-3">
+                        <label for="couponInput" class="form-label">COUPON CODE</label>
+                        <input type="text" id="couponInput" class="form-control" placeholder="Enter code">
+                        <span class="text-info" id="Message"></span>
+                    </div>
+
+                    <!-- Tổng tiền -->
+                    <div class="order-summary">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal: $</span>
+                            <span id="subTotal">@cartItems.Sum(i => (i.Price - (i.Price * i.Discount / 100)) * i.Quantity).ToString("0.00")</span>
+                        </div>
+
+                        <div id="CouponDiscount" class="d-flex justify-content-between mb-2">
+                            <!-- Hiển thị mã giảm giá nếu có -->
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <span id="total" class="fw-bold">Total:</span>
+                        <span id="TotalAmount" class="fw-bold">@($"${cartItems.Sum(i => (i.Price - (i.Price * i.Discount / 100)) * i.Quantity).ToString("0.00")}")</span>
+                    </div>
+                }
+                else
+                {
+                    <p>No items in your cart.</p>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="baseApiUrl" value="@url" />
+

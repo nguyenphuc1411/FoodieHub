@@ -1,0 +1,33 @@
+﻿using System.Net.Http.Headers;
+
+namespace FoodieHub.MVC.Configurations
+{
+    public class CustomHttpClientHandler:DelegatingHandler
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public CustomHttpClientHandler(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var tokenAdmin = _httpContextAccessor.HttpContext.Request.Cookies["TokenAdmin"];
+            var tokenUser = _httpContextAccessor.HttpContext.Request.Cookies["TokenUser"];
+            if (!string.IsNullOrEmpty(tokenUser))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenUser);
+            }
+            else
+            {
+                if(!string.IsNullOrEmpty(tokenAdmin))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenAdmin);
+                }             
+            }
+
+            return await base.SendAsync(request, cancellationToken);
+        }
+    }
+}

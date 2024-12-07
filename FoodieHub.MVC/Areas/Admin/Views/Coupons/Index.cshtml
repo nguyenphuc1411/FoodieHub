@@ -1,0 +1,102 @@
+﻿@model List<FoodieHub.MVC.Models.Coupon.GetCoupon>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2 class="text-center my-4">Coupon List</h2>
+
+<p class="text-right mb-3">
+    <a asp-action="CreateCoupon" class="btn btn-primary">Create Coupon</a>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Coupon ID</th>
+                <th>Coupon Code</th>
+                <th>Discount Type</th>
+                <th>Discount Value</th>
+                <th>Minimum Order Amount</th>
+                <th>Created At</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Is Active</th>
+                <th>Is Used</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var coupon in Model)
+                {
+                    <tr>
+                        <td>@coupon.CouponID</td>
+                        <td>@coupon.CouponCode</td>
+                        <td>@coupon.DiscountType</td>
+                        <td>
+                            @if (coupon.DiscountType == "Fixed")
+                            {
+                                <span>@coupon.DiscountValue $</span>
+                            
+                            }
+                            else
+                            {
+                                <span>@coupon.DiscountValue %</span>
+                            }
+                        </td>
+                        <td>@coupon.MinimumOrderAmount $</td>
+                        <td>@coupon.CreatedAt.ToString("yyyy-MM-dd")</td>
+                        <td>@coupon.StartDate.ToString("yyyy-MM-dd")</td>
+                        <td>@coupon.EndDate.ToString("yyyy-MM-dd")</td>
+                        <td>@(coupon.IsActive ? "Yes" : "No")</td>
+                        <td>@(coupon.IsUsed ? "Yes" : "No")</td>
+                        <td>
+                            @if (!coupon.IsUsed)
+                            {
+                                <a asp-action="EditCoupon" asp-route-id="@coupon.CouponID" class="btn btn-warning btn-sm me-2">Edit</a>
+                            }
+                          
+                            @if (coupon.IsActive && !coupon.IsUsed)
+                            {
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal@coupon.CouponID">Delete</button>
+
+                                <!-- Confirmation Modal -->
+                                <div class="modal fade" id="confirmDeleteModal@coupon.CouponID" tabindex="-1" aria-labelledby="confirmDeleteModalLabel@coupon.CouponID" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="confirmDeleteModalLabel@coupon.CouponID">Confirm Deletion</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete the coupon with ID: @coupon.CouponID?<br />
+                                                This action will permanently delete the coupon and cannot be undone.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form action="@Url.Action("DeleteCoupon", "Coupons", new { area = "Admin" })" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@coupon.CouponID" />
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="12" class="text-center">No coupons available.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

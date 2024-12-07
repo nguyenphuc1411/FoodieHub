@@ -1,0 +1,56 @@
+/* LOGIN PAGE */
+.account-page {
+    background: url("/images/background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.account-page .form {
+    width: 430px;
+}
+
+.account-page h1 {
+    position: relative;
+}
+
+.account-page h1::after {
+    position: absolute;
+    content: "";
+    width: 44px;
+    height: 4px;
+    left: 0;
+    bottom: -10px;
+    background: #0d6efd;
+}
+
+.account-page .form-group {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 20px;
+}
+
+.account-page .form-group input {
+    border: none;
+    outline: none;
+}
+
+.account-page .button {
+    text-transform: uppercase;
+}
+
+.account-page .google {
+    color: var(--text);
+    text-transform: uppercase;
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+}
+
+.account-page .google-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.account-page a.text-primary:hover {
+    font-weight: 500;
+}

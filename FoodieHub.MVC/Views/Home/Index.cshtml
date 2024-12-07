@@ -1,8 +1,506 @@
-﻿@{
+﻿@using FoodieHub.MVC.Service.Interfaces
+@inject IProductService _productService;
+@inject IOrderService _orderService;
+@inject IReviewService _reviewService;
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
     ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var apiUrl = Configuration["BaseHost"];
+
+    var listOrderDetails = await _orderService.GetOrderDetailsWithProductID();
+
+    var listProduct = await _productService.GetAll();
+
+    var latestProducts = listProduct
+    .Where(item => item.IsActive == true && item.StockQuantity > 0) 
+    .OrderByDescending(item => item.CreatedAt) 
+    .Take(4) 
+    .ToList(); 
+
+
+
+    var productSales = listOrderDetails?.Data
+        ?.GroupBy(od => od.ProductID)
+        .Select(group => new
+        {
+            ProductID = group.Key,
+            TotalSold = group.Sum(od => od.Quantity)
+        })
+        .OrderByDescending(ps => ps.TotalSold)
+        .Take(1)
+        .ToList();
+
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <a asp-action="Index" asp-controller="Products" class="text-dark">
+                <div class="card mb-4" style="border: none">
+                    <img src="images/background.png" class="card-img-top" alt="Điện tử sản phẩm ở đây">
+                    <div class="card-body ">
+                        <h5 class="card-title">Want to learn cooking but afraid it's hard? Visit our shop and grab your cooking secrets now!</h5>
+                        <p class="card-text">Quick cooking tips for beginners</p>
+                        <a class="button button-dark mt-2">
+                            SHOP NOW
+                            <i class="fas fa-hand-point-right animated-icon"></i>
+                        </a>
+                    </div>
+                </div>
+            </a>
+           
+        </div>
+
+        <div class="col-md-6">
+            @if (productSales?.Any() != true)
+            {
+                <!-- Không có sản phẩm -->
+                <div class="d-flex flex-column align-items-center justify-content-center text-center" style="height: 500px; border: 2px dashed #ccc;">
+                    <img src="images/placeholder.png" alt="No top-selling product" class="img-fluid" style="width: 150px;">
+                    <p class="text-muted mt-3">No top-selling product available at the moment.</p>
+                </div>
+            }
+            else
+            {
+                var topSellingProduct = listProduct?.FirstOrDefault(p => p.ProductID == productSales.First().ProductID);
+
+                var listReviewOrther = await _reviewService.GetListReview(topSellingProduct.ProductID);
+
+                int averageRatingOther = 0;
+                if (listReviewOrther.Data.Any())
+                {
+                    double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue);
+                    double avgRate = totalRate / listReviewOrther.Data.Count;
+                    averageRatingOther = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
+                }
+
+                int totalSoldCount = 0;
+                if (listOrderDetails?.Data != null)
+                {
+                    foreach (var itemDT in listOrderDetails.Data)
+                    {
+                        if (itemDT.ProductID == topSellingProduct.ProductID && itemDT.Status == "COMPLETED")
+                        {
+                            totalSoldCount += itemDT.Quantity;
+                        }
+                    }
+                }
+
+                <!-- Hiển thị sản phẩm bán chạy -->
+                <div class="card border-0">
+                    <!-- Hình ảnh sản phẩm -->
+                    <div class="position-relative">
+                        <img src="@($"{apiUrl}Images/{topSellingProduct.MainImage}")" class="card-img-top img-fluid rounded-top" alt="@topSellingProduct.ProductName" style="height: 400px; object-fit: cover;">
+                       <span class="badge bg-danger position-absolute top-0 start-0 px-3 py-1 rounded-bottom-end">Best Seller This Month</span>
+
+                    </div>
+
+                    <!-- Nội dung sản phẩm -->
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-primary fw-bold">@topSellingProduct.ProductName</h5>
+                        <p class="text-muted">The Best Product For You</p>
+
+                        <div class="d-flex justify-content-center align-items-center gap-3 my-3">
+                            <div>
+                                <p class="m-0"><strong>Rating:</strong> <span class="text-warning">@averageRatingOther ★</span></p>
+                            </div>
+                            <div>
+                                <p class="m-0"><strong>Sold:</strong> <span class="text-success">@totalSoldCount+ Pcs</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Giá sản phẩm -->
+                        <div class="mb-4">
+                            @{
+                                var discountedPriceMain = (topSellingProduct.Price - (topSellingProduct.Price * topSellingProduct.Discount / 100)).ToString("0.00");
+                            }
+                            @if (topSellingProduct.Discount == 0)
+                            {
+                                <span class="text-danger fw-bold h5">$@topSellingProduct.Price.ToString("0.00")</span>
+                            }
+                            else
+                            {
+                                <span class="text-decoration-line-through text-muted">$@topSellingProduct.Price.ToString("0.00")</span>
+                                <span class="h4 text-danger fw-bold mx-2">$@discountedPriceMain</span>
+                                <span class="ba-discount bg-success">-@topSellingProduct.Discount.ToString("0")%</span>
+                            }
+                        </div>
+
+                        <!-- Nút hành động -->
+                        <div class="d-flex justify-content-center gap-3">
+                            <a asp-action="Detail" asp-controller="Products" asp-route-id="@topSellingProduct.ProductID" class="button button-dark mt-2">
+                                View Now 
+                                <i class="fas fa-hand-point-right animated-icon"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+
+
+        <div class="col-md-3">
+            <p class="text-center my-3">Recipes we're leaving</p>
+            <div class="mb-2">
+                <img src="images/background.png" class="card-img-top" alt="Điền tiêu đề công thức ở đây">
+                <div class="card-body">
+                    <p class="card-title text-center">Điền tiêu đề công thức ở đây</p>
+                </div>
+            </div>
+            <div class="mb-2">
+                <img src="images/background.png" class="card-img-top" alt="Điền tiêu đề công thức ở đây">
+                <div class="card-body">
+                    <p class="card-title text-center">Điền tiêu đề công thức ở đây</p>
+                </div>
+            </div>
+            <div class="mb-2">
+                <img src="images/background.png" class="card-img-top" alt="Điền tiêu đề công thức ở đây">
+                <div class="card-body">
+                    <p class="card-title text-center">Điền tiêu đề công thức ở đây</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ngancach"></div>
+    <!-- Phần sản phẩm mới -->
+    <div class="col text-center my-5">
+        <h2 class="mb-4">New to The Shop</h2>
+        <p>Our newest additions that we can't stop talking about</p>
+    </div>
+    <div class="col d-flex justify-content-end mb-2 position-relative">
+        <a asp-action="Index" asp-controller="Products" class="view-all text-success p-2">
+            View all
+            <i class="fas fa-hand-point-right animated-icon"></i>
+        </a>
+    </div>
+   
+    <div class="category-container mb-2">
+        @foreach (var item in latestProducts)
+        {
+
+            var listReviewOrther = await _reviewService.GetListReview(item.ProductID);
+
+
+            int averageRatingOther = 0;
+            if (listReviewOrther.Data.Any())
+            {
+                double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
+                double avgRate = totalRate / listReviewOrther.Data.Count;  // Trung bình rate
+
+                // Làm tròn: nếu avgRate >= 3.5, làm tròn lên, nếu < 3.5, làm tròn xuống
+                averageRatingOther = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
+            }
+
+            <div class="card d-flex position-relative">
+                <!-- Nhãn "New" -->
+
+
+                <div class="badge-new position-absolute">New</div>
+
+
+                <!-- Ảnh sản phẩm -->
+                <a asp-action="Detail" asp-controller="Products" asp-route-id="@item.ProductID" class="">
+                    <img src="@($"{apiUrl}Images/{item.MainImage}")" class="card-img-top" alt="@item.ProductName">
+                </a>
+
+                <!-- Nội dung card -->
+                <div class="card-body">
+                    <a asp-action="Detail" asp-controller="Products" asp-route-id="@item.ProductID" class="">
+                        <h5 class="card-title text-dark">@item.ProductName</h5>
+                    </a>
+
+                    <!-- Giá sản phẩm -->
+                    <div class="d-flex mt-3">
+                        @if (item.Discount == 0)
+                        {
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="product-price">$@item.Price.ToString("0.00")</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex justify-content-between align-items-center">
+                                @{
+                                    var discountedPrice = (item.Price - (item.Price * item.Discount / 100)).ToString("0.00");
+                                }
+                                <div class="d-flex">
+                                    <div class="product-price">$@discountedPrice</div>
+                                    <div class="product-original-price mx-2">$@item.Price.ToString("0.00")</div>
+                                    <span class="discount-percent-text">-@item.Discount.ToString("0")%</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-sm-6 text-end">
+                            <div class="product-rating">@averageRatingOther ★</div>
+                        </div>
+                    </div>
+
+                    <!-- Nút thêm vào giỏ hàng -->
+                    <a href="@Url.Action("AddToCart", "Cart", new { productId = item.ProductID, quantity = 1 })" class="btn button-light btn-sm mt-2">Add to Cart</a>
+                </div>
+            </div>
+
+        }
+
+
+    </div>
+    <div class="ngancach"></div>
+
+    <!-- Phần công thức -->
+    <div class="row">
+        <h2 class="my-6">Recipes</h2>
+        <div class="col-md-6">
+            <div class="recipe-image"></div>
+            <p class="my-2">Recipes News</p>
+            <h2 class="my-3">Tiêu đề công thức</h2>
+            <p>Mô tả về công thức</p>
+        </div>
+        <div class="col-md-6">
+            <h2>Lastest</h2>
+            <div class="latest-recipe">
+                <div class="col-8">
+                    <p>TEN DANH MUC</p>
+                    <h4>Tên công thức ở đây</h4>
+                </div>
+                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
+            </div>
+            <div class="latest-recipe">
+                <div class="col-8">
+                    <p>TEN DANH MUC</p>
+                    <h4>Tên công thức ở đây</h4>
+                </div>
+                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
+            </div>
+            <div class="latest-recipe">
+                <div class="col-8">
+                    <p>TEN DANH MUC</p>
+                    <h4>Tên công thức ở đây</h4>
+                </div>
+                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
+            </div>
+            <div class="latest-recipe">
+                <div class="col-8">
+                    <p>TEN DANH MUC</p>
+                    <h4>Tên công thức ở đây</h4>
+                </div>
+                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
+            </div>
+        </div>
+    </div>
+    <div class="ngancach"></div>
+
+    <!-- Phần Bài viết -->
+    <div class="row">
+        <h2 class="my-5">Article</h2>
+        <div class="col-md-5">
+            <div class="recipe-image"></div>
+            <p class="my-2">Article News</p>
+            <h2 class="my-3">Tiêu đề công thức</h2>
+            <p>Mô tả về công thức</p>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-6">
+            <h2>Lastest</h2>
+            <div class="latest-recipe">
+                <div class="col-8">
+                    <p>TEN DANH MUC</p>
+                    <h4>Tên công thức ở đây</h4>
+                </div>
+                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
+            </div>
+            <div class="latest-recipe">
+                <div class="col-8">
+                    <p>TEN DANH MUC</p>
+                    <h4>Tên công thức ở đây</h4>
+                </div>
+                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
+            </div>
+            <div class="latest-recipe">
+                <div class="col-8">
+                    <p>TEN DANH MUC</p>
+                    <h4>Tên công thức ở đây</h4>
+                </div>
+                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
+            </div>
+            <div class="latest-recipe">
+                <div class="col-8">
+                    <p>TEN DANH MUC</p>
+                    <h4>Tên công thức ở đây</h4>
+                </div>
+                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    /* Style cho phần sản phẩm */
+    .category-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .nav-link {
+        color: #444;
+        border-radius: 20px;
+        padding: 8px 15px;
+        margin-right: 5px;
+        background-color: #f8f9fa;
+        transition: background-color 0.3s;
+    }
+
+        .nav-link:hover {
+            background-color: #e2e6ea;
+        }
+
+    .card {
+        transition: transform 0.2s;
+        border: gray 1px solid ; /* Bỏ viền card */
+        border-top-left-radius: 0.25rem;
+    }
+
+        .card:hover {
+            transform: scale(1.05); /* Tăng kích thước card khi hover */
+        }
+
+    @* .card-img-top {
+        border-top-left-radius: 15px; /* Bo tròn góc trên bên trái */
+        border-top-right-radius: 15px; /* Bo tròn góc trên bên phải */
+    } *@
+
+    .recipe-image {
+        background-image: url('images/background.png');
+        background-size: cover;
+        background-position: center;
+        height: 300px;
+    }
+
+    .latest-recipe {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .latest-recipe-image {
+        width: 124px;
+        height: 85px;
+        background-size: cover;
+        background-position: center;
+        margin-left: 1rem;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #e63946;
+    }
+
+    .product-rating {
+        font-size: 1rem;
+        color: #ffc107;
+    }
+
+    .product-original-price {
+        font-size: 0.9rem;
+        text-decoration: line-through;
+        color: #6c757d;
+    }
+
+
+    .card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+
+    .discount-percent-text {
+        font-size: 14px;
+        color: red;
+        border-radius: 6px;
+    }
+    .animated-icon {
+        margin-left: 10px;  /* Khoảng cách giữa button và icon */
+        animation: bounce 1s infinite;  /* Tạo hiệu ứng chạy qua lại */
+    }
+    @@keyframes bounce {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(10px);  /* Di chuyển sang phải */
+    }
+}
+    /* Nhãn "New" */
+    .badge-new {
+        background-color: #28a745; /* Màu xanh lá nổi bật */
+        color: white;
+        font-size: 0.9rem;
+        font-weight: bold;
+        padding: 5px 10px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        border-top-left-radius: 0.25rem;
+        border-bottom-right-radius: 0.5rem; /* Cong nhẹ góc phải dưới */
+        z-index: 10;
+    }
+
+    /* Giá sản phẩm */
+    .product-price {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #dc3545; /* Màu đỏ cho giá giảm */
+    }
+
+    .product-original-price {
+        font-size: 0.9rem;
+        color: #6c757d; /* Màu xám cho giá gốc */
+        text-decoration: line-through;
+    }
+
+    /* Button chỉnh */
+    .button-light {
+        background-color: #ffc107; /* Vàng nổi bật */
+        color: white;
+        border: none;
+        transition: 0.3s;
+    }
+
+        .button-light:hover {
+            background-color: #e0a800; /* Vàng đậm hơn khi hover */
+            color: #fff;
+        }
+
+    /* Định dạng tổng thể card */
+    .card {
+        border: 1px solid #e0e0e0; /* Đường viền nhẹ */
+        border-radius: 0.25rem; /* Bo góc nhẹ cho toàn card */
+        overflow: hidden; /* Để tránh các phần tử tràn khỏi card */
+    }
+    .ba-discount{
+        font-size: 10px; /* Giảm kích thước chữ để vừa vặn */
+        font-weight: 500;
+        text-transform: uppercase;
+        padding: 6px 10px !important;
+        border-radius: 6px;
+        color: white;
+    }
+
+    .badge {
+        font-size: 16px; /* Giảm kích thước chữ để vừa vặn */
+        font-weight: 500;
+        text-transform: uppercase;
+        padding: 10px 20px !important; /* Điều chỉnh padding cho vừa vặn */
+    }
+
+</style>
+
+

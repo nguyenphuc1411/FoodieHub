@@ -1,0 +1,136 @@
+﻿/* Favorite */
+/* sidebar-profile  */
+.sidebar-profile {
+    background: var(--bg-secondary);
+    margin-top: 1em;
+    font-size: 14px;
+    line-height: 21px;
+    font-weight: 700;
+    height: fit-content;
+}
+
+    .sidebar-profile .nav li a {
+        color: #A18F7A;
+    }
+
+    .sidebar-profile .flex-column {
+        margin: 5px;
+    }
+
+/* Main Content */
+.Favorite-content {
+    border: 2px solid #EAEAEA;
+    border-radius: 5px;
+}
+
+.card .img {
+    width: 300px;
+    height: 400px;
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: none;
+    transition: transform 0.2s ease-in-out;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+.card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #d8e3e7;
+    border-color: transparent;
+    color: #333;
+}
+
+.rating-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 9px;
+}
+
+    .rating-info span {
+        margin-right: 8px;
+    }
+
+/* OrderDetail */
+.vertical-separator {
+    border-left: 1px solid #e9ecef;
+    height: 100%;
+}
+
+.OrderDetail-content {
+    border: 2px solid #EAEAEA;
+    border-radius: 5px;
+}
+
+.DashBoard-contentt .greeting {
+    text-align: center;
+    color: #2D4558;
+}
+
+/* Order User */
+.table-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.btn-view {
+    background-color: #495057;
+    color: #fff;
+}
+
+    .btn-view:hover {
+        background-color: rgb(54, 74, 205);
+        color: #9a4343;
+        font-weight: 700;
+    }
+
+/* Profile */
+
+/* Main Content */
+.Profile-content {
+    border: 2px solid #EAEAEA;
+    border-radius: 5px;
+}
+
+.Profile-contentt .greeting {
+    color: #2D4558;
+}
+
+.form-control {
+    border-radius: 10px;
+    /* Làm tròn góc các ô nhập liệu */
+}
+
+.form-label {
+    margin-left: 5px;
+}
+
+/* Dash Board */
+
+/* Main Content */
+.DashBoard-content {
+    border: 2px solid #EAEAEA;
+    border-radius: 5px;
+}
+
+.DashBoard-contentt .greeting {
+    text-align: center;
+    color: #2D4558;
+}

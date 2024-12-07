@@ -1,0 +1,135 @@
+﻿@using System.Text.Json.Nodes
+@inject IConfiguration config;
+
+@{
+    var url = config["BaseHost"];
+    ViewData["Title"] = "Recipe Details";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+@model JsonObject
+
+<div class="container py-4">
+    <h2 class="text-danger">Delete Recipe</h2>
+    <p>Are you sure you want to delete this recipe?</p>
+    <p class="text-muted">After deletion, the recipe will be moved to the trash folder.</p>
+
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    <!-- Trigger modal -->
+    <a asp-action="ConfirmDelete" asp-route-id="@Model["recipeID"]?.ToString()" class="btn btn-danger">
+        Confirm Delete
+    </a>
+</div>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-primary">@Model["title"]?.ToString()</h1>
+        <div>
+            <a href="~/Admin/Recipes" class="btn btn-secondary me-2">Back to List</a>
+            <a href="~/Admin/Recipes/Edit/@Model["recipeID"]?.ToString()" class="btn btn-warning">Edit</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Recipe Details -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <img src="@(url + "/images/" + Model["imageURL"]?.ToString())" alt="Recipe Image" class="card-img-top" />
+                <div class="card-body">
+                    <h5 class="card-title">Recipe Information</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Serves:</strong> @Model["serves"]?.ToString()</li>
+                        <li><strong>Prep Time:</strong> @Model["prepTime"]?.ToString()</li>
+                        <li><strong>Cook Time:</strong> @Model["cookTime"]?.ToString()</li>
+                    </ul>
+                    <hr />
+                    <h5 class="card-title">Ingredients</h5>
+                    <div>@Html.Raw(Model["ingredients"]?.ToString())</div>
+                    <hr />
+                    <h5 class="card-title">Directions</h5>
+                    <div>@Html.Raw(Model["Directions"]?.ToString())</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Author and Additional Info -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4 text-center author-info">
+                <div class="card-body">
+                    <h5 class="card-title">Author Information</h5>
+                    <img src="@(Model["avatar"] != null ? (url + "/images/" + Model["avatar"].ToString()) : "/images/profile.jpg")"
+                         alt="Avatar"
+                         class="rounded-circle mb-3"
+                         style="width: 120px; height: 120px;" />
+                    <p class="card-text">@Model["fullname"]?.ToString()</p>
+                    <hr />
+                    <p><strong>Created At:</strong> @(DateTime.Parse(Model["createdAt"]?.ToString() ?? DateTime.MinValue.ToString()).ToString("dd/MM/yyyy HH:mm"))</p>
+                    <h5 class="card-title">Recipe Stats</h5>
+                    <p><strong>Total Comments:</strong> @Model["totalComment"]?.ToString()</p>
+                    <p><strong>Total Ratings:</strong> @Model["totalRating"]?.ToString()</p>
+                    <p><strong>Average Rating:</strong> @Model["averageRating"]?.ToString()</p>
+                    <p><strong>Total Favorites:</strong> @Model["totalFavorite"]?.ToString()</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styling -->
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img-top {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        max-height: 400px;
+        object-fit: cover;
+    }
+
+    .author-info {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+        .author-info img {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 120px;
+            height: 120px;
+        }
+
+    .btn-secondary, .btn-warning {
+        font-size: 0.95rem;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .btn-warning {
+        background-color: #ffba00;
+        border: none;
+    }
+
+        .btn-secondary:hover, .btn-warning:hover {
+            opacity: 0.9;
+        }
+
+    ul {
+        padding-left: 0;
+    }
+
+        ul li {
+            list-style: none;
+            margin-bottom: 0.5rem;
+        }
+
+    p {
+        line-height: 1.75;
+        color: #4a4a4a;
+    }
+</style>
+

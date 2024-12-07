@@ -1,0 +1,1247 @@
+﻿@using FoodieHub.MVC.Areas.Admin.Models
+@using FoodieHub.MVC.Models.Contact
+@using FoodieHub.MVC.Models.Order
+@inject IConfiguration config
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+@{
+    var url = config["BaseHost"];
+    var dataOrder = ViewBag.DataOrder as Statistics<int>;
+    var dataRevenue = ViewBag.DataRevenue as Statistics<decimal>;
+    var dataCustomer = ViewBag.DataCustomer as Statistics<int>;
+    var recentlyOrder = ViewBag.RecentlyOrder as List<RecentlyOrder> ?? new List<RecentlyOrder>();
+    var topSelling = ViewBag.TopSelling as List<TopSelling> ?? new List<TopSelling>();
+    var topRevenue = ViewBag.TopRevenue as List<TopSelling> ?? new List<TopSelling>();
+    var dataContact = ViewBag.ContactInfo as List<GetContact> ?? new List<GetContact>();
+}
+<div class="main-dashboard">
+
+    <div class="pagetitle">
+        <h1>Dashboard</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a>Home</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section dashboard">
+        <div class="row">
+
+            <!-- Left side columns -->
+            <div class="col-lg-8">
+                <div class="row">
+
+                    <!-- Sales Card -->
+                    <div class="col-xxl-4 col-md-6">
+                        <div class="card info-card sales-card">
+
+                            <div class="filter">
+                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                    <li class="dropdown-header text-start">
+                                        <h6>Filter</h6>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item" asp-action="Index"
+                                           asp-route-revenue="@dataRevenue?.GetBy?.Replace(" ", "")"
+                                           asp-route-customer="@dataCustomer?.GetBy?.Replace(" ", "")"
+                                           asp-route-order="Today">Today</a>
+                                    </li>
+                                     <li>
+                                        <a class="dropdown-item" asp-action="Index"
+                                           asp-route-revenue="@dataRevenue?.GetBy?.Replace(" ", "")"
+                                           asp-route-customer="@dataCustomer?.GetBy?.Replace(" ", "")"
+                                           asp-route-order="ThisMonth">This Month</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-action="Index"
+                                           asp-route-revenue="@dataRevenue?.GetBy?.Replace(" ", "")"
+                                           asp-route-customer="@dataCustomer?.GetBy?.Replace(" ", "")"
+                                           asp-route-order="ThisYear">This Year</a>
+                                    </li>                            
+                                </ul>
+                            </div>
+
+                            <div class="card-body">
+                                <h5 class="card-title">Sales <span>| @dataOrder?.GetBy</span></h5>
+
+                                <div class="d-flex align-items-center">
+                                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="fa-solid fa-cart-shopping"></i>
+                                    </div>
+                                    <div class="ps-3">
+                                        <h6>@dataOrder?.Total</h6>
+                                        <span class="@(dataOrder?.Trend>0 ?"text-success":"text-danger") small pt-1 fw-bold">@dataOrder?.Trend%</span> <span class="text-muted small pt-2 ps-1">increase</span>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div><!-- End Sales Card -->
+                    <!-- Revenue Card -->
+                    <div class="col-xxl-4 col-md-6">
+                        <div class="card info-card revenue-card">
+
+                            <div class="filter">
+                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                    <li class="dropdown-header text-start">
+                                        <h6>Filter</h6>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-action="Index"
+                                           asp-route-revenue="Today"
+                                           asp-route-customer="@dataCustomer?.GetBy?.Replace(" ", "")"
+                                           asp-route-order="@dataOrder?.GetBy.Replace(" ", "")">Today</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-action="Index"
+                                           asp-route-revenue="ThisMonth"
+                                           asp-route-customer="@dataCustomer?.GetBy?.Replace(" ", "")"
+                                           asp-route-order="@dataOrder?.GetBy.Replace(" ", "")">This Month</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-action="Index"
+                                           asp-route-revenue="ThisYear"
+                                           asp-route-customer="@dataCustomer?.GetBy?.Replace(" ", "")"
+                                           asp-route-order="@dataOrder?.GetBy.Replace(" ", "")">This Year</a>
+                                    </li>                                  
+                                </ul>
+                            </div>
+
+                            <div class="card-body">
+                                <h5 class="card-title">Revenue <span>| @dataRevenue?.GetBy</span></h5>
+
+                                <div class="d-flex align-items-center">
+                                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="fa-solid fa-sack-dollar"></i>
+                                    </div>
+                                    <div class="ps-3">
+                                        <h6>$@(dataRevenue?.Total ?? 0) </h6>
+                                        <span class="@(dataRevenue?.Trend>0 ?"text-success":"text-danger")  small pt-1 fw-bold">@dataRevenue?.Trend%</span> <span class="text-muted small pt-2 ps-1">increase</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div><!-- End Revenue Card -->
+                    <!-- Customers Card -->
+                    <div class="col-xxl-4 col-xl-12">
+
+                        <div class="card info-card customers-card">
+
+                            <div class="filter">
+                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                    <li class="dropdown-header text-start">
+                                        <h6>Filter</h6>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item" asp-action="Index"
+                                           asp-route-revenue="@dataRevenue?.GetBy.Replace(" ", "")"
+                                           asp-route-customer="Today"
+                                           asp-route-order="@dataOrder?.GetBy.Replace(" ", "")">Today</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-action="Index"
+                                           asp-route-revenue="@dataRevenue?.GetBy.Replace(" ", "")"
+                                           asp-route-customer="ThisMonth"
+                                           asp-route-order="@dataOrder?.GetBy.Replace(" ", "")">This Month</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-action="Index"
+                                           asp-route-revenue="@dataRevenue?.GetBy.Replace(" ", "")"
+                                           asp-route-customer="ThisYear"
+                                           asp-route-order="@dataOrder?.GetBy.Replace(" ", "")">This Year</a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="card-body">
+                                <h5 class="card-title">Customers <span>| @dataCustomer?.GetBy</span></h5>
+
+                                <div class="d-flex align-items-center">
+                                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="fa-solid fa-users"></i>
+                                    </div>
+                                    <div class="ps-3">
+                                        <h6>@dataCustomer?.Total</h6>
+                                        <span class="@(dataCustomer?.Trend>0 ?"text-success":"text-danger") small pt-1 fw-bold">@dataCustomer?.Trend%</span> <span class="text-muted small pt-2 ps-1">decrease</span>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div><!-- End Customers Card -->
+                    <!-- Reports -->
+                    <div class="col-12">
+                        <div class="card">
+
+                            <div class="filter">
+                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                    <li class="dropdown-header text-start">
+                                        <h6>Filter</h6>
+                                    </li>                      
+                                    <li><a class="dropdown-item" asp-action="Index" asp-route-orderreport="7days">7 Days</a></li>
+                                    <li><a class="dropdown-item" asp-action="Index" asp-route-orderreport="30days">30 days</a></li>
+                                    <li><a class="dropdown-item" asp-action="Index" asp-route-orderreport="7months">7 Months</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="card-body">
+                                <h5 class="card-title">Order Reports <span>/@ViewBag.orderreport</span></h5>
+                                <!-- Line Chart -->
+                                <canvas id="reportsChartOrder"></canvas>
+                
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+
+                            <div class="filter">
+                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                    <li class="dropdown-header text-start">
+                                        <h6>Filter</h6>
+                                    </li>
+                                    <li><a class="dropdown-item" asp-action="Index" asp-route-revenuereport="7days">7 Days</a></li>
+                                    <li><a class="dropdown-item" asp-action="Index" asp-route-revenuereport="30days">30 days</a></li>
+                                    <li><a class="dropdown-item" asp-action="Index" asp-route-revenuereport="7months">7 Months</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="card-body">
+                                <h5 class="card-title">Revenue Reports <span>/@ViewBag.revenuereport</span></h5>
+
+                                <!-- Line Chart -->
+                                <canvas id="reportsChartRevenue"></canvas>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- End Reports -->
+                    <!-- Recent Sales -->
+                    <div class="col-12">
+                        <div class="card recent-sales overflow-auto">
+
+                            <div class="filter">
+                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                    <li class="dropdown-header text-start">
+                                        <h6>Filter</h6>
+                                    </li>
+
+                                    <li><a class="dropdown-item">Today</a></li>
+                                    <li><a class="dropdown-item">This Month</a></li>
+                                    <li><a class="dropdown-item">This Year</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="card-body">
+                                <h5 class="card-title">Recent Sales <span>| Today</span></h5>
+
+                                <table class="table table-borderless datatable">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Customer</th>
+                                            <th scope="col">Phone Number</th>
+                                            <th scope="col">Total Price</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in recentlyOrder)
+                                        {
+                                            <tr>
+                                                <th scope="row"><a href="@($"/admin/orders/details/{item.OrderID}")">#@item.OrderID</a></th>
+                                                <td><a href="@($"/admin/orders/details/{item.OrderID}")">@item.FullName</a> </td>
+                                                <td><a href="@($"/admin/orders/details/{item.OrderID}")" class="text-primary">@item.PhoneNumber</a></td>
+                                                <td>$@item.TotalAmount</td>
+                                                <td>
+                                                    @{
+                                                        string status = item.Status.ToLowerInvariant();
+                                                        if (!string.IsNullOrEmpty(status)) 
+                                                        {
+                                                            status = char.ToUpper(status[0]) + status.Substring(1); 
+                                                        }
+
+                                                        switch (status)
+                                                        {
+                                                            case "Pending":
+                                                                <span class="badge bg-warning">@status</span>
+                                                                break;
+                                                            case "Approved":
+                                                                <span class="badge bg-success">@status</span>
+                                                                break;
+                                                            case "Rejected":
+                                                                <span class="badge bg-danger">@status</span>
+                                                                break;
+                                                            case "Payed":
+                                                                <span class="badge bg-success">@status</span>
+                                                                break;
+                                                            case "Shipping":
+                                                                <span class="badge bg-secondary">@status</span>
+                                                                break;
+                                                            case "Completed":
+                                                                <span class="badge bg-info">@status</span>
+                                                                break;
+                                                            case "Canceled":
+                                                                <span class="badge bg-danger-subtle">@status</span>
+                                                                break;
+                                                            default:
+                                                                <span class="badge bg-primary-subtle">@status</span>
+                                                                ; // or use a default badge if necessary
+                                                                break;
+                                                        }
+                                                    }                                                 
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+
+
+                            </div>
+
+                        </div>
+                    </div><!-- End Recent Sales -->
+
+                    <!-- Top Selling -->
+                    <div class="col-12">
+                        <div class="card top-selling overflow-auto">
+
+                            <div class="filter">
+                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                    <li class="dropdown-header text-start">
+                                        <h6>Filter</h6>
+                                    </li>
+
+                                    <li><a class="dropdown-item" asp-route-topsellingby="day">Today</a></li>
+                                    <li><a class="dropdown-item" asp-route-topsellingby="month">This Month</a></li>
+                                    <li><a class="dropdown-item" asp-route-topsellingby="year">This Year</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="card-body pb-0">
+                                <h5 class="card-title">Top Selling <span>| @ViewBag?.topsellingby</span></h5>
+
+                                <table class="table table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Preview</th>
+                                            <th scope="col">Product</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col">Sold</th>
+                                            <th scope="col">Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach (var item in topSelling)
+                                        {
+                                            <tr>
+                                                <th scope="row"><a href="@($"/admin/products/details/{item.ProductID}")"><img src="@(url+"/images/"+item.ImageUrl)" alt="@item.ProductName"></a></th>
+                                                <td><a href="@($"/admin/products/details/{item.ProductID}")" class="text-primary fw-bold">@item.ProductName</a></td>
+                                                <td>$@item.Price</td>
+                                                <td class="fw-bold">@item.Sold</td>
+                                                <td>$@item.TotalRevenue</td>
+                                            </tr>
+                                        }
+                                                 
+                                    </tbody>
+                                </table>
+
+                            </div>
+
+                        </div>
+                    </div><!-- End Top Selling -->
+
+                    <!-- Top Revenue -->
+                    <div class="col-12">
+                        <div class="card top-selling overflow-auto">
+
+                            <div class="filter">
+                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                    <li class="dropdown-header text-start">
+                                        <h6>Filter</h6>
+                                    </li>
+
+                                    <li><a class="dropdown-item" asp-route-toprevenueby="day">Today</a></li>
+                                    <li><a class="dropdown-item" asp-route-toprevenueby="month">This Month</a></li>
+                                    <li><a class="dropdown-item" asp-route-toprevenueby="year">This Year</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="card-body pb-0">
+                                <h5 class="card-title">Top Revenue <span>| @ViewBag?.toprevenueby</span></h5>
+
+                                <table class="table table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Preview</th>
+                                            <th scope="col">Product</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col">Sold</th>
+                                            <th scope="col">Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in topRevenue)
+                                        {
+                                            <tr>
+                                                <th scope="row"><a href="@($"/admin/products/details/{item.ProductID}")"><img src="@(url+"/images/"+item.ImageUrl)" alt="@item.ProductName"></a></th>
+                                                <td><a href="@($"/admin/products/details/{item.ProductID}")" class="text-primary fw-bold">@item.ProductName</a></td>
+                                                <td>$@item.Price</td>
+                                                <td class="fw-bold">@item.Sold</td>
+                                                <td>$@item.TotalRevenue</td>
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+
+                        </div>
+                    </div><!-- End Top Revenue -->
+
+                </div>
+            </div><!-- End Left side columns -->
+            <!-- Right side columns -->
+            <div class="col-lg-4">
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="filter">
+                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                            <li class="dropdown-header text-start">
+                                <h6>Filter</h6>
+                            </li>
+
+                            <li><a class="dropdown-item" href="#">Today</a></li>
+                            <li><a class="dropdown-item" href="#">This Month</a></li>
+                            <li><a class="dropdown-item" href="#">This Year</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title">Recent Activity <span>| Today</span></h5>
+
+                        <div class="activity">
+
+                            <div class="activity-item d-flex">
+                                <div class="activite-label">32 min</div>
+                                <i class='bi bi-circle-fill activity-badge text-success align-self-start'></i>
+                                <div class="activity-content">
+                                    Quia quae rerum <a href="#" class="fw-bold text-dark">explicabo officiis</a> beatae
+                                </div>
+                            </div><!-- End activity item-->
+
+                            <div class="activity-item d-flex">
+                                <div class="activite-label">56 min</div>
+                                <i class='bi bi-circle-fill activity-badge text-danger align-self-start'></i>
+                                <div class="activity-content">
+                                    Voluptatem blanditiis blanditiis eveniet
+                                </div>
+                            </div><!-- End activity item-->
+
+                            <div class="activity-item d-flex">
+                                <div class="activite-label">2 hrs</div>
+                                <i class='bi bi-circle-fill activity-badge text-primary align-self-start'></i>
+                                <div class="activity-content">
+                                    Voluptates corrupti molestias voluptatem
+                                </div>
+                            </div><!-- End activity item-->
+
+                            <div class="activity-item d-flex">
+                                <div class="activite-label">1 day</div>
+                                <i class='bi bi-circle-fill activity-badge text-info align-self-start'></i>
+                                <div class="activity-content">
+                                    Tempore autem saepe <a href="#" class="fw-bold text-dark">occaecati voluptatem</a> tempore
+                                </div>
+                            </div><!-- End activity item-->
+
+                            <div class="activity-item d-flex">
+                                <div class="activite-label">2 days</div>
+                                <i class='bi bi-circle-fill activity-badge text-warning align-self-start'></i>
+                                <div class="activity-content">
+                                    Est sit eum reiciendis exercitationem
+                                </div>
+                            </div><!-- End activity item-->
+
+                            <div class="activity-item d-flex">
+                                <div class="activite-label">4 weeks</div>
+                                <i class='bi bi-circle-fill activity-badge text-muted align-self-start'></i>
+                                <div class="activity-content">
+                                    Dicta dolorem harum nulla eius. Ut quidem quidem sit quas
+                                </div>
+                            </div><!-- End activity item-->
+
+                        </div>
+
+                    </div>
+                </div><!-- End Recent Activity -->
+                <!-- Budget Report -->
+                <div class="card">
+                    <div class="filter">
+                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                            <li class="dropdown-header text-start">
+                                <h6>Filter</h6>
+                            </li>
+
+                            <li><a class="dropdown-item" href="#">Today</a></li>
+                            <li><a class="dropdown-item" href="#">This Month</a></li>
+                            <li><a class="dropdown-item" href="#">This Year</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body pb-0">
+                        <h5 class="card-title">Contact <span>| This Month</span></h5>
+
+                        <div id="budgetChart" style="min-height: 400px;" class="echart">
+                            <table class="table" style="font-size: 10px;">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Created Date</th>
+                                        <th>Full Name</th>
+                                        <th>Product Name</th>
+                                        <th>Product Image</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var contact in dataContact)
+                                    {
+                                        <tr class="contact-row" data-fullname="@contact.FullName"
+                                            data-email="@contact.Email" data-phonenumber="@contact.PhoneNumber"
+                                            data-note="@contact.Note" data-isread="@contact.IsRead"
+                                            data-createddate="@contact.CreatedDate.ToString("yyyy-MM-dd")"
+                                            data-productid="@contact.ProductID" data-productname="@contact.ProductName"
+                                            data-productimage="@($"{url}/images/{contact.ProductImage}")">
+                                            <td>
+                                                <span class="badge" style="background-color: @(contact.IsRead ? "green" :"red"); width: 10px; height: 10px; border-radius: 50%; display: inline-block;"></span>
+                                            </td>
+                                            <td>@contact.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@contact.FullName</td>
+                                            <td>@contact.ProductName</td>
+                                            <td>
+                                                <img class="img-fluid" src="@($"{url}/images/{contact.ProductImage}")" alt="Product Image" style="width: 50px; height: 50px; object-fit: cover;" />
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Modal -->
+                        <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="contactModalLabel">Contact Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <strong>Full Name:</strong> <span id="modalFullName"></span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Email:</strong> <span id="modalEmail"></span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Phone Number:</strong> <span id="modalPhoneNumber"></span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Note:</strong> <span id="modalNote"></span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Is Read:</strong> <span id="modalIsRead"></span>
+                                            <div class="toggle-border">
+                                                <input id="one" type="checkbox">
+                                                <label for="one">
+                                                    <div class="handle"></div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Created Date:</strong> <span id="modalCreatedDate"></span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Product Name:</strong> <span id="modalProductName"></span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Product Image:</strong><br />
+                                            <img class="img-fluid" id="modalProductImage" src="" alt="Product Image" style="width: 200px; height: 200px; object-fit: cover;" />
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <style>
+                            /* From Uiverse.io by cssbuttons-io */
+                            .toggle-border {
+                                border: 2px solid #f0ebeb;
+                                border-radius: 130px;
+                                margin-bottom: 45px;
+                                padding: 1px 2px;
+                                background: linear-gradient(to bottom right, white, rgba(220,220,220,.5)), white;
+                                box-shadow: 0 0 0 2px #fbfbfb;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                width: 65px;
+                            }
+
+                                .toggle-border:last-child {
+                                    margin-bottom: 0;
+                                }
+
+                                .toggle-border input[type="checkbox"] {
+                                    display: none;
+                                }
+
+                                .toggle-border label {
+                                    position: relative;
+                                    display: inline-block;
+                                    width: 65px;
+                                    height: 20px;
+                                    background: #d13613;
+                                    border-radius: 80px;
+                                    cursor: pointer;
+                                    box-shadow: inset 0 0 16px rgba(0,0,0,.3);
+                                    transition: background .5s;
+                                }
+
+                                .toggle-border input[type="checkbox"]:checked + label {
+                                    background: #13d162;
+                                }
+
+                            .handle {
+                                position: absolute;
+                                top: -8px;
+                                left: -10px;
+                                width: 35px;
+                                height: 35px;
+                                border: 1px solid #e5e5e5;
+                                background: repeating-radial-gradient(circle at 50% 50%, rgba(200,200,200,.2) 0%, rgba(200,200,200,.2) 2%, transparent 2%, transparent 3%, rgba(200,200,200,.2) 3%, transparent 3%), conic-gradient(white 0%, silver 10%, white 35%, silver 45%, white 60%, silver 70%, white 80%, silver 95%, white 100%);
+                                border-radius: 50%;
+                                box-shadow: 3px 5px 10px 0 rgba(0,0,0,.4);
+                                transition: left .4s;
+                            }
+
+                            .toggle-border input[type="checkbox"]:checked + label > .handle {
+                                left: calc(100% - 35px + 10px);
+                            }
+                        </style>
+                        <script>
+                            // Wait for the DOM to load
+                            document.addEventListener("DOMContentLoaded", function () {
+                                // Select all rows with the class 'contact-row'
+                                const rows = document.querySelectorAll('.contact-row');
+
+                                // Add event listener to each row
+                                rows.forEach(function (row) {
+                                    row.addEventListener('click', function () {
+                                        // Get data attributes from the clicked row
+                                        const fullName = row.getAttribute('data-fullname');
+                                        const email = row.getAttribute('data-email');
+                                        const phoneNumber = row.getAttribute('data-phonenumber');
+                                        const note = row.getAttribute('data-note');
+                                        const isRead = row.getAttribute('data-isread') === 'True' ? 'Yes' : 'No';  // Show "Yes" or "No" for IsRead
+                                        const createdDate = row.getAttribute('data-createddate');
+                                        const productName = row.getAttribute('data-productname');
+                                        const productImage = row.getAttribute('data-productimage');
+
+                                        // Populate the modal with the data
+                                        document.getElementById('modalFullName').innerText = fullName;
+                                        document.getElementById('modalEmail').innerText = email;
+                                        document.getElementById('modalPhoneNumber').innerText = phoneNumber;
+                                        document.getElementById('modalNote').innerText = note;
+                                        document.getElementById('modalIsRead').innerText = isRead;
+                                        document.getElementById('modalCreatedDate').innerText = createdDate;
+                                        document.getElementById('modalProductName').innerText = productName;
+                                        document.getElementById('modalProductImage').src = productImage;
+
+                                        // Show the modal
+                                        var myModal = new bootstrap.Modal(document.getElementById('contactModal'));
+                                        myModal.show();
+                                    });
+                                });
+                            });
+                        </script>
+
+                    </div>
+                </div>
+                <!-- End Budget Report -->
+                <!-- Website Traffic -->
+                <div class="card">
+                    <div class="filter">
+                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                            <li class="dropdown-header text-start">
+                                <h6>Filter</h6>
+                            </li>
+
+                            <li><a class="dropdown-item" href="#">Today</a></li>
+                            <li><a class="dropdown-item" href="#">This Month</a></li>
+                            <li><a class="dropdown-item" href="#">This Year</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body pb-0">
+                        <h5 class="card-title">Website Traffic <span>| Today</span></h5>
+
+                        <div id="trafficChart" style="min-height: 400px;" class="echart"></div>                   
+                    </div>
+                </div>
+                <!-- End Website Traffic -->
+                <!-- News & Updates Traffic -->
+                <div class="card">
+                    <div class="filter">
+                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis"></i></a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                            <li class="dropdown-header text-start">
+                                <h6>Filter</h6>
+                            </li>
+
+                            <li><a class="dropdown-item" href="#">Today</a></li>
+                            <li><a class="dropdown-item" href="#">This Month</a></li>
+                            <li><a class="dropdown-item" href="#">This Year</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body pb-0">
+                        <h5 class="card-title">News &amp; Updates <span>| Today</span></h5>
+
+                        <div class="news">
+                            <div class="post-item clearfix">
+                                <img src="assets/img/news-1.jpg" alt="">
+                                <h4><a href="#">Nihil blanditiis at in nihil autem</a></h4>
+                                <p>Sit recusandae non aspernatur laboriosam. Quia enim eligendi sed ut harum...</p>
+                            </div>
+
+                            <div class="post-item clearfix">
+                                <img src="assets/img/news-2.jpg" alt="">
+                                <h4><a href="#">Quidem autem et impedit</a></h4>
+                                <p>Illo nemo neque maiores vitae officiis cum eum turos elan dries werona nande...</p>
+                            </div>
+
+                            <div class="post-item clearfix">
+                                <img src="assets/img/news-3.jpg" alt="">
+                                <h4><a href="#">Id quia et et ut maxime similique occaecati ut</a></h4>
+                                <p>Fugiat voluptas vero eaque accusantium eos. Consequuntur sed ipsam et totam...</p>
+                            </div>
+
+                            <div class="post-item clearfix">
+                                <img src="assets/img/news-4.jpg" alt="">
+                                <h4><a href="#">Laborum corporis quo dara net para</a></h4>
+                                <p>Qui enim quia optio. Eligendi aut asperiores enim repellendusvel rerum cuder...</p>
+                            </div>
+
+                            <div class="post-item clearfix">
+                                <img src="assets/img/news-5.jpg" alt="">
+                                <h4><a href="#">Et dolores corrupti quae illo quod dolor</a></h4>
+                                <p>Odit ut eveniet modi reiciendis. Atque cupiditate libero beatae dignissimos eius...</p>
+                            </div>
+
+                        </div><!-- End sidebar recent posts-->
+
+                    </div>
+                </div><!-- End News & Updates -->
+
+            </div><!-- End Right side columns -->
+
+        </div>
+    </section>
+
+</div><!-- End #main -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Chuyển đổi dữ liệu từ ViewBag thành dạng JSON để sử dụng trong JavaScript
+        var orderReportData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.OrderReportData));
+
+    // Các nhãn (Label) lấy từ orderReportData
+    const labels = orderReportData.map(x => x.Label); // Lấy các nhãn (Label)
+    const data = orderReportData.map(x => x.Data); // Lấy dữ liệu (Data) của các đơn hàng
+
+    // Lấy phần tử canvas từ HTML để vẽ biểu đồ
+    const ctx = document.getElementById('reportsChartOrder').getContext('2d');
+
+    // Tạo biểu đồ với dữ liệu ban đầu
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Orders",
+                data: data,
+                backgroundColor: data.map((_, index) => {
+                    // Sinh màu nền động cho mỗi cột
+                    return `rgba(${(index * 30) % 255}, ${(index * 60) % 255}, 132, 0.2)`;
+                }),
+                borderColor: data.map((_, index) => {
+                    // Sinh màu viền động cho mỗi cột
+                    return `rgb(${(index * 30) % 255}, ${(index * 60) % 255}, 132)`;
+                }),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+
+
+    // Chuyển đổi dữ liệu từ ViewBag thành dạng JSON để sử dụng trong JavaScript
+    var revenueReportData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.RevenueReportData));
+
+    const labelRevenues = revenueReportData.map(x => x.Label); 
+    const dataRevenue = revenueReportData.map(x => x.Data); 
+
+    // Lấy phần tử canvas từ HTML để vẽ biểu đồ
+    const ctxRevenue = document.getElementById('reportsChartRevenue').getContext('2d');
+
+    // Tạo biểu đồ với dữ liệu ban đầu
+    const chartRevenue = new Chart(ctxRevenue, {
+        type: 'bar',
+        data: {
+            labels: labelRevenues,
+            datasets: [{
+                label: "Revenue",
+                data: dataRevenue,
+                backgroundColor: dataRevenue.map((_, index) => {
+                    // Sinh màu nền động cho mỗi cột
+                    return `rgba(${(index * 30) % 255}, ${(index * 60) % 255}, 132, 0.2)`;
+                }),
+                borderColor: dataRevenue.map((_, index) => {
+                    // Sinh màu viền động cho mỗi cột
+                    return `rgb(${(index * 30) % 255}, ${(index * 60) % 255}, 132)`;
+                }),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+
+
+
+
+
+<style>
+   :root {
+  scroll-behavior: smooth;
+}
+a {
+  color: #4154f1;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #717ff5;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Nunito", sans-serif;
+}
+
+/*--------------------------------------------------------------
+# Main
+--------------------------------------------------------------*/
+.main-dashboard {
+  transition: all 0.3s;
+}
+/*--------------------------------------------------------------
+# Page Title
+--------------------------------------------------------------*/
+.pagetitle {
+  margin-bottom: 10px;
+}
+
+.pagetitle h1 {
+  font-size: 24px;
+  margin-bottom: 0;
+  font-weight: 600;
+  color: #012970;
+}
+
+/*--------------------------------------------------------------
+
+/* Card */
+.card {
+  margin-bottom: 30px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0px 0 30px rgba(1, 41, 112, 0.1);
+}
+
+.card-header,
+.card-footer {
+  border-color: #ebeef4;
+  background-color: #fff;
+  color: #798eb3;
+  padding: 15px;
+}
+
+.card-title {
+  padding: 20px 0 15px 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #012970;
+  font-family: "Poppins", sans-serif;
+}
+
+.card-title span {
+  color: #899bbd;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.card-body {
+  padding: 0 20px 20px 20px;
+}
+
+.card-img-overlay {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Alerts */
+.alert-heading {
+  font-weight: 500;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+}
+
+/* Close Button */
+.btn-close {
+  background-size: 25%;
+}
+
+.btn-close:focus {
+  outline: 0;
+  box-shadow: none;
+}
+
+/* Accordion */
+.accordion-item {
+  border: 1px solid #ebeef4;
+}
+
+.accordion-button:focus {
+  outline: 0;
+  box-shadow: none;
+}
+
+.accordion-button:not(.collapsed) {
+  color: #012970;
+  background-color: #f6f9ff;
+}
+
+.accordion-flush .accordion-button {
+  padding: 15px 0;
+  background: none;
+  border: 0;
+}
+
+.accordion-flush .accordion-button:not(.collapsed) {
+  box-shadow: none;
+  color: #4154f1;
+}
+
+.accordion-flush .accordion-body {
+  padding: 0 0 15px 0;
+  color: #3e4f6f;
+  font-size: 15px;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+  font-size: 14px;
+  font-family: "Nunito", sans-serif;
+  color: #899bbd;
+  font-weight: 600;
+}
+
+.breadcrumb a {
+  color: #899bbd;
+  transition: 0.3s;
+}
+
+.breadcrumb a:hover {
+  color: #51678f;
+}
+
+.breadcrumb .breadcrumb-item::before {
+  color: #899bbd;
+}
+
+.breadcrumb .active {
+  color: #51678f;
+  font-weight: 600;
+}
+
+/* Bordered Tabs */
+.nav-tabs-bordered {
+  border-bottom: 2px solid #ebeef4;
+}
+
+.nav-tabs-bordered .nav-link {
+  margin-bottom: -2px;
+  border: none;
+  color: #2c384e;
+}
+
+.nav-tabs-bordered .nav-link:hover,
+.nav-tabs-bordered .nav-link:focus {
+  color: #4154f1;
+}
+
+.nav-tabs-bordered .nav-link.active {
+  background-color: #fff;
+  color: #4154f1;
+  border-bottom: 2px solid #4154f1;
+}
+
+/*--------------------------------------------------------------
+# Dashboard
+--------------------------------------------------------------*/
+/* Filter dropdown */
+.dashboard .filter {
+  position: absolute;
+  right: 0px;
+  top: 15px;
+}
+
+.dashboard .filter .icon {
+  color: #aab7cf;
+  padding-right: 20px;
+  padding-bottom: 5px;
+  transition: 0.3s;
+  font-size: 16px;
+}
+
+.dashboard .filter .icon:hover,
+.dashboard .filter .icon:focus {
+  color: #4154f1;
+}
+
+.dashboard .filter .dropdown-header {
+  padding: 8px 15px;
+}
+
+.dashboard .filter .dropdown-header h6 {
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #aab7cf;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.dashboard .filter .dropdown-item {
+  padding: 8px 15px;
+}
+
+/* Info Cards */
+.dashboard .info-card {
+  padding-bottom: 10px;
+}
+
+.dashboard .info-card h6 {
+  font-size: 28px;
+  color: #012970;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard .card-icon {
+  font-size: 32px;
+  line-height: 0;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.dashboard .sales-card .card-icon {
+  color: #4154f1;
+  background: #f6f6fe;
+}
+
+.dashboard .revenue-card .card-icon {
+  color: #2eca6a;
+  background: #e0f8e9;
+}
+
+.dashboard .customers-card .card-icon {
+  color: #ff771d;
+  background: #ffecdf;
+}
+
+/* Activity */
+.dashboard .activity {
+  font-size: 14px;
+}
+
+.dashboard .activity .activity-item .activite-label {
+  color: #888;
+  position: relative;
+  flex-shrink: 0;
+  flex-grow: 0;
+  min-width: 64px;
+}
+
+.dashboard .activity .activity-item .activite-label::before {
+  content: "";
+  position: absolute;
+  right: -11px;
+  width: 4px;
+  top: 0;
+  bottom: 0;
+  background-color: #eceefe;
+}
+
+.dashboard .activity .activity-item .activity-badge {
+  margin-top: 3px;
+  z-index: 1;
+  font-size: 11px;
+  line-height: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 3px solid #fff;
+  flex-grow: 0;
+}
+
+.dashboard .activity .activity-item .activity-content {
+  padding-left: 10px;
+  padding-bottom: 20px;
+}
+
+.dashboard .activity .activity-item:first-child .activite-label::before {
+  top: 5px;
+}
+
+.dashboard .activity .activity-item:last-child .activity-content {
+  padding-bottom: 0;
+}
+
+/* News & Updates */
+.dashboard .news .post-item+.post-item {
+  margin-top: 15px;
+}
+
+.dashboard .news img {
+  width: 80px;
+  float: left;
+  border-radius: 5px;
+}
+
+.dashboard .news h4 {
+  font-size: 15px;
+  margin-left: 95px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.dashboard .news h4 a {
+  color: #012970;
+  transition: 0.3s;
+}
+
+.dashboard .news h4 a:hover {
+  color: #4154f1;
+}
+
+.dashboard .news p {
+  font-size: 14px;
+  color: #777777;
+  margin-left: 95px;
+}
+
+/* Recent Sales */
+.dashboard .recent-sales {
+  font-size: 14px;
+}
+
+.dashboard .recent-sales .table thead {
+  background: #f6f6fe;
+}
+
+.dashboard .recent-sales .table thead th {
+  border: 0;
+}
+
+.dashboard .recent-sales .dataTable-top {
+  padding: 0 0 10px 0;
+}
+
+.dashboard .recent-sales .dataTable-bottom {
+  padding: 10px 0 0 0;
+}
+
+/* Top Selling */
+.dashboard .top-selling {
+  font-size: 14px;
+}
+
+.dashboard .top-selling .table thead {
+  background: #f6f6fe;
+}
+
+.dashboard .top-selling .table thead th {
+  border: 0;
+}
+
+.dashboard .top-selling .table tbody td {
+  vertical-align: middle;
+}
+
+.dashboard .top-selling img {
+  border-radius: 5px;
+  max-width: 60px;
+}
+
+</style>
+

@@ -1,0 +1,172 @@
+﻿@inject IConfiguration config;
+@model IEnumerable<FoodieHub.MVC.Models.Order.GetOrder>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var url = config["BaseHost"];
+
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Order List</h2>
+    <form method="get" class="d-flex align-items-center gap-3 bg-light p-2 rounded">
+        <a class="btn btn-light me-3" asp-action="Index">Clear All Filter</a>
+
+        <!-- Filter by Date -->
+        <div class="d-flex align-items-center">
+            <label for="orderDate" class="form-label me-2 font-weight-bold mb-0">Order Date:</label>
+            <input type="date" id="orderDate" name="orderDate" class="form-control" style="max-width: 200px;" value="@ViewData["OrderDate"]" />
+        </div>
+
+        <!-- Filter by Status -->
+        <div class="d-flex align-items-center">
+            <label for="OrderStatus" class="form-label me-2 font-weight-bold mb-0">Status:</label>
+            <select class="form-select" id="OrderStatus" name="orderStatus" style="max-width: 150px;" onchange="this.form.submit()">
+                <option value="">All</option>
+                <option value="Pending" selected="@(ViewData["SelectedStatus"] as string == "Pending")">Pending</option>
+                <option value="Payed" selected="@(ViewData["SelectedStatus"] as string == "Payed")">Payed</option>
+                <option value="Approved" selected="@(ViewData["SelectedStatus"] as string == "Confirm")">Confirm</option>
+                <option value="Shipping" selected="@(ViewData["SelectedStatus"] as string == "Shipping")">Shipping</option>
+                <option value="Completed" selected="@(ViewData["SelectedStatus"] as string == "Completed")">Completed</option>
+                <option value="Canceled" selected="@(ViewData["SelectedStatus"] as string == "Canceled")">Canceled</option>
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <p>No orders available.</p>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-orderKey="ORDEREDDATE"
+                       asp-route-isDesc="@(ViewData["OrderKey"] as string == "ORDEREDDATE" ? !(ViewData["IsOrderedDateDescending"] as bool? ?? false) : false)"
+                       asp-route-currentPage="@ViewData["CurrentPage"]"
+                       asp-route-pageSize="@ViewData["PageSize"]">
+                        Ordered At
+                        @(ViewData["OrderKey"] as string == "ORDEREDDATE"
+                            ? ((ViewData["IsOrderedDateDescending"] as bool? ?? false) ? " ↓" : " ↑")
+                            : "")
+                    </a>
+                </th>
+                <th>Customer Name</th>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-orderKey="PRICE"
+                       asp-route-isDesc="@(ViewData["OrderKey"] as string == "PRICE" ? !(ViewData["IsTotalAmountDescending"] as bool? ?? false) : false)"
+                       asp-route-currentPage="@ViewData["CurrentPage"]"
+                       asp-route-pageSize="@ViewData["PageSize"]">
+                        Total Amount
+                        @(ViewData["OrderKey"] as string == "PRICE"
+                            ? ((ViewData["IsTotalAmountDescending"] as bool? ?? false) ? " ↓" : " ↑")
+                            : "")
+                    </a>
+                </th>
+                <th>Status</th>
+                <th>Payment Method</th>
+                <th>Payment Status</th>
+                <th>Phone Number</th>
+                <th>QR Code</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.OrderID</td>
+                    <td>@order.OrderedAt.ToString("MM/dd/yyyy")</td>
+                    <td>@order.Fullname</td>
+                    <td>$ @(order.TotalAmount - (order.Discount??0) - (order.DiscountOfCoupon??0))</td>
+                    <td>
+                        @{
+                            string status = order.Status.ToLowerInvariant();
+                            if (!string.IsNullOrEmpty(status))
+                            {
+                                status = char.ToUpper(status[0]) + status.Substring(1);
+                            }
+
+                            switch (status)
+                            {
+                                case "Pending":
+                                    <span class="badge bg-warning">@status</span>
+                                    break;
+                                case "Approved":
+                                    <span class="badge bg-success">@status</span>
+                                    break;
+                                case "Rejected":
+                                    <span class="badge bg-danger">@status</span>
+                                    break;
+                                case "Payed":
+                                    <span class="badge bg-success">@status</span>
+                                    break;
+                                case "Shipping":
+                                    <span class="badge bg-secondary">@status</span>
+                                    break;
+                                case "Completed":
+                                    <span class="badge bg-info">@status</span>
+                                    break;
+                                case "Canceled":
+                                    <span class="badge bg-danger-subtle">@status</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-primary-subtle">@status</span>
+                                    ; // or use a default badge if necessary
+                                    break;
+                            }
+                        }
+
+                    </td>
+                    <td>@(order.PaymentMethod ? "Card" : "Cash")</td>
+                    <td>@(order.PaymentStatus ? "Paid" : "Unpaid")</td>
+                    <td>@order.PhoneNumber</td>
+                    <td>
+                        <img src=@(url+"/"+order.QRCode) alt="QR Code" style="width: 50px; height: 50px;" />                      
+                    </td>
+                    <td>                   
+                        <a class="btn btn-primary" asp-action="Details" asp-route-id="@order.OrderID">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-center">
+        <!-- Pagination Controls -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                @if (ViewData["CurrentPage"] != null && (int)ViewData["CurrentPage"] > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-currentPage="@((int)ViewData["CurrentPage"] - 1)" asp-route-pageSize="@ViewData["PageSize"]" asp-route-orderDate="@ViewData["OrderDate"]" asp-route-orderKey="@ViewData["OrderKey"]" asp-route-isDesc="@((string)ViewData["OrderKey"] == "PRICE" ? ViewData["IsTotalAmountDescending"] : ViewData["IsOrderedDateDescending"])">Previous</a>
+                    </li>
+                }
+
+                @for (int i = 1; i <= (int)(ViewData["TotalPages"] ?? 1); i++)
+                {
+                    <li class="page-item @(i == (int)(ViewData["CurrentPage"] ?? 1) ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-currentPage="@i" asp-route-pageSize="@ViewData["PageSize"]" asp-route-orderDate="@ViewData["OrderDate"]" asp-route-orderKey="@ViewData["OrderKey"]" asp-route-isDesc="@((string)ViewData["OrderKey"] == "PRICE" ? ViewData["IsTotalAmountDescending"] : ViewData["IsOrderedDateDescending"])">@i</a>
+                    </li>
+                }
+
+                @if (ViewData["CurrentPage"] != null && ViewData["TotalPages"] != null && (int)ViewData["CurrentPage"] < (int)ViewData["TotalPages"])
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-currentPage="@((int)ViewData["CurrentPage"] + 1)" asp-route-pageSize="@ViewData["PageSize"]" asp-route-orderDate="@ViewData["OrderDate"]" asp-route-orderKey="@ViewData["OrderKey"]" asp-route-isDesc="@((string)ViewData["OrderKey"] == "PRICE" ? ViewData["IsTotalAmountDescending"] : ViewData["IsOrderedDateDescending"])">Next</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+}

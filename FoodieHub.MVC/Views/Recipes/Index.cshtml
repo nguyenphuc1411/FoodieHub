@@ -1,0 +1,205 @@
+﻿@inject IConfiguration config
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+}
+
+<div class="container py-5">
+    <h2 class="text-center mb-5">Recipe List</h2>
+
+    <!-- Filter and Search Options -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-3">
+            <form class="filter-container">
+                <!-- Search Bar -->
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search recipes..." aria-label="Search recipes">
+                    </div>
+                </div>
+
+                <!-- Filter by Ingredient -->
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Filter by ingredients">
+                </div>
+                <!-- Filter by Time -->
+                <div class="mb-3">
+                    <select class="form-select">
+                        <option value="">Filter by Time</option>
+                        <option value="under30">Under 30 mins</option>
+                        <option value="30to60">30 - 60 mins</option>
+                        <option value="over60">Over 60 mins</option>
+                    </select>
+                </div>
+
+                <!-- Filter by Upload Type -->
+                <div class="mb-3">
+                    <select class="form-select">
+                        <option value="">Uploaded by</option>
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                    </select>
+                </div>
+
+                <!-- Sort by Dropdown -->
+                <div class="mb-3">
+                    <select class="form-select">
+                        <option value="date">Sort by Date</option>
+                        <option value="likes">Sort by Likes</option>
+                        <option value="rating">Sort by Rating</option>
+                    </select>
+                </div>
+
+                <!-- Apply Filters Button -->
+                <div class="d-grid gap-2">
+                    <button class="button button-dark">Apply Filters</button>
+                </div>
+
+                <!-- Clear Filters Button -->
+                <div class="d-grid gap-2 mt-2">
+                    <button class="button button-light">Clear Filters</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Recipe Cards -->
+        <div class="col-12 col-md-9">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+               @*  @foreach (var recipe in Model)
+                {
+                    <div class="col">
+                        <div class="card recipe-card shadow-sm">
+                            <img src="@url + recipe.ImageUrl" class="card-img-top" alt="Recipe Image">
+                            <div class="card-body">
+                                <h5 class="card-title">@recipe.Title</h5>
+                                <p class="card-text">@recipe.Description</p>
+                                <div class="recipe-stats">
+                                    <span>Created on: @recipe.CreatedDate.ToString("dd/MM/yyyy")</span>
+                                    <span>Likes: @recipe.Likes</span>
+                                </div>
+                                <div class="recipe-stats">
+                                    <span>Rating: @recipe.Rating</span>
+                                    <span>Reviews: @recipe.ReviewsCount</span>
+                                </div>
+                                <div class="recipe-stats">
+                                    <span>Cooking Time: @recipe.CookingTime mins</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                } *@
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mt-4">
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- More Recipe Cards can be added here -->
+</div>
+
+<div class="py-5 text-center">
+    <h1 style="font-family: Inter; font-size: 35px; font-style: italic; font-weight: 500; line-height: 42px;">
+        Meet Our Residents
+    </h1>
+</div>
+
+<div class="text-center">
+    <p class="nho">
+        The ultimate dream team—our residents will share everything you’ve ever wanted to know about dinner-wrangling, dessert-whispering, and more.
+    </p>
+</div>
+
+<div class="container text-center">
+    <div class="row gy-4 justify-content-center">
+        <div class="col-lg-2 col-md-6 col-sm-12 d-flex justify-content-center align-items-center">
+            <div class="infocard text-center">
+                <div class="d-flex justify-content-center">
+                    <img src="/images/profile.jpg" alt="Profile Image" class="img-fluid rounded-circle profile-img">
+                </div>
+                <div class="info-box">
+                    <p class="username">Tên người dùng</p>
+                    <p class="view-profile">VIEW PROFILE &gt;&gt;</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="py-5">
+            <button class="button button-light">View More</button>
+        </div>
+    </div>
+</div>
+
+<div class="ngancach"></div>
+
+<div class="recipe-section text-center p-3">
+    <h2>Add a New Recipe</h2>
+    <p>Contribute your best original recipes to the FoodieHub cooking community's all-star collection.</p>
+    <a href="/recipes/create" class="button button-dark">CREATE A RECIPE</a>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .recipe-card {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .recipe-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .recipe-card .card-body {
+            padding: 20px;
+        }
+
+        .recipe-card .card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .recipe-card .card-text {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+    .recipe-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #777;
+        margin-top: 10px;
+    }
+</style>

@@ -1,0 +1,130 @@
+﻿@inject IConfiguration config
+@model IEnumerable<FoodieHub.MVC.Models.Order.GetOrder>
+
+@{
+    ViewData["Title"] = "Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+
+}
+<link rel="stylesheet" href="~/css/profile.css">
+<div class="container py-5">
+    <div class="row align-items-start">
+        <div>
+            <h5>Account / Order</h5>
+        </div>
+        @await Html.PartialAsync("_NavigationForProfile")
+
+        <div class="col-md-1">
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-8 main-content mt-3">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ORDER</th>
+                            <th>DATE</th>
+                            <th>STATUS</th>
+                            <th>TOTAL AMOUNT</th>
+                            <th>QR CODE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>@order.OrderID</td>
+                                    <td>@order.OrderedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>@order.Status</td>
+                                    <td>@order.TotalAmount.ToString("F2") $</td>
+                                    <td>
+                                        <img src=@(url+"/"+order.QRCode) alt="QR Code" class="img-fluid" style="width:50px;height:50px" />
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("OrderDetail", "Account", new { id = order.OrderID })" class="button button-dark rounded-2">View</a>
+                                        @if (order.Status == "PENDING")
+                                        {
+                                            <button class="button rounded-2 bg-danger text-light" onclick="setOrderId(@order.OrderID)" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">Cancel</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center">No orders found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="d-flex justify-content-center mt-2">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        @if (ViewData["CurrentPage"] != null && (int)ViewData["CurrentPage"] > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Order" asp-route-currentPage="@((int)ViewData["CurrentPage"] - 1)" asp-route-pageSize="@ViewData["PageSize"]">Previous</a>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= (int)(ViewData["TotalPages"] ?? 1); i++)
+                        {
+                            <li class="page-item @(i == (int)(ViewData["CurrentPage"] ?? 1) ? "active" : "")">
+                                <a class="page-link" asp-action="Order" asp-route-currentPage="@i" asp-route-pageSize="@ViewData["PageSize"]">@i</a>
+                            </li>
+                        }
+
+                        @if (ViewData["CurrentPage"] != null && ViewData["TotalPages"] != null && (int)ViewData["CurrentPage"] < (int)ViewData["TotalPages"])
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Order" asp-route-currentPage="@((int)ViewData["CurrentPage"] + 1)" asp-route-pageSize="@ViewData["PageSize"]">Next</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Modal for Order Cancellation Reason -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="cancelOrderForm" method="post" action="@Url.Action("CancelOrder", "Account")">
+                    <input type="hidden" id="orderID" name="orderID" />
+                    <div class="mb-3">
+                        <label for="cancellationReason" class="form-label">Reason for Cancellation</label>
+                        <textarea id="cancellationReason" class="form-control" name="cancellationReason" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-danger" form="cancelOrderForm">Confirm Cancellation</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setOrderId(orderId) {
+        document.getElementById('orderID').value = orderId;
+    }
+</script>

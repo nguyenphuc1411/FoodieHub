@@ -1,0 +1,58 @@
+﻿@using FoodieHub.MVC.Models.Article
+@model EditArticle
+@inject IConfiguration config;
+
+@{
+    var url = config["BaseHost"];
+    ViewData["Title"] = "Edit Article";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container py-4">
+    <h2 class="text-primary">Edit Article</h2>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="ArticleID"/>
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Title</label>
+            <input asp-for="Title" class="form-control" placeholder="Enter article title" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 d-flex align-items-center">
+            <div class="me-3">
+                <label asp-for="File" class="form-label">Image</label>
+                <input asp-for="File" type="file" class="form-control" accept="image/*" />
+                <small class="text-muted">Leave blank to keep current image.</small>
+            </div>
+            <div>
+                <label class="form-label">Current Image</label>
+                <img src="@(url + $"/images/{ViewBag.CurrentImage}")" alt="Current Image" class="img-fluid" style="max-width: 100px; height: auto;" />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" placeholder="Enter article description"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CategoryID" class="form-label me-3">Category</label>
+            <span asp-validation-for="CategoryID" class="text-danger"></span>
+            <select asp-for="CategoryID" class="form-select form-select-sm me-2" style="width: 150px;">
+                <option selected>All</option>
+                @if (ViewBag.Category != null)
+                {
+                    foreach (var item in ViewBag.Category)
+                    {
+                        <option value="@item.CategoryID">@item.CategoryName</option>
+                    }
+                }
+            </select>
+
+        </div>
+        <button type="submit" class="btn btn-primary">Update Article</button>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>

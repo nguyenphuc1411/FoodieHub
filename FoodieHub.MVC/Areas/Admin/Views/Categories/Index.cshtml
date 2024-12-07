@@ -1,0 +1,588 @@
+﻿@using FoodieHub.MVC.Service.Interfaces
+@inject ICategoryService _categoryService;
+@inject IArticleCategoryService _articleCategoryService;
+@inject IRecipeCategoryService _recipeCategoryService
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var listCategory = await _categoryService.GetAll();
+    var listArticleCategories = await _articleCategoryService.GetAll();
+    var listRecipeCategory = await _recipeCategoryService.GetAll();
+    var apiUrl = Configuration["BaseHost"];
+}
+
+<h2>Category Management</h2>
+<div>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link text-secondary active" data-bs-toggle="tab" href="#productcategory">Product Category</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-secondary" data-bs-toggle="tab" href="#recipecategory">Recipe Category</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-secondary" data-bs-toggle="tab" href="#articlecategory">Article Category</a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane container active" id="productcategory">
+            <div class="row mt-3">
+                <div class="col-sm-6">
+                    <h4>Product Category List</h4>
+                </div>
+
+                <div class="col-sm-6 text-end">
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#createProductCategoryModal">
+                        Create Product Category
+                    </button>
+                </div>
+               
+            </div>
+
+            <div class="container mt-4">
+                <table class="table table-bordered d">
+                    <thead class="text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Category Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (listCategory != null && listCategory.Any())
+                        {
+                            foreach (var item in listCategory)
+                            {
+                                <tr class="text-center align-middle">
+                                    <td>@item.CategoryID</td>
+                                    <td>@item.CategoryName</td>
+                                    <td>
+                                        <a data-bs-toggle="modal" data-bs-target="#ProductCategoryRename@(item.CategoryID)"
+                                           class="btn btn-warning mx-1">Rename</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="text-center">
+                                <td colspan="3" class="text-muted">No categories available</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane container fade" id="recipecategory">
+
+            <div class="row mt-3">
+                <div class="col-sm-6">
+                    <h4>Product Category List</h4>
+                </div>
+
+                <div class="col-sm-6 text-end">
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#createRecipeCategoryModal">
+                        Create Recipe Category
+                    </button>
+                </div>
+            </div>
+
+            <div class="container mt-4">
+                <table class="table table-bordered">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Category ID</th>
+                            <th>Category Name</th>
+                            <th>Image</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @if (listRecipeCategory != null && listRecipeCategory.Any())
+                        {
+                            @foreach (var item in listRecipeCategory)
+                            {
+                                // Kiểm tra trạng thái của từng mục
+                                bool isActive = item.IsActice && !item.IsDeleted;
+
+                                <tr>
+                                    <td>@item.CategoryID</td>
+                                    <td>@item.CategoryName</td>
+                                    <td><img src="@($"{apiUrl}Images/{item.ImageURL}")" alt="@item.CategoryName" width="40" height="40" /></td>
+                                    <td>
+                                        @if (isActive)
+                                        {
+                                            <span class="text-success fw-bold">Enable</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger fw-bold">Disable</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a data-bs-toggle="modal" data-bs-target="#RecipeCategoryEdit@(item.CategoryID)"
+                                           class="btn btn-warning mx-1">Edit</a>
+                                        @if (item.IsActice)
+                                        {
+                                            <!-- Nút mở modal Disable -->
+                                            <button type="button" class="btn btn-danger mx-1" data-bs-toggle="modal" data-bs-target="#disableArticleCategorymodal(@item.CategoryID)">
+                                                Disable
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <!-- Nút mở modal Enable -->
+                                            <button type="button" class="btn btn-success mx-1" data-bs-toggle="modal" data-bs-target="#enableArticleCategorymodal(@item.CategoryID)">
+                                                Enable
+                                            </button>
+                                        }
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center">No categories found</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+
+        <div class="tab-pane container fade" id="articlecategory">
+            <div class="row mt-3">
+                <div class="col-sm-6">
+                    <h4>Article Category List</h4>
+                </div>
+
+                <div class="col-sm-6 text-end">
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#createArticleCategoryModal">
+                        Create Article Category
+                    </button>
+                </div>
+            </div>
+
+            <div class="container mt-4">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr class="text-center">
+                            <th>ID</th>
+                            <th>Category Name</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (listArticleCategories != null && listArticleCategories.Any())
+                        {
+                            foreach (var item in listArticleCategories)
+                            {
+                                <tr class="text-center">
+                                    <td>@item.CategoryID</td>
+                                    <td>@item.CategoryName</td>
+                                    <td class="fw-bold">
+                                        @if (item.IsDeleted)
+                                        {
+                                            <span class="text-danger">Deleted</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success">Active</span>
+                                        }
+                                    </td>
+                                   
+                                    <td>
+
+                                        <a data-bs-toggle="modal" data-bs-target="#ArticleCategoryRename@(item.CategoryID)"
+                                           class="btn btn-warning mx-1">Rename</a>
+
+                                        @if (item.IsDeleted)
+                                        {
+                                            <!-- Nút mở modal Enable -->
+                                            <button type="button" class="btn btn-success mx-1" data-bs-toggle="modal" data-bs-target="#enableRecipeCategorymodal(@item.CategoryID)">
+                                                Enable
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <!-- Nút mở modal Disable -->
+                                            <button type="button" class="btn btn-danger mx-1" data-bs-toggle="modal" data-bs-target="#disableRecipeCategorymodal(@item.CategoryID)">
+                                                Disable
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center">No categories found</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@* Create Product Category *@
+<div class="modal fade" id="createProductCategoryModal" tabindex="-1" aria-labelledby="createProductCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createProductCategoryModalLabel">Create Product Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="CreateProductCategory" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <!-- Form inside modal -->
+               
+                        <div class="mb-3">
+                            <label for="CategoryName" class="form-label">Category Name</label>
+                            <input type="text" id="CategoryName" name="CategoryName" class="form-control" required minlength="3" maxlength="50"
+                                   pattern="[A-Za-z0-9À-ỹ\s]+"
+                                   title="Category Name must be 3-50 characters, and cannot contain special characters.">
+                            <div class="text-danger" id="CategoryNameError"></div>
+                        </div>
+               
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"  class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+@* Create Recipe Category *@
+<div class="modal fade" id="createRecipeCategoryModal" tabindex="-1" aria-labelledby="createRecipeCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createRecipeCategoryModalLabel">Create Recipe Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="CreateRecipeCategory" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <!-- Form inside modal -->
+               
+                        <!-- Category Name -->
+                        <div class="mb-3">
+                            <label for="CategoryName" class="form-label">Category Name</label>
+                            <input type="text" id="CategoryName" name="CategoryName" class="form-control" required minlength="3" maxlength="50"
+                                   pattern="[A-Za-z0-9À-ỹ\s]+"
+                                   title="Category Name must be 3-50 characters, and cannot contain special characters.">
+                            <div class="text-danger" id="CategoryNameError"></div>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="mb-3">
+                            <label for="ImageURL" class="form-label">Category Image</label>
+                            <input type="file" id="ImageURL" name="ImageURL" class="form-control" accept="image/*" required>
+                        </div>
+                
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"  class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@* Create Article Category *@
+<div class="modal fade" id="createArticleCategoryModal" tabindex="-1" aria-labelledby="createArticleCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createArticleCategoryModalLabel">Create Article Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="CreateArticleCategory" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <!-- Form inside modal -->
+               
+                        <!-- Category Name -->
+                        <div class="mb-3">
+                            <label for="CategoryName" class="form-label">Category Name</label>
+                            <input type="text" id="CategoryName" name="CategoryName" class="form-control" required minlength="3" maxlength="50"
+                                   pattern="[A-Za-z0-9À-ỹ\s]+"
+                                   title="Category Name must be 3-50 characters, and cannot contain special characters.">
+                            <div class="text-danger" id="CategoryNameError"></div>
+                        </div>
+                
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"  class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Category Product Rename -->
+@foreach (var item in listCategory)
+{
+    <div class="modal fade" id="ProductCategoryRename@(item.CategoryID)" tabindex="-1" aria-labelledby="ProductCategoryRenameLabel@(item.CategoryID)" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="ProductCategoryRenameLabel@(item.CategoryID)">Rename Product Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="EditProductCategory" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="CategoryID" value="@item.CategoryID" />
+
+                        <div class="mb-3">
+                            <label for="newCategoryName@(item.CategoryID)" class="form-label">New Category Name</label>
+                            <input type="text" class="form-control" id="newCategoryName@(item.CategoryID)"
+                                   name="CategoryName"
+                                   value="@item.CategoryName"
+                                   required
+                                   minlength="3"
+                                   maxlength="50"
+                                   pattern="[A-Za-z0-9À-ỹ\s]+"
+                                   title="Name should be 3-50 characters and contain only letters, numbers, spaces, and Vietnamese characters." />
+
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+
+<!-- Modal Category Article Rename -->
+@foreach (var item in listArticleCategories)
+{
+    <div class="modal fade" id="ArticleCategoryRename@(item.CategoryID)" tabindex="-1" aria-labelledby="ArticleCategoryRenameLabel@(item.CategoryID)" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="ArticleCategoryRenameLabel@(item.CategoryID)">Rename Article Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="SetArticleCategoryName" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="CategoryID" value="@item.CategoryID" />
+
+                        <div class="mb-3">
+                            <label for="newCategoryName@(item.CategoryID)" class="form-label">New Category Name</label>
+                            <input type="text" class="form-control" id="newCategoryName@(item.CategoryID)"
+                                   name="CategoryName"
+                                   value="@item.CategoryName"
+                                   required
+                                   minlength="3"
+                                   maxlength="50"
+                                   pattern="[A-Za-z0-9À-ỹ\s]+"
+                                   title="Name should be 3-50 characters and contain only letters, numbers, and spaces." />
+                        </div>
+                        <input type="hidden" class="form-control"
+                               id="IsDeleted@(item.CategoryID)"
+                               name="IsDeleted"
+                               value="@item.IsDeleted"
+                               readonly />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+
+@* Modal Category Recipe Rename *@
+@foreach (var item in listRecipeCategory)
+{
+    <!-- Modal cho từng Recipe Category -->
+    <div class="modal fade" id="RecipeCategoryEdit@(item.CategoryID)" tabindex="-1" aria-labelledby="RecipeCategoryEditLabel@(item.CategoryID)" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="RecipeCategoryEditLabel@(item.CategoryID)">Rename Recipe Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Form cập nhật -->
+                <form asp-action="UpdateRecipeCategory" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+
+                        <!-- Hidden Field CategoryID -->
+                        <input type="hidden" name="CategoryID" value="@item.CategoryID" />
+
+                        <!-- Category Name Input -->
+                        <div class="mb-3">
+                            <label for="updateCategoryName@(item.CategoryID)" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="updateCategoryName@(item.CategoryID)"
+                                   name="CategoryName"
+                                   value="@item.CategoryName"
+                                   required
+                                   minlength="3"
+                                   maxlength="50"
+                                   pattern="[A-Za-z0-9À-ỹ\s]+"
+                                   title="Name should be 3-50 characters and contain only letters, numbers, and spaces." />
+                        </div>
+
+                        <!-- Image URL Input -->
+                        <div class="mb-3">
+                            <label for="updateImageURL@(item.CategoryID)" class="form-label">Category Image</label>
+                            <input type="file" class="form-control" id="updateImageURL@(item.CategoryID)"
+                                   name="ImageURL"
+                                   accept="image/*" />
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@* Set Article Status *@
+@foreach (var item in listRecipeCategory)
+{
+    <!-- Modal Disable -->
+    @if (item.IsActice)
+    {
+        <div class="modal fade" id="disableArticleCategorymodal(@item.CategoryID)" tabindex="-1" aria-labelledby="disableArticleCategorymodal(@item.CategoryID)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="disableArticleCategorymodal(@item.CategoryID)">Confirm Disable</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to disable the category <strong>@item.CategoryName</strong>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form asp-action="SetRecipeCategoryOff" method="post" class="d-inline">
+                            <input type="hidden" name="CategoryID" value="@item.CategoryID" />
+                            <input type="hidden" name="CategoryName" value="@item.CategoryName" />
+                            <button type="submit" class="btn btn-danger">Yes, Disable</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Modal Enable -->
+    @if (!item.IsActice)
+    {
+        <div class="modal fade" id="enableArticleCategorymodal(@item.CategoryID)" tabindex="-1" aria-labelledby="enableArticleCategorymodal(@item.CategoryID)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="enableArticleCategorymodal(@item.CategoryID)">Confirm Enable</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to enable the category <strong>@item.CategoryName</strong>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form asp-action="SetRecipeCategoryOn" method="post" class="d-inline">
+                            <input type="hidden" name="CategoryID" value="@item.CategoryID" />
+                            <input type="hidden" name="CategoryName" value="@item.CategoryName" />
+                            <button type="submit" class="btn btn-success">Yes, Enable</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+
+
+@* Set Recipe Status *@
+@foreach (var item in listArticleCategories) 
+{
+    <!-- Modal Enable -->
+    @if (item.IsDeleted)
+    {
+        <div class="modal fade" id="enableRecipeCategorymodal(@item.CategoryID)" tabindex="-1" aria-labelledby="enableRecipeCategorymodal(@item.CategoryID)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="enableRecipeCategorymodal(@item.CategoryID)">Confirm Enable</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to enable the category <strong>@item.CategoryName</strong>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form asp-action="SetArticleCategoryOn" method="post" class="d-inline">
+                            <input type="hidden" name="CategoryID" value="@item.CategoryID" />
+                            <input type="hidden" name="CategoryName" value="@item.CategoryName" />
+                            <button type="submit" class="btn btn-success">Yes, Enable</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Modal Disable -->
+    @if (!item.IsDeleted)
+    {
+        <div class="modal fade" id="disableRecipeCategorymodal(@item.CategoryID)" tabindex="-1" aria-labelledby="disableRecipeCategorymodal(@item.CategoryID)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="disableRecipeCategorymodal(@item.CategoryID)">Confirm Disable</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to disable the category <strong>@item.CategoryName</strong>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form asp-action="SetArticleCategoryOff" method="post" class="d-inline">
+                            <input type="hidden" name="CategoryID" value="@item.CategoryID" />
+                            <input type="hidden" name="CategoryName" value="@item.CategoryName" />
+                            <button type="submit" class="btn btn-danger">Yes, Disable</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

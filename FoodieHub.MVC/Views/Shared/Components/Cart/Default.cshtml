@@ -1,0 +1,86 @@
+﻿@using FoodieHub.MVC.Models.Cart
+@model List<GetCartDTO>
+@inject IConfiguration config
+
+@{
+    var url = config["BaseHost"];
+}
+<label for="toggle-sidebar" class="btn-cart">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span>@ViewBag.slOrder</span>
+</label>
+<!-- Checkbox Toggle -->
+<input type="checkbox" id="toggle-sidebar" hidden>
+
+<!-- Overlay (che mờ khi mở sidebar) -->
+<label for="toggle-sidebar" class="overlay"></label>
+
+<!-- Sidebar Cart -->
+<div id="cart-sidebar" class="sidebar d-flex flex-column justify-content-between">
+    <div class="cart-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <label for="toggle-sidebar" class="btn-close"></label>
+            <h2 class="text-center flex-grow-1 mb-0">Your Cart</h2>
+        </div>
+        @if (Model != null && Model.Any())
+        {
+            <table id="cart-items" class="table table-hover mb-3">
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <!-- Hình ảnh sản phẩm -->
+                            <td class="align-middle">
+                                <img src="@($"{url}/images/{item.MainImage}")" alt="Product Image" class="img-fluid rounded" style="width: 100px;">
+                            </td>
+
+                            <!-- Tên sản phẩm và số lượng -->
+                            <td class="align-middle">
+                                <div>
+                                    <!-- Tên sản phẩm -->
+                                    <h5 class="product-name-cart mb-1" style="word-wrap: break-word; max-width: 150px;" title="@item.ProductName">
+                                        @item.ProductName
+                                    </h5>
+                                    <!-- Số lượng -->
+                                    <form method="post" action="@Url.Action("UpdateCartItemLayout", "Cart")" class="update-cart-form1 d-flex align-items-center">
+                                        <input type="hidden" name="productId" value="@item.ProductID" />
+                                        <div class="input-group" style="width: 120px;">
+                                            <button type="button" class="btn btn-outline-secondary decrease-quantity">-</button>
+                                            <input readonly type="number" name="quantity" class="form-control text-center quantity-input" value="@item.Quantity" min="1">
+                                            <button type="button" class="btn btn-outline-secondary increase-quantity">+</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </td>
+
+                            <!-- Giá sản phẩm -->
+                            <td class="align-middle text-right">
+                                <span class="price">@($"${((item.Price - (item.Price * item.Discount / 100)) * item.Quantity).ToString("0.00")}")</span>
+                            </td>
+
+                            <!-- Nút xóa sản phẩm -->
+                            <td class="align-middle text-center">
+                                <a asp-controller="Cart" asp-action="RemoveFromCartLayout" asp-route-id="@item.ProductID" class="btn btn-outline-danger btn-sm remove-btn">
+                                    <i class="fa fa-times"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+    </div>
+
+    <!-- Nút CHECK OUT luôn ở dưới cùng -->
+    <div class="checkout-container">
+        <hr>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <span class="font-weight-bold">Subtotal:</span>
+            <span id="total-price" class="font-weight-bold">@($"${Model?.Sum(i => (i.Price - (i.Price * i.Discount / 100)) * i.Quantity).ToString("0.00")}")</span>
+        </div>
+        <hr>
+        <a asp-controller="Cart" asp-action="Checkout" class="button button-dark w-100">CHECK OUT</a>
+    </div>
+</div>
+

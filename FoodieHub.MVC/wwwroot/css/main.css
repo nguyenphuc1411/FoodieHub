@@ -1,0 +1,449 @@
+﻿:root {
+    --primary: #2D4558;
+    --text: #444444;
+    --secondary: #A18F7A;
+    --light: #869FAE;
+    --info: #959595;
+    --bg-secondary: #F7F7F7;
+    --border-color: #EAEAEA;
+}
+
+/*  3.5px   7px   14px   21px   42px    */
+@media screen and (min-width:1200px) and (max-width:1400px) {
+    .container {
+        max-width: 1080px;
+    }
+}
+
+html,
+body {
+    font-size: 14px;
+    color: var(--text);
+    scroll-behavior: smooth;
+}
+
+/* Common CSS */
+a {
+    text-decoration: none;
+}
+
+li {
+    list-style: none;
+}
+
+.button {
+    display: inline-flex;
+    line-height: 40px;
+    padding: 0px 20px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2px;
+    font-weight: 500;
+    opacity: 0.9;
+    cursor: pointer;
+    transition: opacity 0.5s;
+    outline: none;
+    border: none;
+}
+
+.ngancach {
+    width: 100%;
+    height: 70px;
+    background-color: var(--border-color);
+}
+
+.button:hover {
+    opacity: 1;
+}
+
+.button-dark {
+    color: #FFF;
+    background: var(--primary);
+}
+
+.button-light {
+    color: #FFF;
+    background: var(--secondary);
+}
+
+/* Header */
+.header {
+    background-color: var(--bg-secondary);
+    height: 75px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+    padding: 0 15px;
+}
+
+.nav__menu .nav__link {
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.2;
+    text-transform: uppercase;
+    padding: 5px 20px;
+    margin-right: 3px;
+}
+
+.nav__menu li:hover .nav__link,
+.nav__menu li.active .nav__link {
+    color: #ffffff; /* Chữ trắng khi hover hoặc active */
+    background-color: #A18F7A; /* Màu nền khi hover hoặc active */
+    border-radius: 4px; /* Bo góc */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Hiệu ứng shadow nhẹ cho chữ */
+}
+
+/* Hiệu ứng hover thêm một chút */
+.nav__menu li:hover .nav__link {
+    color: #ffffff; /* Chữ trắng khi hover */
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.15); /* Hiệu ứng nhẹ nhàng khi hover */
+    background-color: #A18F7A; /* Màu nền tối hơn khi hover */
+}
+
+/* Style mặc định của các item menu */
+.nav__menu li .nav__link {
+    color: #333333; /* Màu chữ mặc định */
+    text-decoration: none; /* Không gạch chân */
+    padding: 8px 12px;
+    display: block;
+    transition: all 0.3s ease; /* Hiệu ứng chuyển động mượt mà */
+}
+
+/* Khi hover vào các mục menu */
+.nav__menu li:hover .nav__link {
+    color: #fff; /* Chữ trắng khi hover */
+    background-color: #A18F7A; /* Màu nền khi hover */
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Hiệu ứng shadow nhẹ cho chữ */
+}
+
+.header .logo {
+    color: var(--info);
+    font-size: 2.4rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+.header #avatar img {
+    width: 30px;
+    height: 30px;
+    border-radius: 30px;
+}
+.mobile-nav {
+    position: fixed;
+    top: -130px;
+    width: 100%;
+    transition: top 0.7s;
+}
+
+    .mobile-nav.show {
+        top: 75px !important;
+    }
+
+.search-box {
+    width: 100%;
+}
+
+.nav__link {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+}
+
+    .nav__link:hover {
+        background-color: #f8f9fa;
+    }
+
+/* CSS BTN PROFILE VÀ CART */
+.btn-profile i {
+    display: block;
+    padding: 5px;
+    color: #FFF;
+    border-radius: 50%;
+    background-color: var(--text);
+}
+
+.btn-profile span {
+    color: var(--primary);
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.btn-cart {
+    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 5px;
+    width: 47px;
+    height: 35px;
+    border-radius: 1px;
+    background: var(--primary);
+    color: #FFF;
+    opacity: 0.9;
+    outline: none;
+    border: none;
+    transition: opacity 0.4s;
+    cursor: pointer;
+}
+
+    .btn-cart:hover {
+        opacity: 1;
+    }
+
+    .btn-cart span {
+        font-weight: 600;
+    }
+
+.toggleSearch,
+.toggleMenu {
+    outline: none;
+    border: none;
+    padding: 5px 10px;
+}
+
+    .toggleSearch:hover,
+    .toggleMenu:hover {
+        background-color: var(--light);
+    }
+
+/* ========== Gio Hang */
+/* Sidebar cơ bản */
+.sidebar {
+    position: fixed;
+    right: -390px;
+    /* Ẩn ngoài màn hình */
+    top: 0;
+    width: 390px;
+    height: 100%;
+    background-color: #f4f4f4;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+    transition: right 0.3s ease;
+    /* Hiệu ứng trượt */
+    padding: 20px;
+    z-index: 2000;
+    /* Đặt sidebar trên overlay */
+    display: flex;
+    flex-direction: column;
+    /* Sử dụng Flexbox */
+    justify-content: space-between;
+    /* Giữ nội dung ở giữa và nút check out ở dưới */
+}
+
+    .sidebar .btn-close {
+        cursor: pointer;
+    }
+
+/* Khi checkbox được chọn, hiển thị sidebar */
+#toggle-sidebar:checked ~ #cart-sidebar {
+    right: 0;
+    /* Hiển thị sidebar */
+}
+
+/* Định dạng overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1000;
+    /* Đặt overlay dưới sidebar */
+}
+
+.product-image {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.product-info {
+    width: 165px;
+}
+
+.product-name {
+    font-size: 1rem;
+}
+
+/* Khi checkbox được chọn, hiển thị overlay */
+#toggle-sidebar:checked ~ .overlay {
+    display: block;
+}
+
+/* Định dạng cho nút giỏ hàng */
+.btn-light {
+    cursor: pointer;
+    z-index: 3000;
+}
+
+.cart-content {
+    overflow-y: auto;
+}
+
+.checkout-container {
+    padding-top: 10px;
+}
+
+.checkout-btns {
+    width: 100%;
+    padding: 15px;
+    background-color: #343a40;
+    color: white;
+    border: none;
+    text-align: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+    .checkout-btns:hover {
+        background-color: #495057;
+    }
+
+.cart-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    padding: 15px;
+}
+
+.product-image-cart {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.product-info-cart {
+    width: 165px;
+}
+
+.product-name-cart {
+    font-size: 1rem;
+}
+
+.quantity-controls button {
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+}
+
+.quantity-controls input {
+    width: 50px;
+    height: 30px;
+    text-align: center;
+}
+
+.product-price-cart .price {
+    font-size: 1rem;
+}
+
+.remove-btn {
+    border: none;
+    background: none;
+    color: #dc3545;
+}
+
+/* CSS CHO MAIN */
+.main {
+    margin-top: 110px;
+}
+
+/* CSS Footer */
+.footer {
+    background: var(--light);
+}
+
+    .footer .logo {
+        color: #fff;
+        font-size: 2.4rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+.footer__desc {
+    color: #fff;
+    max-width: 450px;
+}
+
+.footer .form-signup {
+    max-width: 300px;
+}
+
+    .footer .form-signup input {
+        background-color: transparent;
+        outline: none;
+        border: none;
+        color: #fff;
+    }
+
+        .footer .form-signup input::placeholder {
+            color: #fff;
+        }
+
+/* CSS NUT SCROLL UP */
+.scroll-up {
+    position: fixed;
+    bottom: -40px;
+    right: 30px;
+    transition: color 0.4s, bottom 0.4s;
+}
+
+    .scroll-up i {
+        color: var(--secondary);
+        font-size: 25px;
+    }
+
+    .scroll-up:hover i {
+        color: var(--primary);
+    }
+
+.show-scroll {
+    bottom: 40px;
+}
+
+/* CSS SEARCH */
+.search {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: var(--bg-secondary);
+    transition: top 0.7s;
+}
+
+.show-search {
+    border-top: 1px solid var(--border-color);
+    top: 75px !important;
+}
+
+/* === Breakpoint */
+@media screen and (max-width:768px) {
+    .footer .group1 {
+        border-right: 0 !important;
+        border-bottom: 1px solid #FFF;
+    }
+
+    .footer .group3 {
+        padding: 0 !important;
+    }
+
+    .ngancach {
+        height: 50px;
+    }
+}
+
+@media screen and (max-width:576px) {
+    .header .logo {
+        font-size: 1.6rem;
+    }
+
+    .header .btn-profile span {
+        font-size: 1rem;
+        font-weight: 400;
+    }
+
+    .ngancach {
+        height: 30px;
+    }
+}

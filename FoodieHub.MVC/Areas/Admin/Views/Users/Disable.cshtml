@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Disable User";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container py-4">
+    <h2>Disable User</h2>
+    <p>Are you sure you want to disable the following user?</p>
+    <dl class="row">
+        <dt class="col-sm-3">Full Name</dt>
+        <dd class="col-sm-9">[User's Full Name]</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">[User's Email]</dd>
+
+        <dt class="col-sm-3">Role</dt>
+        <dd class="col-sm-9">[User's Role]</dd>
+    </dl>
+
+    <form asp-action="Disable" method="post">
+        <button type="submit" class="btn btn-danger">Confirm Disable</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        <a asp-controller="Users" asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>
+
+

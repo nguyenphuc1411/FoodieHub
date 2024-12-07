@@ -1,0 +1,169 @@
+﻿@inject IConfiguration Configuration
+@model List<FoodieHub.MVC.Models.Recipe.GetRecipes>
+
+@{
+    ViewData["Title"] = "ViewAll";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var apiUrl = Configuration["BaseHost"];
+}
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Sidebar với radio button -->
+        <div class="col-md-3 sidebar-profile">
+            <h5>Filter By:</h5>
+            <form id="filterForm" method="get" asp-action="ViewAll">
+                <ul class="list-unstyled">
+                    <!-- Thêm tùy chọn View All -->
+                    <li class="d-flex justify-content-between align-items-center">
+                        <label class="me-auto">View All</label>
+                        <input type="radio" name="category" value=""
+                        @(string.IsNullOrEmpty((string)ViewData["SelectedCategory"]) ? "checked" : "")
+                               onchange="this.form.submit();">
+                    </li>
+
+                    <!-- Hiển thị tất cả các danh mục từ ViewData["AllCategories"] -->
+                    @foreach (var category in ViewData["AllCategories"] as List<string>)
+                    {
+                        <li class="d-flex justify-content-between align-items-center">
+                            <label class="me-auto">@category</label>
+                            <input type="radio" name="category" value="@category"
+                            @(category == (string)ViewData["SelectedCategory"] ? "checked" : "")
+                                   onchange="this.form.submit();">
+                        </li>
+                    }
+                </ul>
+                <input type="hidden" name="sortOrder" value="@ViewData["SortOrder"]" />
+                <input type="hidden" name="currentPage" value="1" />
+            </form>
+        </div>
+
+        <!-- Products Column -->
+		<div class="col-md-9">
+			
+			
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="product-count text-primary">Có @ViewData["TotalRecipes"] bài viết</div>
+                <div class="d-flex align-items-center sort-by text-primary">
+                    <span>Sort by:</span>
+                    <div class="dropdown ms-2">
+                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <strong class="text-secondary">
+                                @((ViewData["SortOrder"].ToString() == "asc") ? "A to Z" : "Z to A")
+                            </strong> <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="@Url.Action("ViewAll", new { sortOrder = "asc", category = ViewData["SelectedCategory"], currentPage = 1 })">Name: A to Z</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="@Url.Action("ViewAll", new { sortOrder = "desc", category = ViewData["SelectedCategory"], currentPage = 1 })">Name: Z to A</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="row g-3">
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <div class="col-md-4">
+                            <div class="product-card p-3 shadow-sm">
+                                <img src="@($"{apiUrl}Images/{item.ImageURL}")" alt="Product Image" class="product-image">
+                                <h6 class="mt-3">@item.Title</h6>
+                                <div class="d-flex justify-content-between mt-3">
+                                    <a asp-action="Detail" asp-controller="Recipes" asp-route-id="@item.RecipeID" class="btn button-dark btn-sm">Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Không có bài viết nào cho danh mục này.</p>
+                }
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="my-5">
+                <ul class="pagination justify-content-center">
+                    @for (var i = 1; i <= (int)ViewData["TotalPages"]; i++)
+                    {
+                        <li class="page-item @(i == (int)ViewData["CurrentPage"] ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("ViewAll", new { currentPage = i, sortOrder = ViewData["SortOrder"], category = ViewData["SelectedCategory"] })">@i</a>
+                        </li>
+                    }
+                    @if ((int)ViewData["CurrentPage"] < (int)ViewData["TotalPages"])
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("ViewAll", new { currentPage = (int)ViewData["CurrentPage"] + 1, sortOrder = ViewData["SortOrder"], category = ViewData["SelectedCategory"] })">Next &raquo;</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CSS cho phần giao diện */
+    .product-card {
+        background-color: #fff;
+        border-radius: 10px;
+        border: 1px solid #eaeaea;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .product-image {
+        width: 100%;
+        height: 200px;
+        border-radius: 8px;
+    }
+
+    .filters {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        color: #333;
+    }
+
+    .pagination a {
+        color: #444;
+        padding: 8px 12px;
+        margin: 0 4px;
+        border-radius: 4px;
+        text-decoration: none;
+        border: 1px solid #ddd;
+    }
+
+        .pagination a.active, .pagination a:hover {
+            background-color: #869FAE;
+            color: #fff;
+        }
+
+    .product-count, .sort-by {
+        font-size: 1rem;
+        color: #555;
+    }
+
+        .sort-by span {
+            margin-right: 8px;
+        }
+
+    /* Căn trái label và căn phải radio button */
+    .d-flex.justify-content-between.align-items-center label {
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    .d-flex.justify-content-between.align-items-center input[type="radio"] {
+        margin-left: auto;
+    }
+</style>

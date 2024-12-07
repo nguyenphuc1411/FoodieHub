@@ -1,0 +1,82 @@
+﻿@using FoodieHub.MVC.Models.User
+@inject IConfiguration config
+@model UpdateUser 
+@{
+    ViewData["Title"] = "Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+}
+
+<link rel="stylesheet" href="~/css/profile.css">
+<div class="container py-5">
+    <div class="row align-items-start">
+        <div>
+            <h5>Account / Profile</h5>
+        </div>
+        @await Html.PartialAsync("_NavigationForProfile")
+        <div class="col-md-1">
+        </div>
+        <!-- Main Content -->
+        <div class="col-md-8 Profile-content mt-3">
+            <div class="greeting m-3">
+                <h3>My Account</h3>
+            </div>
+            <form asp-action="Profile" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="fullname" class="form-label">Fullname</label>
+                            <input asp-for="Fullname" class="form-control" />
+                            <span asp-validation-for="Fullname" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-1"></div>
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" readonly />
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Bio</label>
+                            <textarea asp-for="Bio" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Bio" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-1"></div>
+
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="avatar" class="form-label">Change Avatar</label>
+                            <input asp-for="File" type="file" class="form-control" accept="image/*" />                      
+                            <img src="@(url+"/images/"+Model.Avatar)" class="mt-2 rounded-circle" style="width: 100px; height: 100px;" alt="Avatar" />                         
+                        </div>
+                    </div>
+
+                    <!-- Password Change Section -->
+                    <div class="col-md-12 mt-4">
+                        <h4>Change Password</h4>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="oldPassword" class="form-label">Current Password</label>
+                            <input asp-for="OldPassword" type="password" class="form-control" placeholder="Enter current password" />
+                            <span asp-validation-for="OldPassword" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input asp-for="NewPassword" type="password" class="form-control" placeholder="Enter new password" />
+                            <span asp-validation-for="NewPassword" class="text-danger"></span>
+                        </div>
+                    </div>                
+                    <div class="col-md-12 mb-4" style="margin-left:5px;">
+                        <button type="submit" class="button button-dark px-5">Update</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

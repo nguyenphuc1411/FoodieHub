@@ -1,0 +1,44 @@
+﻿@using FoodieHub.MVC.Models.Request
+
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+@model RegisterVM
+<form asp-action="Register" method="post" class="form bg-white py-4 px-5 rounded p-4">
+    <h1>Register</h1>
+    <div class="form-group mt-5 ">
+        <span asp-validation-for="FullName" class="text-danger"></span>
+        <div class="d-flex column-gap-4 justify-content-between align-items-center">
+            <i class="fa-solid fa-user"></i>
+            <input asp-for="FullName" class="w-100" type="text" placeholder="Enter your full name">
+        </div>
+    </div>
+    <div class="form-group mt-4">
+        <span asp-validation-for="Email" class="text-danger"></span>
+        <div class="d-flex column-gap-4 justify-content-between align-items-center">
+            <i class="fa-solid fa-envelope"></i>
+            <input asp-for="Email" class="w-100" type="text" placeholder="Enter your email">
+        </div>
+    </div>
+    <div class="form-group mt-4">
+        <span asp-validation-for="Password" class="text-danger"></span>
+        <div class="d-flex column-gap-4 justify-content-between align-items-center">
+            <i class="fa-solid fa-lock"></i>
+            <input asp-for="Password" class="w-100" type="password" placeholder="Enter your password">
+        </div>
+    </div>
+    <div class="form-group mt-4 mb-4">
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        <div class="d-flex column-gap-4 justify-content-between align-items-center">
+            <i class="fa-solid fa-lock"></i>
+            <input asp-for="ConfirmPassword" class="w-100" type="password" placeholder="Enter confirm  password">
+        </div>
+    </div>
+    <button type="submit" class="button button-dark w-100">Register</button>
+
+    <p class="mt-4 mb-3 text-center">
+        Have a account? <a href="/account/login" class="text-primary">Login Now</a>
+    </p>
+</form>
+

@@ -1,0 +1,208 @@
+﻿@model FoodieHub.MVC.Models.Article.GetArticleDetail
+@using FoodieHub.MVC.Models.Response
+@using System.Text.Json
+@inject IConfiguration config
+
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+
+}
+
+<div class="container">
+    <div class="row">
+        <p class="mt-3">Article / @Model.CategoryName</p>
+        <div class="col-md-12 text-center mt-1">
+            <h2 class="mb-3">@Model.Title</h2>
+            <p><strong>By:</strong> @Model.FullName | <strong>@Model.UpdatedAt.ToString("MMMM dd, yyyy")</strong></p>
+            <a href="#reviews">View @Model.TotalComment comments</a>
+        </div>
+
+        <div class="col-md-6">
+            <img src="@($"{url}/images/{Model.MainImage}")" alt="Article" class="img-fluid mb-3">
+
+            <p>@Html.Raw(@Model.Description)</p>
+        </div>
+
+        <div class="col-md-6">
+            <div class="col-12 d-flex align-items-center mb-1">
+                <form asp-action="Favorite" asp-route-id="@Model.ArticleID" method="post">
+                    <button type="submit" class="btn btn-outline-secondary me-2">Save</button>
+                </form>
+                <form asp-action="UnFavorite" asp-route-id="@Model.ArticleID" method="post">
+                    <button type="submit" class="btn btn-outline-secondary me-2">UnSave</button>
+                </form>
+                <button class="btn btn-outline-secondary me-2">Review</button>
+            </div>
+            <hr>
+            <div class="recipe-by">
+                <div class="recipe-by-info">
+                    <img src="@($"{url}/images/{Model.Avatar}")" alt="User Image" >
+
+                    <p class="mb-0"><strong>Recipe By: <br></strong> @Model.FullName</p>
+                </div>
+                <a href=@("/account/userinfo/"+Model.UserID) class="btn btn-outline-secondary">View Profile</a>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <!-- Reviews Section -->
+    <div class="mt-4" id="reviews">
+        <h5>REVIEWS(@ViewBag.TotalComment)</h5>
+        
+        <!-- Thông báo lỗi nếu có -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+        }
+
+        <!-- Form tạo bình luận mới -->
+        <form asp-action="CreateComment" method="post">
+            <input type="hidden" name="articleID" value="@Model.ArticleID" />
+            <input type="hidden" name="order" value="@ViewBag.Order" />
+
+            <div class="col-6 d-flex align-items-center mb-3">
+                <!-- Avatar của người dùng hiện tại -->
+                <img src="@($"{url}/images/{ViewBag.CurrentUserAvatar}")" alt="Avatar" class="rounded-circle me-2" style="width: 40px; height: 40px;border-radius: 50%; margin-right: 10px;">
+
+                <!-- Hiển thị tên người dùng hiện tại -->
+                <p class="mb-0"><strong>@ViewBag.CurrentUserFullName</strong></p>
+            </div>
+
+            <!-- Nút submit và ô nhập nội dung bình luận -->
+            <div class="col-6 d-flex">
+                <textarea name="commentContent" class="form-control mb-3" rows="3" placeholder="Enter a Review"></textarea>
+                <button type="submit" class="btn btn-dark ms-2" style="height:75px">Submit Review</button>
+            </div>
+
+            <!-- Dropdown chọn thứ tự sắp xếp -->
+            <div class="d-flex align-items-center mb-3">
+                <label for="order-by" class="me-2"><strong>Order By:</strong></label>
+                <select id="order-by" class="form-select" style="width: auto;" onchange="location.href='?order=' + this.value">
+                    <option value="desc" selected="@(ViewBag.Order == "desc")">Newest</option>
+                    <option value="asc" selected="@(ViewBag.Order == "asc")">Oldest</option>
+                </select>
+            </div>
+        </form>
+
+
+        <!-- Hiển thị danh sách bình luận -->
+        <div id="commentsList">
+            @if (ViewBag.Comments != null)
+            {
+                @foreach (var comment in ViewBag.Comments)
+                {
+                    <div class="review d-flex align-items-center">
+                        <img src="@($"{url}/images/{comment.Avatar}")" alt="Avatar" class="img-fluid rounded-circle">
+
+
+                        <div class="col-9">
+
+                            <p><strong>@comment.FullNameComment</strong> - @comment.CommentAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                            <p>@comment.CommentContent</p>
+                        </div>
+
+                        <!-- Cột 3: Nút Xóa căn giữa theo chiều dọc -->
+                        @if (comment.UserID == ViewBag.UserID)
+                        {
+                            <div class="col-2 d-flex justify-content-end">
+                                <form asp-action="DeleteComment" method="post" id="deleteForm_@comment.CommentID">
+                                    <input type="hidden" name="commentID" value="@comment.CommentID" />
+                                    <input type="hidden" name="articleID" value="@ViewBag.ArticleID" />
+                                    <button type="button" class="btn btn-danger d-flex align-items-center" onclick="confirmDelete(@comment.CommentID)">Xóa</button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+
+
+                }
+            }
+            else
+            {
+                <p>Chưa có bình luận nào.</p>
+            }
+        </div>
+    </div>
+</div>
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Xác nhận xóa bình luận</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa bình luận này không?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Có</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function confirmDelete(commentID) {
+        // Lưu ID của bình luận vào biến toàn cục
+        window.commentIDToDelete = commentID;
+
+        // Hiển thị modal xác nhận
+        var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        modal.show();
+    }
+
+    // Xử lý khi người dùng nhấn "Có" để xóa bình luận
+    document.getElementById('confirmDeleteButton').addEventListener('click', function () {
+        // Submit form xóa bình luận
+        document.getElementById("deleteForm_" + window.commentIDToDelete).submit();
+
+        // Đóng modal sau khi đã xóa
+        var modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+        modal.hide();
+    });
+</script>
+
+<style>
+    .star-rating {
+        color: #f5c518;
+    }
+
+    .ingredient-list, .directions-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .review {
+        border-top: 1px solid #ddd;
+        padding-top: 10px;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+        .review img, .recipe-by img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+    .recipe-by {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .review p {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .recipe-by-info {
+        display: flex;
+        align-items: center;
+    }
+</style>

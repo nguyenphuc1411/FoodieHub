@@ -1,0 +1,276 @@
+﻿@using System.Text.Json
+@using FoodieHub.MVC.Models.User
+@inject IConfiguration config;
+
+@{
+    ViewData["Title"] = "UserInfo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+    var userFollowings = ViewBag.Following as List<UserDTO> ?? new List<UserDTO>();
+    var userFollowers = ViewBag.Follower as List<UserDTO> ?? new List<UserDTO>();
+    var recipes = ViewBag.Recipes as List<JsonElement> ?? new List<JsonElement>();
+    var followingCurrent = ViewBag.FollowingCurrent as List<UserDTO> ?? new List<UserDTO>();
+}
+
+@model JsonElement
+
+<div class="container my-5">
+    <!-- Profile Section -->
+    <div class="profile-header text-center mb-5">
+        <img src="@(string.IsNullOrEmpty(Model.GetProperty("avatar").GetString()) ? "/images/profile.jpg" : url + "/images/" + Model.GetProperty("avatar").GetString())" class="rounded-circle mb-3" alt="Profile Picture">
+        <h2>@Model.GetProperty("fullname").GetString()</h2>
+        <p class="text-muted">Member since @Model.GetProperty("joinedAt").GetDateTime().ToString("MMMM dd, yyyy")</p>
+        <p class="text-muted">Bio: @Html.Raw(@Model.GetProperty("bio"))</p>
+        @if (followingCurrent.Count > 0)
+        {
+            if (followingCurrent.Any(f => f.Id == Model.GetProperty("id").GetString()))
+            {
+                <a href="@($"/account/unfollow/{Model.GetProperty("id").GetString()}")" class="button button-dark">UnFollow</a>
+            }
+            else
+            {
+                <a href="@($"/account/follow/{Model.GetProperty("id").GetString()}")" class="button button-dark">Follow</a>
+            }
+        }
+        else
+        {
+            <a href="@($"/account/follow/{Model.GetProperty("id").GetString()}")" class="button button-dark">Follow</a>
+        }
+    </div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs justify-content-center mb-4" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="recipes-tab" data-bs-toggle="tab" data-bs-target="#recipes" type="button" role="tab" aria-controls="recipes" aria-selected="true">
+                <strong>@recipes.Count()</strong> Recipes
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="following-tab" data-bs-toggle="tab" data-bs-target="#following" type="button" role="tab" aria-controls="following" aria-selected="false">
+                <strong>@userFollowings.Count()</strong> Following
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="followers-tab" data-bs-toggle="tab" data-bs-target="#followers" type="button" role="tab" aria-controls="followers" aria-selected="false">
+                <strong>@userFollowers.Count()</strong> Followers
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="profileTabsContent">
+        <!-- Recipes Tab -->
+        <div class="tab-pane fade show active" id="recipes" role="tabpanel" aria-labelledby="recipes-tab">
+            <div class="row">
+                @if (recipes != null && recipes.Count > 0)
+                {
+                    foreach (var item in recipes)
+                    {         
+                        <div class="col-lg-3 col-md-4 col-6 mb-4">
+                            <a href="/recipes/detail/@item.GetProperty("recipeID")">
+                                <div class="card h-100">
+                                    <img src="@(url + "images/" + item.GetProperty("imageURL"))" class="card-img-top" alt="Recipe Image">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">@item.GetProperty("title")</h5>
+                                        <p>@item.GetProperty("createdAt").GetDateTime()</p>
+                                    </div>
+                                </div>
+                            </a>                          
+                        </div>
+                       
+                    }
+                }
+                else
+                {
+                    <p>No recipes found.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Following Tab -->
+        <div class="tab-pane fade" id="following" role="tabpanel" aria-labelledby="following-tab">
+            <div class="row">
+                @if (userFollowings.Count > 0)
+                {
+                    foreach (var item in userFollowings)
+                    {
+                        <div class="col-lg-3 col-md-4 col-6 mb-4">
+                            <div class="card h-100 text-center">
+                                <img src="@(string.IsNullOrEmpty(item.Avatar) ? "~/images/profile.jpg" : url + "/images/" + item.Avatar)" class="user-img mx-auto mt-3" alt="Profile Picture">
+                                <div class="card-body">
+                                    <h5 class="card-title">@item.Fullname</h5>
+
+                                    @if (ViewBag.Profile is JsonElement profile)
+                                    {
+                                        if (profile.TryGetProperty("id", out var idElement))
+                                        {
+                                            string currentID = idElement.GetString();
+
+                                            // Ensure item is defined and has a valid Id
+                                            if (!string.IsNullOrEmpty(item?.Id) && item.Id != currentID)
+                                            {
+                                                // Check if followingCurrent is initialized and has items
+                                                if (followingCurrent != null && followingCurrent.Count > 0)
+                                                {
+                                                    if (followingCurrent.Any(f => f.Id == item.Id))
+                                                    {
+                                                        <a href="@($"/account/unfollow/{item.Id}")" class="button button-dark">UnFollow</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="@($"/account/follow/{item.Id}")" class="button button-dark">Follow</a>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <a href="@($"/account/follow/{item.Id}")" class="button button-dark">Follow</a>
+                                                }
+                                                <a href="@($"/account/userinfo/{item.Id}")" class="button button-light ms-2">
+                                                    View Profile
+                                                </a>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <p>Profile ID not found.</p>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p>User profile data not available.</p>
+                                    }
+
+                                                                    
+                               </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Followers Tab -->
+        <div class="tab-pane fade" id="followers" role="tabpanel" aria-labelledby="followers-tab">
+            <div class="row">
+                @if (userFollowers.Count > 0)
+                {
+                    foreach (var item in userFollowers)
+                    {
+                        <div class="col-lg-3 col-md-4 col-6 mb-4">
+                            <div class="card h-100 text-center">
+                                <img src="@(string.IsNullOrEmpty(item.Avatar) ? "~/images/profile.jpg" : url + "/images/" + item.Avatar)" class="user-img mx-auto mt-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">@item.Fullname</h5>
+                                    @if (ViewBag.Profile is JsonElement profile)
+                                    {
+                                        if (profile.TryGetProperty("id", out var idElement))
+                                        {
+                                            string currentID = idElement.GetString();
+
+                                            // Ensure item is defined and has a valid Id
+                                            if (!string.IsNullOrEmpty(item?.Id) && item.Id != currentID)
+                                            {
+                                                // Check if followingCurrent is initialized and has items
+                                                if (followingCurrent != null && followingCurrent.Count > 0)
+                                                {
+                                                    if (followingCurrent.Any(f => f.Id == item.Id))
+                                                    {
+                                                        <a href="@($"/account/unfollow/{item.Id}")" class="button button-dark">UnFollow</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="@($"/account/follow/{item.Id}")" class="button button-dark">Follow</a>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <a href="@($"/account/follow/{item.Id}")" class="button button-dark">Follow</a>
+                                                }
+                                                <a href="@($"/account/userinfo/{item.Id}")" class="button button-light ms-2">
+                                                    View Profile
+                                                </a>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <p>Profile ID not found.</p>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p>User profile data not available.</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- CSS Styling -->
+<style>
+    .profile-header img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid #343a40;
+    }
+
+    .nav-tabs .nav-link {
+        color: #fff;
+        background-color: #495057;
+        border-radius: 0.25rem;
+        font-weight: bold;
+    }
+
+        .nav-tabs .nav-link.active {
+            background-color: #adb5bd;
+            color: #000;
+        }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+    .card-title {
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .rating {
+        color: #ffc107;
+    }
+
+    .user-img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .button-outline-dark {
+        border-color: #343a40;
+        color: #343a40;
+    }
+
+        .button-outline-dark:hover {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+    .save-button, .unfollow-button {
+        margin-top: 10px;
+    }
+</style>

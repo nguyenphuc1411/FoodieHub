@@ -1,0 +1,71 @@
+﻿@model FoodieHub.MVC.Models.Coupon.CouponDTO
+@{
+    ViewData["Title"] = "EditCoupon";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2 class="text-center">Edit Coupon</h2>
+
+<div class="container">
+    <form asp-action="EditCoupon" method="post" class="mx-auto" style="max-width: 600px;">
+        <div class="form-group">
+            <label asp-for="CouponCode" class="control-label"></label>
+            <input asp-for="CouponCode" class="form-control" readonly />
+            <span asp-validation-for="CouponCode" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="DiscountType" class="control-label"></label>
+            <select asp-for="DiscountType" class="form-control">
+                <option value="Percentage">Percentage</option>
+                <option value="Fixed">Fixed</option>
+            </select>
+            <span asp-validation-for="DiscountType" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="DiscountValue" class="control-label"></label>
+            <input asp-for="DiscountValue" class="form-control" />
+            <span asp-validation-for="DiscountValue" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="MinimumOrderAmount" class="control-label"></label>
+            <input asp-for="MinimumOrderAmount" class="form-control" />
+            <span asp-validation-for="MinimumOrderAmount" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Note" class="control-label"></label>
+            <textarea asp-for="Note" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Note" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="StartDate" class="control-label"></label>
+            <input asp-for="StartDate" class="form-control" type="date" />
+            <span asp-validation-for="StartDate" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="EndDate" class="control-label"></label>
+            <input asp-for="EndDate" class="form-control" type="date" />
+            <span asp-validation-for="EndDate" class="text-danger"></span>
+        </div>
+        <div class="form-group form-check">
+            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+            <label asp-for="IsActive" class="form-check-label">Is Active</label>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Update Coupon</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

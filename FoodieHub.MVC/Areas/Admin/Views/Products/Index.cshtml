@@ -1,0 +1,915 @@
+﻿@using FoodieHub.MVC.Service.Interfaces
+@model List<GetProductDTO>
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@inject ICategoryService _categoryService
+@inject IProductImageService _imgService
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var apiUrl = Configuration["BaseHost"];
+    var listCategory = _categoryService.GetAll();
+    var listImg = _imgService.GetAllImg();
+
+}
+
+
+<div class="row d-flex">
+    <h1 class="border-bottom pb-3" >Product Management</h1>
+</div>
+
+<div class="row mb-2 border-bottom pb-2">
+    <div class="col-sm-7">
+        <a data-bs-toggle="modal" data-bs-target="#addProductModal" class="btn btn-secondary mt-2">Create New Product</a>
+    </div>
+
+    <div class="row col-sm-5">
+        <form class="mt-2" method="get" asp-action="Index">
+            <div class="row">
+                <div class="col-sm-5">
+                    <input type="text" name="searchName" placeholder="Search product ..." class="form-control" />
+                </div>
+                @* new *@
+                <div class="col-sm-5">
+                    <select name="categoryId" class="form-control">
+                        <option value="">-- Select Category --</option>
+                        @foreach (var category in ViewBag.CategoryID)
+                        {
+                            <option value="@category.Value" name="CategoryID">
+                                @category.Text
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-sm-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+    
+
+</div>
+
+
+<div class="menu-product-panel">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link text-secondary active" data-bs-toggle="tab" href="#instockproduct">In Stock</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-secondary" data-bs-toggle="tab" href="#outstockproduct">Out Stock</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-secondary" data-bs-toggle="tab" href="#discountinue">Discountinued</a>
+        </li>
+
+       
+    </ul>
+
+
+    <div class="tab-content mt-4" style="height: 80vh; overflow: auto;">
+        <div class="tab-pane container active" id="instockproduct">
+            <table class="table table-bordered ">
+                <thead class="text-center">
+                    <tr>
+                        <th>ID</th>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Price($)</th>
+                        <th>Discount(%)</th>
+                        <th>Re-Price($)</th>
+                        <th>Stock</th>
+                        <th>ShelfLife</th>
+                        <th>Created At</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    @if (Model != null && Model.Any(item => item.StockQuantity > 0 && item.IsActive))
+                    {
+                        @foreach (var item in Model)
+                        {
+                            @if (item.StockQuantity > 0 && item.IsActive == true)
+                            {
+                                <tr>
+                                    <td>@item.ProductID</td>
+                                    <td>
+                                        <img src="@($"{apiUrl}Images/{item.MainImage}")" alt="Product Image" width="40" height="40" />
+                                    </td>
+                                    <td>@item.ProductName</td>
+                                    <td>@item.Price.ToString("0.00")$</td>
+                                    <td>@item.Discount.ToString("0")%</td>
+                                    @{
+                                        var discountedPrice = (item.Price - (item.Price * item.Discount / 100)).ToString("0.00");
+                                    }
+                                    <td>@discountedPrice$</td>
+                                    <td data-bs-toggle="tooltip" title="@item.StockQuantity Pcs">
+                                        @if (item.StockQuantity > 0)
+                                        {
+                                            <span class="text-success" >In stock</span>
+                                        }
+                                    </td>
+                                    <td data-bs-toggle="tooltip" title="@item.ShelfLife Days">
+                                        @{
+                                            // Giả sử shelfLife là thời hạn sử dụng sản phẩm (số ngày)
+                                            int shelfLife = item.ShelfLife; // Giá trị ShelfLife (ví dụ: 30, 40, v.v.)
+
+                                            if (shelfLife <= 30)
+                                            {
+                                                // Nếu dưới hoặc bằng 30 ngày, hiển thị số ngày
+                                                <span>@($"{shelfLife} days")</span>
+                                            }
+                                            else
+                                            {
+                                                // Tính toán tháng và ngày dư thừa
+                                                int months = shelfLife / 30; // Số tháng
+                                                int remainingDays = shelfLife % 30; // Số ngày dư
+
+                                                if (months >= 12)
+                                                {
+                                                    // Nếu tổng thời gian >= 1 năm, hiển thị năm, tháng và ngày
+                                                    int years = months / 12;
+                                                    months = months % 12;
+                                                    <span>@($"{years} year{(years > 1 ? "s" : "")} {months} month{(months > 1 ? "s" : "")} {remainingDays} day{(remainingDays > 1 ? "s" : "")}")</span>
+                                                }
+                                                else
+                                                {
+                                                    // Nếu dưới 1 năm, hiển thị tháng và ngày
+                                                    <span>@($"{months} month{(months > 1 ? "s" : "")} {remainingDays} day{(remainingDays > 1 ? "s" : "")}")</span>
+                                                }
+                                            }
+                                        }
+                                    </td>
+                                    <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+
+                                    <td>
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="text-success">Available</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="dropdown">
+                                            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#ProductDetailModal@(item.ProductID)">Details</a></li>
+                                                <li><a class="dropdown-item" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#ProductEditModal@(item.ProductID)">Edit</a></li>
+                                                <li><a class="dropdown-item" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#ProductEditImgsModal@(item.ProductID)">Edit Details Imgs</a></li>
+                                                <li>
+                                                    <a class="dropdown-item"
+                                                       data-bs-dismiss="modal"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#Product@(item.IsActive ? "Disable" : "Enable")Modal@(item.ProductID)">
+                                                        @(item.IsActive ? "Disable" : "Enable")
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center">No products available</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+
+        <div class="tab-pane container fade" id="outstockproduct">
+            <div class="card-product-panel d-flex  align-items-center gap-3 row">
+                <table class="table table-bordered table-striped">
+                    <thead class="text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Price($)</th>
+                            <th>Discount(%)</th>
+                            <th>Re-Price($)</th>
+                            <th>Stock</th>
+                            <th>ShelfLife</th>
+                            <th>Created At</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @if (Model != null && Model.Any(item => item.StockQuantity <= 0 && item.IsActive))
+                        {
+                            @foreach (var item in Model)
+                            {
+                                @if (item.StockQuantity <= 0 && item.IsActive)
+                                {
+                                    <tr>
+                                        <td>@item.ProductID</td>
+                                        <td>
+                                            <img src="@($"{apiUrl}Images/{item.MainImage}")" alt="Product Image" width="40" height="40" />
+                                        </td>
+                                        <td>@item.ProductName</td>
+                                        <td>@item.Price.ToString("0.00")$</td>
+                                        <td>@item.Discount.ToString("0")%</td>
+                                        @{
+                                            var discountedPrice = (item.Price - (item.Price * item.Discount / 100)).ToString("0.00");
+                                        }
+                                        <td>@discountedPrice$</td>
+                                        <td>
+                                            <span class="text-danger">Out stock</span>
+                                        </td>
+                                        <td data-bs-toggle="tooltip" title="@item.ShelfLife Days">
+                                            @{
+                                                // Giả sử shelfLife là thời hạn sử dụng sản phẩm (số ngày)
+                                                int shelfLife = item.ShelfLife; // Giá trị ShelfLife (ví dụ: 30, 40, v.v.)
+
+                                                if (shelfLife <= 30)
+                                                {
+                                                    // Nếu dưới hoặc bằng 30 ngày, hiển thị số ngày
+                                                    <span>@($"{shelfLife} days")</span>
+                                                }
+                                                else
+                                                {
+                                                    // Tính toán tháng và ngày dư thừa
+                                                    int months = shelfLife / 30; // Số tháng
+                                                    int remainingDays = shelfLife % 30; // Số ngày dư
+
+                                                    if (months >= 12)
+                                                    {
+                                                        // Nếu tổng thời gian >= 1 năm, hiển thị năm, tháng và ngày
+                                                        int years = months / 12;
+                                                        months = months % 12;
+                                                        <span>@($"{years} year{(years > 1 ? "s" : "")} {months} month{(months > 1 ? "s" : "")} {remainingDays} day{(remainingDays > 1 ? "s" : "")}")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        // Nếu dưới 1 năm, hiển thị tháng và ngày
+                                                        <span>@($"{months} month{(months > 1 ? "s" : "")} {remainingDays} day{(remainingDays > 1 ? "s" : "")}")</span>
+                                                    }
+                                                }
+                                            }
+                                        </td>
+                                        <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+
+                                        <td>
+                                            <span class="text-success">Available</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#ProductDetailModal@(item.ProductID)">Details</a></li>
+                                                    <li><a class="dropdown-item" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#ProductEditModal@(item.ProductID)">Edit</a></li>
+                                                    <li><a class="dropdown-item" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#ProductEditImgsModal@(item.ProductID)">Edit Details Imgs</a></li>
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           data-bs-dismiss="modal"
+                                                           data-bs-toggle="modal"
+                                                           data-bs-target="#Product@(item.IsActive ? "Disable" : "Enable")Modal@(item.ProductID)">
+                                                            @(item.IsActive ? "Disable" : "Enable")
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="11" class="text-center">No out-of-stock products available</td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+
+        </div>
+
+
+
+        <div class="tab-pane container fade" id="discountinue">
+            <div class="card-product-panel d-flex  align-items-center gap-3 row">
+                <table class="table table-bordered table-striped">
+                    <thead class="text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Price($)</th>
+                            <th>Discount(%)</th>
+                            <th>Re-Price($)</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @if (Model != null && Model.Any(item => !item.IsActive))
+                        {
+                            @foreach (var item in Model)
+                            {
+                                @if (!item.IsActive)
+                                {
+                                    <tr>
+                                        <td>@item.ProductID</td>
+                                        <td>
+                                            <img src="@($"{apiUrl}Images/{item.MainImage}")" alt="Product Image" width="50" height="50" />
+                                        </td>
+                                        <td>@item.ProductName</td>
+                                        <td>@item.Price.ToString("0.00")$</td>
+                                        <td>@item.Discount.ToString("0")%</td>
+                                        @{
+                                            var discountedPrice = (item.Price - (item.Price * item.Discount / 100)).ToString("0.00");
+                                        }
+                                        <td>@discountedPrice$</td>
+                                       
+                                        <td>
+                                            <span class="text-danger">Unavailable</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#ProductDetailModal@(item.ProductID)">Details</a></li>
+                                                    <li><a class="dropdown-item" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#ProductEditModal@(item.ProductID)">Edit</a></li>
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           data-bs-dismiss="modal"
+                                                           data-bs-toggle="modal"
+                                                           data-bs-target="#Product@(item.IsActive ? "Disable" : "Enable")Modal@(item.ProductID)">
+                                                            @(item.IsActive ? "Disable" : "Enable")
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center">No unavailable products</td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+
+        </div>
+
+
+
+
+
+
+
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+@* Details Product *@
+@foreach (var item in Model)
+{
+    <!-- Modal chi tiết sản phẩm -->
+    <div class="modal fade" id="ProductDetailModal@(item.ProductID)" tabindex="-1" aria-labelledby="ProductDetailModalLabel@(item.ProductID)" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content bg-light text-dark">
+                <!-- Modal Header -->
+               <div class="modal-header">
+                    <h4 class="modal-title">Product ID: <span class="text-warning">@item.ProductID</span> </h4>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal Body with Product Details -->
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Cột 1: Product Image -->
+                        <div class="col-md-4 text-center">
+                            <div class="product-image-admin">
+                                <img src="@($"{apiUrl}Images/{item.MainImage}")" alt="Product Image" class="img-thumbnail w-100" style="height: auto; max-height: 300px;">
+                            </div>
+                        </div>
+
+                        <!-- Cột 2 và 3: Product Info -->
+                        <div class="col-md-8">
+                            <div class="row">
+                                <!-- Cột 2: Thông tin bên trái -->
+                                <div class="col-md-6">
+                                    <p><strong>Product Name:</strong> @item.ProductName</p>
+                                    <p><strong>Price:</strong> $@item.Price</p>
+                                    <p><strong>Discount:</strong> @item.Discount%</p>
+                                    @{
+                                        var discountedPrice = (item.Price - (item.Price * item.Discount / 100)).ToString("0");
+                                    }
+                                    <p><strong>Re-Price:</strong> $@discountedPrice</p>
+                                    
+                                      <p><strong>Stock Quantity:</strong> @item.StockQuantity pcs</p>
+                                   
+                                    <p><strong>Description:</strong> @item.Description</p>
+                                </div>
+
+                                <!-- Cột 3: Thông tin bên phải -->
+                                <div class="col-md-6">
+                                    <p><strong>Shelf Life:</strong> <span class="text-warning"> @item.ShelfLife Days</span</p>
+                                    <p><strong>Created At:</strong> <span class="text-warning"> @item.CreatedAt.ToString("dd/MM/yyyy")</span> </p>
+                                    @foreach (var cate in listCategory.Result)
+                                    {
+                                        if (cate.CategoryID == item.CategoryID)
+                                        {
+                                            <p><strong>Category:</strong> <span class="text-success">@cate.CategoryName</span></p>
+                                        }
+                                    }
+                                    <p>
+                                        <strong>Stock Status:</strong>
+                                        <span class="@(item.StockQuantity > 0 ? "text-success" : "text-danger")">
+                                            @(item.StockQuantity > 0 ? "In Stock" : "Out of Stock")
+                                        </span>
+                                    </p>
+                                    <p>
+                                        <strong>Status:</strong>
+                                        <span class="@(item.IsActive ? "text-success" : "text-danger")">
+                                            @(item.IsActive ? "Available" : "Unavailable")
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* Set Status Product *@
+@foreach (var item in Model)
+{
+    <!-- Modal for disabling product -->
+    <div class="modal fade" id="ProductDisableModal@(item.ProductID)" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Disable Product With ID: @item.ProductID</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to disable this product?
+                </div>
+                <div class="modal-footer">
+                    <form asp-action="SetProductStatusOff" method="post">
+                        <input type="hidden" name="ProductID" value="@item.ProductID" />
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">Disable</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for enabling product -->
+    <div class="modal fade" id="ProductEnableModal@(item.ProductID)" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Disable Product With ID: @item.ProductID</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to enable this product?
+                </div>
+                <div class="modal-footer">
+                    <form asp-action="SetProductStatusOn" method="post">
+                        <input type="hidden" name="ProductID" value="@item.ProductID" />
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Enable</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@* Edit Product *@
+@foreach(var item in Model){
+    <div class="modal fade" id="ProductEditModal@(item.ProductID)" tabindex="-1" aria-labelledby="ProductEditLabel@(item.ProductID)" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="ProductUpdateLabel@(item.ProductID)">Update Product With ID: @(item.ProductID)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <form method="post" enctype="multipart/form-data" asp-action="EditProduct">
+                    <div class="modal-body">
+                        <!-- Hidden field for Product ID -->
+                        <input type="hidden" name="ProductID" value="@item.ProductID" />
+
+                        <!-- Product Name -->
+                        <div class="mb-3">
+                            <label for="ProductName@(item.ProductID)" class="form-label">Product Name</label>
+                            <input type="text" class="form-control" id="ProductName@(item.ProductID)" name="ProductName"
+                                   value="@item.ProductName" required maxlength="255" minlength="3"  />
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <label for="Price@(item.ProductID)" class="form-label">Price (Unit: $)</label>
+                            <input type="number" class="form-control" id="Price@(item.ProductID)" name="Price"
+                                   value="@item.Price" step="0.01" required min="0" max="999999999999.99"
+                                   title="Price must be greater than 0 and in a valid format." />
+                        </div>
+                        <div class="mb-3">
+                            <label for="ShelfLife@(item.ProductID)" class="form-label">ShelfLife ( Days )</label>
+                            <input type="number" class="form-control" id="ShelfLife@(item.ProductID)" name="ShelfLife"
+                                   value="@item.ShelfLife"  required min="30" max="365"
+                                   title="ShelfLife must be greater than 0 and in a valid format." />
+                        </div>
+                        <!-- Main Image -->
+                        <div class="mb-3">
+                            <label for="ImgFileUpdate@(item.ProductID)" class="form-label">Main Image</label>
+                            <input type="file" class="form-control" value="@item.ImgFileUpdate" id="ImgFileUpdate@(item.ProductID)" name="ImgFileUpdate" />
+                        </div>
+
+
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="Description@(item.ProductID)" class="form-label">Description</label>
+                            <input  class="form-control" value="@item.Description" id="Description@(item.ProductID)" name="Description" />
+                        </div>
+
+                        <!-- Discount -->
+                        <div class="mb-3">
+                            <label for="Discount@(item.ProductID)" class="form-label">Discount (Unit: %)</label>
+                            <input type="number" class="form-control" id="Discount@(item.ProductID)" name="Discount"
+                                   value="@item.Discount" min="0" max="100" step="1" title="Discount must be between 0 and 100." />
+                        </div>
+
+                        <!-- Stock Quantity -->
+                        <div class="mb-3">
+                            <label for="StockQuantity@(item.ProductID)" class="form-label">Stock Quantity</label>
+                            <input type="number" class="form-control" id="StockQuantity@(item.ProductID)" name="StockQuantity"
+                                   value="@item.StockQuantity" min="0" step="1" title="Stock quantity must be a non-negative integer." />
+                        </div>
+
+
+                        <div class="mb-3">
+                           
+                            <input type="hidden" id="CategoryID@(item.ProductID)" name="CategoryID" value="@item.CategoryID" />
+
+
+                            @* <select id="CategoryID@(item.ProductID)" name="CategoryID"  class="form-control"  title="Category ID must be greater than 0.">
+                                @foreach (var category in ViewBag.CategoryID)
+                                {
+                                    <option value="@category.Value" name="CategoryID">
+                                        @category.Text
+                                    </option>
+                                }
+                            </select> *@
+                        </div>
+
+
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+ }
+
+@* Edit Product Details Imgs *@
+@foreach (var item in Model)
+{
+    <div class="modal fade" id="ProductEditImgsModal@(item.ProductID)" tabindex="-1" aria-labelledby="ProductEditImgsLabel@(item.ProductID)" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="ProductEditImgsLabel@(item.ProductID)">
+                        Change Details Images for Product ID: @(item.ProductID)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <!-- Hidden field for Product ID -->
+                    <input type="hidden" name="ProductID" value="@item.ProductID" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Details Images</label>
+                        <div class="details-img-list row g-3 d-flex align-items-center">
+                            <!-- Nút thêm hình ảnh -->
+                            <div class="col-1 position-relative">
+                                <button class="btn btn-outline-secondary "
+                                        data-bs-dismiss="modal"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addImgDetailModal">
+                                    <i class="fa-solid fa-plus fa-2x"></i>
+                                </button>
+                            </div>
+
+                            <!-- Hình ảnh chi tiết sản phẩm -->
+                            @if (listImg.Result.Any(i => i.ProductID == item.ProductID))
+                            {
+                                @foreach (var itemImg in listImg.Result)
+                                {
+                                    if (itemImg.ProductID == item.ProductID)
+                                    {
+                                        <div class="col-3 position-relative position-relative-img">
+                                            <!-- Hình ảnh -->
+                                            <img src="@($"{apiUrl}Images/{itemImg.ImageURL}")"
+                                                 class="img-thumbnail img-details-product"
+                                                 alt="Product Image">
+
+                                            <!-- Form xóa hình ảnh -->
+                                            <form asp-action="DeleteImageInImg" method="post">
+                                                <input type="hidden" name="ImageID" value="@itemImg.ImageID" />
+                                                <button type="submit"
+                                                        class="btn-delete-img-details position-absolute top-0">
+                                                    <i class="fa-solid fa-x"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-sm-12 text-danger">
+                                    <p>No images found.</p>
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* Add Product Details Img *@
+@foreach(var item in Model)
+{
+    <div class="modal fade" id="addImgDetailModal" tabindex="-1" aria-labelledby="addImgDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addImgDetailtModalLabel">Add New Image Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="AddImg" asp-controller="ProductImage" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="ProductID" value="@item.ProductID" />
+                        <div class="row">
+
+
+                            <div class="form-group">
+                                <label for="MainImage">Main Image</label>
+                                <input type="file" class="form-control" accept=".jpg,.jpeg,.png" id="ImageURL" name="ImageURL" required />
+                                <span class="text-danger" id="MainImageError"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group  mt-3 text-end">
+                            <button type="submit" class="btn btn-secondary">Create</button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateNewProduct" asp-controller="Products" method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="ProductName">Product Name</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="ProductName"
+                                       name="ProductName"
+                                       required
+                                       minlength="3"
+                                       maxlength="50" />
+                                <span class="text-danger" id="ProductNameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Description">Description</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="Description"
+                                       name="Description"
+                                       required/>
+                                <span class="text-danger" id="DescriptionError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Price">Price (Unit: $)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       id="Price"
+                                       name="Price"
+                                       step="0.01"
+                                       required
+                                       min="0"
+                                       title="Price must be a positive number." />
+                                <span class="text-danger" id="PriceError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Discount">Discount (Unit: %)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       id="Discount"
+                                       name="Discount"
+                                       required
+                                       min="0"
+                                       max="100"
+                                       title="Discount must be a number between 0 and 100." />
+                                <span class="text-danger" id="DiscountError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="StockQuantity">Stock Quantity (Unit: Pcs)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       id="StockQuantity"
+                                       name="StockQuantity"
+                                       required
+                                       min="0"
+                                       title="Stock quantity must be a positive number." />
+                                <span class="text-danger" id="StockQuantityError"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="ShelfLife" class="form-label">ShelfLife ( Days )</label>
+                                <input type="number" class="form-control" id="ShelfLife" name="ShelfLife"
+                                       value="ShelfLife"  required min="30" max="365"
+                                       title="ShelfLife must be greater than 0 and in a valid format." />
+                            </div>
+                          
+
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="MainImage">Main Image</label>
+                                <input type="file" class="form-control" accept=".jpg,.jpeg,.png" id="MainImage" name="MainImage" required />
+                                <span class="text-danger" id="MainImageError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Images">Additional Images</label>
+                                <input type="file" class="form-control" accept=".jpg,.jpeg,.png" id="Images" name="Images" multiple required />
+                            </div>
+
+                          
+
+                            <div class="form-group">
+                                <label for="CategoryID">Categories</label>
+                                <select class="form-control" id="CategoryID" name="CategoryID">
+                                    @foreach (var category in listCategory.Result)
+                                    {
+                                        <option value="@category.CategoryID">@category.CategoryName</option>
+                                    }
+                                </select>
+                                <span class="text-danger" id="CategoryIDError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3 text-end">
+                        @if (!listCategory.Result.Any())
+                        {
+                            <span class="text-danger">Category is null!</span>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-secondary">Create</button>
+                        }
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- CSS cho dấu X -->
+
+<style>
+    .img-details-product {
+        width: 75px;
+        height: 70px;
+        object-fit: cover;
+    }
+
+    .details-img-list {
+        margin-top: 10px;
+    }
+
+    .position-relative-img {
+        width: 75px;
+        height: 70px;
+        padding: 5px;
+        background-color: #f8f9fa;
+    }
+
+    .btn-delete-img-details {
+        padding: 6px;
+        right: 0px;
+        border-radius: 50%;
+        font-size: 8px;
+        background-color: red;
+        color: white;
+        border: none;
+    }
+
+    .g-3 {
+        gap: 15px;
+    }
+    
+</style>

@@ -1,0 +1,132 @@
+﻿@model IEnumerable<FoodieHub.MVC.Models.Recipe.GetRecipes>
+@using FoodieHub.MVC.Models.Response
+@inject IConfiguration config
+@{
+    ViewData["Title"] = "Search Results";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+    var searchQuery = ViewData["SearchQuery"] as string;
+}
+<div class="container">
+    <h1 class="pb-5 text-center">Search Results for "@searchQuery"</h1>
+
+    <!-- Display Search Results -->
+    <div class="container py-5">
+        @if (Model != null && Model.Any())
+        {
+            <div class="row">
+                @foreach (var recipe in Model)
+                {
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <div class="card">
+                            <!-- Hiển thị hình ảnh -->
+                            <div class="image-container">
+                                <img src="@($"{url}/images/{recipe.ImageURL}")" alt="Recipe Image" class="recipe-image" />
+                            </div>
+
+                            <!-- Nội dung thẻ -->
+                            <div class="card-body">
+                                <h5 class="card-title">@recipe.Title</h5>
+
+                                <!-- Hiển thị đánh giá -->
+                                <div class="rating-comments d-flex align-items-center">
+                                    <p class="mb-0 me-2">Rating: @recipe.RatingAverage</p>
+                                    ⭐
+                                    <p class="mb-0 ms-2">Comments: @recipe.TotalComment</p>
+                                </div>
+
+                                <!-- Nút xem chi tiết -->
+                                <a href="@Url.Action("Detail", new { id = recipe.RecipeID })" class="btn btn-primary">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-muted">No recipes found for your search query.</p>
+        }
+    </div>
+
+    <!-- Back to All Recipes -->
+    <div class="text-center py-4">
+        <a href="@Url.Action("Index", "Recipes")" class="btn btn-secondary">Back to All Recipes</a>
+    </div>
+</div>
+<style>
+    .card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        background-color: #fff;
+        border: 1px solid #eaeaea;
+        border-radius: 10px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+    .image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%; /* Ensure the container is responsive */
+        height: 200px; /* Fixed height */
+        overflow: hidden; /* Hide overflowed image parts */
+    }
+
+    .recipe-image {
+        width: 100%; /* Ensure image takes up 100% of its container width */
+        height: 100%; /* Ensure image height covers the container */
+        object-fit: cover; /* Maintain aspect ratio while covering the container */
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+        margin: 10px 0;
+    }
+
+    .rating-comments {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        color: #555;
+        margin: 10px 0;
+    }
+
+        .rating-comments p {
+            margin: 0;
+        }
+
+        .rating-comments .me-2 {
+            margin-right: 8px;
+        }
+
+        .rating-comments .ms-2 {
+            margin-left: 8px;
+        }
+
+    .btn-primary {
+        background-color: #A18F7A;
+        border: none;
+        padding: 8px 15px;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-top: 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+</style>

@@ -1,0 +1,122 @@
+﻿@using FoodieHub.MVC.Models.Recipe
+@inject IConfiguration config
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = config["BaseHost"];
+}
+
+@model EditRecipe
+
+<!-- Place the first <script> tag in your HTML's <head> -->
+<script src="https://cdn.tiny.cloud/1/duegha34dr7j1t0qyhfswxzknx2j50fyq02kkj4d1ylv0stm/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow">
+                <form asp-controller="Recipes" asp-action="Edit" method="post" enctype="multipart/form-data" class="card-body">
+                    <h2 class="card-title text-center mb-4">Update Recipe</h2>
+                    <div class="py-1 text-center">
+                        <img src="/images/horizontal-line1 1.png" alt="horizontal line">
+                    </div>
+                    <input type="hidden" asp-for="RecipeID" />
+                    <!-- Recipe Title -->
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Recipe Title *</label>
+                        <input asp-for="Title" class="form-control" placeholder="This is title">
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <!-- Time Fields -->
+                    <div class="row">
+                        <!-- Prep Time -->
+                        <div class="col-md-6 mb-3">
+                            <label for="prep-time" class="form-label">Prep Time *</label>
+                            <div class="d-flex">
+                                <input asp-for="PrepHours" class="form-control me-2" placeholder="Hours">
+                                <input asp-for="PrepMinutes" class="form-control" placeholder="Minutes">
+                            </div>
+                            <span asp-validation-for="PrepHours" class="text-danger"></span>
+                            <span asp-validation-for="PrepMinutes" class="text-danger"></span>
+                        </div>
+
+                        <!-- Cook Time -->
+                        <div class="col-md-6 mb-3">
+                            <label for="cook-time" class="form-label">Cook Time *</label>
+                            <div class="d-flex">
+                                <input asp-for="CookHours" class="form-control me-2" placeholder="Hours">
+                                <input asp-for="CookMinutes" class="form-control" placeholder="Minutes">
+                            </div>
+                            <span asp-validation-for="CookHours" class="text-danger"></span>
+                            <span asp-validation-for="CookMinutes" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Recipe Servings -->
+                    <div class="mb-3">
+                        <label asp-for="Serves" class="form-label">This Recipe Serves *</label>
+                        <input asp-for="Serves" class="form-control" placeholder="4">
+                        <span asp-validation-for="Serves" class="text-danger"></span>
+                    </div>
+
+                    <!-- Ingredients -->
+                    <div class="mb-3">
+                        <label asp-for="Ingredients" class="form-label me-3">Ingredients *</label>
+                        <span asp-validation-for="Ingredients" class="text-danger"></span>
+                        <textarea asp-for="Ingredients" class="form-control" rows="4"></textarea>
+                    </div>
+
+                    <!-- Directions -->
+                    <div class="mb-3">
+                        <label asp-for="Directions" class="form-label me-3">Directions *</label>
+                        <span asp-validation-for="Directions" class="text-danger"></span>
+                        <textarea asp-for="Directions" class="form-control rows="4"></textarea>
+                    </div>
+
+                    <!-- Upload Image -->
+                    <div class="mb-3 row">
+                        <div class="col-6">
+                            <label asp-for="File" class="form-label">Upload Image *</label>
+                            <input asp-for="File" type="file" class="form-control" accept="image/*">
+                            <span asp-validation-for="File" class="text-danger"></span>
+                        </div>
+                        <div class="col-6">
+                            <p>Current Image</p>
+                            <img src="@(url + "images/" + Model.ImageURL)" style="width:100px;height:100px" alt="Current Image" />
+                            <span class="text-info">Leave blank to keep the current image.</span>
+                        </div>
+
+                    </div>
+                    <label asp-for="CategoryID" class="form-label me-3">Category</label>
+                    <span asp-validation-for="CategoryID" class="text-danger"></span>
+                    <select asp-for="CategoryID" class="form-select form-select-sm me-2" style="width: 150px;">
+                        <option selected>All</option>
+                        @if (ViewBag.Category != null)
+                        {
+                            foreach (var item in ViewBag.Category)
+                            {
+                                <option value="@item.CategoryID">@item.CategoryName</option>
+                            }
+                        }
+                    </select>
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="button button-dark me-2">PUBLISH</button>
+                        <a href="/recipes" class="button button-light">CANCEL</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    tinymce.init({
+        selector: 'textarea',
+        plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+    });
+</script>
+
+

@@ -1,0 +1,35 @@
+﻿@model FoodieHub.MVC.Models.User.UserDTO
+@{
+    ViewData["Title"] = "User Details";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">User Details</h2>
+    <dl class="row">
+        <dt class="col-sm-3">Full Name</dt>
+        <dd class="col-sm-9">@Model.Fullname</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@Model.Email</dd>
+
+        <dt class="col-sm-3">Avatar</dt>
+        <dd class="col-sm-9">
+            <img src="@Url.Content($"~/images/{Model.Avatar}")" alt="User Avatar" class="img-thumbnail" style="width: 100px;">
+        </dd>
+
+        <dt class="col-sm-3">Is Active</dt>
+        <dd class="col-sm-9">@((Model.IsActive) ? "Yes" : "No")</dd>
+
+        <dt class="col-sm-3">Joined At</dt>
+        <dd class="col-sm-9">@Model.JoinedAt.ToString("MMMM dd, yyyy")</dd>
+
+        <dt class="col-sm-3">Role</dt>
+        <dd class="col-sm-9">@Model.Role</dd>
+    </dl>
+
+    <div class="mt-4">
+        <a asp-action="Edit" class="btn btn-warning">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>

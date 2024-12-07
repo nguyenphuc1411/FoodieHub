@@ -1,0 +1,369 @@
+﻿@using Azure.Core
+@using FoodieHub.MVC.Service.Interfaces
+@model List<GetProductDTO>
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@inject ICategoryService _categoryService;
+@inject IReviewService _reviewService;
+@inject IOrderService _orderDetailsService;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml"; 
+    var apiUrl = Configuration["BaseHost"];
+    var listCate =  _categoryService.GetAll();
+    int orderCount = 0;
+    var listOrderDetail =await _orderDetailsService.GetOrderDetailsWithProductID();
+    var listOrder = await _orderDetailsService.GetOrderWithUserId();
+}
+<div class="banner-controller-shop d-flex justify-content-sm-center">
+</div>
+
+<div class="col-sm-12 text-center">
+    <h5 class="book-title-main p-2">Book Shop</h5>
+</div>
+
+<form asp-action="Index" method="get" class="actions-filter container">
+    <div class="row d-flex mb-3">
+        <!-- Price Filter -->
+        <div class="col-sm-3 col-md-2 mb-2">
+            <div class="dropdown w-100">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle w-100" data-bs-toggle="dropdown">
+                    @(ViewContext.HttpContext.Request.Query["priceFilter"].FirstOrDefault() ?? "Price Filter")
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" onclick="setFilter('priceFilter', 'Under25')">Under $25</a></li>
+                    <li><a class="dropdown-item" onclick="setFilter('priceFilter', '25to50')">$25 - $50</a></li>
+                    <li><a class="dropdown-item" onclick="setFilter('priceFilter', '50to100')">$50 - $100</a></li>
+                    <li><a class="dropdown-item" onclick="setFilter('priceFilter', '100to200')">$100 - $200</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Categories Filter -->
+        <div class="col-sm-3 col-md-2 mb-2">
+            <div class="dropdown w-100">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle w-100" data-bs-toggle="dropdown">
+                    @{
+                        var selectedCategoryId = ViewContext.HttpContext.Request.Query["categoryFilter"].FirstOrDefault();
+                        var selectedCategoryName = listCate.Result
+                        .FirstOrDefault(c => c.CategoryID.ToString() == selectedCategoryId)?.CategoryName ?? "Categories Filter";
+                    }
+                    @selectedCategoryName
+                </button>
+                <ul class="dropdown-menu">
+                    @foreach (var item in listCate.Result)
+                    {
+                        <li><a class="dropdown-item" onclick="setFilter('categoryFilter', '@item.CategoryID')">@item.CategoryName</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sort Filter -->
+        <div class="col-sm-3 col-md-2 mb-2">
+            <div class="dropdown w-100">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle w-100" data-bs-toggle="dropdown">
+                    @(ViewContext.HttpContext.Request.Query["sortBy"].FirstOrDefault() ?? "Sort Filter")
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" onclick="setFilter('sortBy', 'Recommended')">Recommended</a></li>
+                    <li><a class="dropdown-item" onclick="setFilter('sortBy', 'PriceLowToHigh')">Price: Low to High</a></li>
+                    <li><a class="dropdown-item" onclick="setFilter('sortBy', 'PriceHighToLow')">Price: High to Low</a></li>
+                    <li><a class="dropdown-item" onclick="setFilter('sortBy', 'NameAToZ')">Name: A to Z</a></li>
+                    <li><a class="dropdown-item" onclick="setFilter('sortBy', 'NameZToA')">Name: Z to A</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Apply Filters Button -->
+        <div class="col-sm-3 col-md-2 mb-2">
+            <button type="submit" class="btn btn-secondary w-100">Apply Filters</button>
+        </div>
+
+        <!-- Reset Filters Button -->
+        <div class="col-sm-3 col-md-2 mb-2">
+            <button type="button" class="btn btn-outline-secondary w-100" onclick="resetFilters()">Reset Filters</button>
+        </div>
+    </div>
+
+    <!-- Hidden Inputs for Filters -->
+    <input type="hidden" id="priceFilter" name="priceFilter" value="@ViewContext.HttpContext.Request.Query["priceFilter"].FirstOrDefault()">
+    <input type="hidden" id="categoryFilter" name="categoryFilter" value="@ViewContext.HttpContext.Request.Query["categoryFilter"].FirstOrDefault()">
+    <input type="hidden" id="sortBy" name="sortBy" value="@ViewContext.HttpContext.Request.Query["sortBy"].FirstOrDefault()">
+</form>
+
+
+
+
+
+
+
+
+
+<div class="container mb-3">
+    <div class="col-md-12">
+        <!-- Kiểm tra nếu Model rỗng hoặc không có sản phẩm phù hợp -->
+        @if (Model == null || !Model.Any(item => item.IsActive))
+        {
+            <div class="alert alert-warning text-center">
+                None product now!
+            </div>
+        }
+        else
+        {
+            <!-- Product Grid -->
+            <div class="row g-3">
+                <!-- Product Card -->
+                @foreach (var item in Model)
+                {
+                    if (item.IsActive)
+                    {
+                        // Kiểm tra nếu sản phẩm mới trong vòng 1 tháng
+                        var oneMonthAgo = DateTime.Now.AddMonths(-1); // Lấy ngày cách đây 1 tháng
+                        bool isNewProduct = item.CreatedAt >= oneMonthAgo;
+
+                        <div class="col-md-3">
+                            <div class="product-card p-3 shadow-sm position-relative">
+
+                                <a asp-action="Detail" asp-controller="Products" asp-route-id="@item.ProductID" class="">
+                                    <img src="@($"{apiUrl}Images/{item.MainImage}")" alt="Product Image" class="product-image">
+                                </a>
+
+                                <!-- Hiển thị chữ New nếu sản phẩm mới -->
+                                @if (isNewProduct)
+                                {
+                                    <span class="badge new-badge position-absolute top-0  m-2">New</span>
+                                }
+
+                                <a asp-action="Detail" asp-controller="Products" asp-route-id="@item.ProductID" class="">
+                                    <h6 class="mt-3">@item.ProductName</h6>
+                                </a>
+
+                                <p class="mb-1">
+                                    @{
+                                        var discountedPriceMain = (item.Price - (item.Price * item.Discount / 100)).ToString("0.00");
+                                    }
+                                    @if (item.Discount == 0)
+                                    {
+                                        <span class="text-danger">$@item.Price.ToString("0.00")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-decoration-line-through text-muted">$@item.Price.ToString("0.00")</span>
+                                        <span class="h5 text-danger mx-2">$@discountedPriceMain</span>
+                                        <span class="discount-percent-text">-@item.Discount.ToString("0") %</span>
+                                    }
+                                </p>
+
+                                @{
+                                    var listReviewOrther = await _reviewService.GetListReview(item.ProductID);
+                                    int averageRatingOther = 0;
+                                    if (listReviewOrther.Data.Any())
+                                    {
+                                        double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
+                                        double avgRate = totalRate / listReviewOrther.Data.Count;  // Trung bình rate
+
+                                        averageRatingOther = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
+                                    }
+                                }
+                                <p class="text-warning">@averageRatingOther ★</p>
+
+                                <div class="d-flex justify-content-between mt-3">
+                                    @if (item.StockQuantity <= 0)
+                                    {
+                                        <button class="btn text-danger btn-sm" disabled>Out of stock</button>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("AddToCart", "Cart", new { productId = item.ProductID, quantity = 1 })" class="btn button-light btn-sm">Add to cart</a>
+                                    }
+
+                                    @{
+                                        int totalSoldCount = 0;
+                                        if (listOrderDetail?.Data != null)
+                                        {
+                                            foreach (var itemDT in listOrderDetail.Data)
+                                            {
+                                                if (itemDT.ProductID == item.ProductID && itemDT.Status == "COMPLETED")
+                                                {
+                                                    totalSoldCount += itemDT.Quantity; // Cộng số lượng sản phẩm đã bán
+                                                }
+                                            }
+                                        }
+                                    }
+                                    <span class="sold-text mt-2">Sold: @totalSoldCount Pcs</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+
+            </div>
+
+            <!-- Pagination -->
+             <nav aria-label="Page navigation" class="my-5">
+                <ul class="pagination justify-content-center">
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li>
+                            <a class="btn btn-pagination @(i == ViewBag.CurrentPage ? "active" : "")"
+                               asp-action="Index"
+                               asp-route-page="@i"
+                               asp-route-priceFilter="@ViewContext.HttpContext.Request.Query["priceFilter"]"
+                               asp-route-categoryFilter="@ViewContext.HttpContext.Request.Query["categoryFilter"]"
+                               asp-route-sortBy="@ViewContext.HttpContext.Request.Query["sortBy"]">
+                                @i
+                            </a>
+                        </li>
+
+                    }
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@(ViewBag.CurrentPage + 1)"
+                               asp-route-priceFilter="@ViewContext.HttpContext.Request.Query["priceFilter"]"
+                               asp-route-categoryFilter="@ViewContext.HttpContext.Request.Query["categoryFilter"]"
+                               asp-route-sortBy="@ViewContext.HttpContext.Request.Query["sortBy"]">
+                                Next &raquo;
+                            </a>
+                        </li>
+                    }
+
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
+
+
+<style>
+    .sold-text{
+        font-weight: 600;
+    }
+    a {
+    text-decoration: none; /* Loại bỏ gạch chân */
+    color: inherit; /* Giữ nguyên màu mặc định của văn bản */
+}
+
+a:hover {
+    text-decoration: none; /* Giữ nguyên không gạch chân khi hover */
+    color: inherit; /* Không đổi màu khi hover */
+}
+
+a h6 {
+    color: black; /* Đặt màu chữ mặc định là đen */
+}
+
+a h6:hover {
+    color: black; /* Giữ màu chữ đen khi hover vào liên kết */
+}
+
+    .banner-controller-shop {
+        width: 100%;
+        height: 45vh;
+
+        padding: 20px;
+        background-image: url("images/FoodieBook.png");
+        background-size: cover; /* Đảm bảo hình ảnh phủ toàn bộ vùng nền */
+        background-position: center; /* Canh giữa hình ảnh */
+        background-repeat: no-repeat; /* Không lặp lại hình ảnh */
+    }
+
+    .book-title-main{
+        font-size: 70px;
+        color: black;
+        font-weight: 400;
+    }
+
+
+    .product-card {
+        background-color: #fff;
+        border-radius: 10px;
+        border: 1px solid #eaeaea;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .product-image {
+        width: 100%;
+        height: 200px;
+        border-radius: 8px;
+    }
+
+
+
+    .pagination a {
+        color: #444;
+        padding: 8px 12px;
+        margin: 0 4px;
+        border-radius: 4px;
+        text-decoration: none;
+        border: 1px solid #ddd;
+    }
+
+        .pagination a.active, .pagination a:hover {
+            background-color: #869FAE;
+            color: #fff;
+        }
+
+    .product-count, .sort-by {
+        font-size: 1rem;
+        color: #555;
+    }
+
+    .discount-percent-text {
+        background-color: red;
+        font-size: 12px;
+        color: white;
+        padding: 2px 3px;
+        border-radius: 6px;
+    }
+    /* Kiểu dáng cho "New" badge */
+    .new-badge {
+        background-color: #28a745; /* Màu nền xanh */
+        color: white; /* Chữ trắng */
+        font-weight: bold;
+        font-size: 14px;
+        padding: 4px 12px; /* Điều chỉnh khoảng cách xung quanh chữ */
+        border-radius: 20px; /* Viền tròn, bo nhẹ */
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: absolute;
+        top: 0;
+        right: 0; /* Đặt badge ở góc trên bên phải */
+        margin: 10px; /* Cách góc trên và bên phải 10px */
+    }
+
+    .product-card {
+        position: relative; /* Để đặt "New" badge vào vị trí chính xác */
+        overflow: hidden; /* Đảm bảo "New" badge không bị tràn ra ngoài */
+    }
+
+        .product-card img {
+            width: 100%; /* Đảm bảo hình ảnh chiếm toàn bộ chiều rộng */
+            height: auto;
+        }
+
+
+</style>
+<script>
+    function setFilter(filterName, value) {
+        document.getElementById(filterName).value = value;
+    }
+</script>
+<script>
+    function resetFilters() {
+        document.getElementById('priceFilter').value = '';
+        document.getElementById('categoryFilter').value = '';
+        document.getElementById('sortBy').value = '';
+        document.querySelector('input[name="searchName"]').value = '';
+        document.querySelector('form.actions-filter').submit();
+    }
+</script>
+
