@@ -365,7 +365,6 @@ FodyWeavers.xsd
 
 /FoodieHub.API/wwwroot
 
-# Ignore appsettings.json
-**/appsettings.json
+
 
 
