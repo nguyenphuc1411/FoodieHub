@@ -12,5 +12,7 @@ namespace FoodieHub.MVC.Service.Interfaces
         Task<bool> ResetPassword(ResetPasswordDTO resetPasswordDTO);
 
         Task<string?> ConfirmRegistion(ConfirmRegistion confirmRegistion);
+
+        Task<APIResponse?> UpdateProfile(UpdateProfileDTO updateProfileDTO);
     }
 }

@@ -22,7 +22,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<List<GetProductDTO>> GetAll()
         {
-            var response = await _httpClient.GetAsync("Products/getallproducts");
+            var response = await _httpClient.GetAsync("Products");
 
             if (response.IsSuccessStatusCode)
             {
@@ -38,7 +38,7 @@ namespace FoodieHub.MVC.Service.Implementations
         public async Task<APIResponse<GetProductDTO>> GetById(int id)
         {
 
-            var response = await _httpClient.GetAsync($"Products/getproductbyid/{id}");
+            var response = await _httpClient.GetAsync($"Products/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -87,7 +87,7 @@ namespace FoodieHub.MVC.Service.Implementations
             }
 
             // Gửi POST request tới API
-            var response = await _httpClient.PostAsync($"Products/addproduct", content);
+            var response = await _httpClient.PostAsync($"Products", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -135,7 +135,7 @@ namespace FoodieHub.MVC.Service.Implementations
             }
 
             // Gửi PUT request tới API
-            var response = await _httpClient.PutAsync("Products/updateproduct", content);
+            var response = await _httpClient.PutAsync("Products", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -157,7 +157,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<APIResponse> DeleteProduct(int id)
         {
-            var response = await _httpClient.DeleteAsync($"Products/deleteproduct/{id}");
+            var response = await _httpClient.DeleteAsync($"Products/{id}");
 
             if (response.IsSuccessStatusCode)
             {

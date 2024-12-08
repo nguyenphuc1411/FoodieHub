@@ -124,5 +124,15 @@ namespace FoodieHub.MVC.Service.Implementations
                 return httpResponse.IsSuccessStatusCode;
             }
         }
+
+        public async Task<IEnumerable<GetRecipeDTO>?> GetOfUser()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<GetRecipeDTO>>("recipes/user");
+        }
+
+        public async Task<IEnumerable<GetRecipeDTO>?> GetByUser(string userId)
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<GetRecipeDTO>>("recipes/user/"+userId);
+        }
     }
 }

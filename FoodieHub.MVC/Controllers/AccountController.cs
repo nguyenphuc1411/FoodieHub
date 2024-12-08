@@ -6,13 +6,10 @@ using FoodieHub.API.Models.QueryModel;
 using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Helpers;
 using FoodieHub.MVC.Models.Favorite;
-using FoodieHub.MVC.Models.Order;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.Net.Http.Headers;
-using System.Text.Json;
 
 
 namespace FoodieHub.MVC.Controllers
@@ -20,18 +17,23 @@ namespace FoodieHub.MVC.Controllers
     public class AccountController : Controller
     {
         private readonly IConfiguration _config;
-        private readonly HttpClient _httpClient;
         private readonly IFavoriteService favoriteService;
         private readonly IAuthService authService;
         private readonly IOrderService orderService;
-        public AccountController(IConfiguration config, IHttpClientFactory httpClientFactory,
-            IFavoriteService favoriteService, IAuthService authService, IOrderService orderService)
+        private readonly IRecipeService recipeService;
+        private readonly IUserService userService;
+        public AccountController(IConfiguration config,
+            IFavoriteService favoriteService,
+            IAuthService authService,
+            IOrderService orderService,
+            IRecipeService recipeService, IUserService userService)
         {
             _config = config;
-            _httpClient = httpClientFactory.CreateClient("MyAPI");
             this.favoriteService = favoriteService;
             this.authService = authService;
             this.orderService = orderService;
+            this.recipeService = recipeService;
+            this.userService = userService;
         }
 
         public IActionResult Login()
@@ -212,12 +214,10 @@ namespace FoodieHub.MVC.Controllers
         [ValidateTokenForUser]
         public async Task<IActionResult> CancelOrder(int orderID, string cancellationReason)
         {
-            var response = await _httpClient.GetAsync($"Orders/{orderID}");
-            var content = await response.Content.ReadFromJsonAsync<APIResponse<GetDetailOrder>>();
-            var orderDetails = content?.Data;
+            var orderDetails = await orderService.GetByID(orderID);
             if (orderDetails == null)
             {
-                TempData["ErrorMessage"] = content.Message;
+                NotificationHelper.SetErrorNotification(this, "Not found this order");
                 return RedirectToAction("Order");
             }
 
@@ -225,122 +225,72 @@ namespace FoodieHub.MVC.Controllers
             {
                 orderDetails.Status = "CANCELED";
             }
-            var ChangeStatus = await _httpClient.PatchAsync($"Orders/ChangeStatusUser/{orderID}?status={orderDetails.Status}&cancellationReason={cancellationReason}", null);
-            var changeStatusContent = await ChangeStatus.Content.ReadFromJsonAsync<APIResponse>();
-            if (changeStatusContent.Success)
+            var result = await orderService.ChangeStatus(orderID, orderDetails.Status, cancellationReason);   
+            if (result!=null)
             {
-                var userresponse = await _httpClient.GetAsync("Auth/profile");
-                var usercontent = await userresponse.Content.ReadFromJsonAsync<APIResponse<UserDTO>>();
-                var userDetail = usercontent?.Data;
-                if (userDetail.LockoutEnd == null || userDetail.LockoutEnd <= DateTime.UtcNow || userDetail.LockoutEnabled == false)
+                if (result.Success)
                 {
-                    TempData["SuccessMessage"] = changeStatusContent.Message;
+                    var userDetail = await authService.GetProfile();
+                    if (userDetail == null) return RedirectToAction("Order");
+                    if (userDetail.LockoutEnd == null || userDetail.LockoutEnd <= DateTime.UtcNow || userDetail.LockoutEnabled == false)
+                    {
+                        NotificationHelper.SetSuccessNotification(this, result.Message);
+                    }
+                    else
+                    {
+                        Response.DeleteCookie("TokenUser");
+                        Response.DeleteCookie("FullName");
+                        Response.DeleteCookie("Avatar");
+                        NotificationHelper.SetErrorNotification(this, "Your account has been locked for 1 day due to security reasons.");
+                        return RedirectToAction("Login");
+                    }
                 }
                 else
                 {
-                    var cookieOptions = new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        Expires = DateTime.UtcNow.AddDays(-1)
-                    };
-
-                    Response.Cookies.Append("TokenUser", string.Empty, cookieOptions);
-                    Response.Cookies.Append("Name", string.Empty, cookieOptions);
-                    Response.Cookies.Append("Avatar", string.Empty, cookieOptions);
-                    TempData["ErrorMessage"] = "Your account has been locked for 1 day due to security reasons.";
-                    return RedirectToAction("Login");
+                    NotificationHelper.SetErrorNotification(this,result.Message);
                 }
-                
             }
             else
             {
-                TempData["ErrorMessage"] = changeStatusContent.Message;
+                NotificationHelper.SetErrorNotification(this, "PLease try again later.");
             }
-
             return RedirectToAction("Order");
         }
 
         public async Task<IActionResult> UserInfo(string id)
         {
-            var response = await _httpClient.GetAsync($"users/{id}");
-            if (response.IsSuccessStatusCode)
-            {
-                // Fetching profile data
-                var responseProfile = await _httpClient.GetAsync("auth/profile");
-                var dataProfile = await responseProfile.Content.ReadFromJsonAsync<APIResponse<JsonElement>>();
-                if (dataProfile != null && dataProfile.Success)
-                {
-                    ViewBag.Profile = dataProfile.Data;
-                }
-                else
-                {
-                    ViewBag.Profile = null;
-                }
-
-
-                var data = await response.Content.ReadFromJsonAsync<APIResponse<JsonElement>>();
-
-                // Fetching recipes for the user
-                var responseRecipes = await _httpClient.GetAsync($"recipes/user/{id}");
-                var dataRecipes = await responseRecipes.Content.ReadFromJsonAsync<APIResponse<List<JsonElement>>>();
-                ViewBag.Recipes = dataRecipes?.Success == true ? dataRecipes.Data: new List<JsonElement>() ;
-
-                return View(data.Data);
-            }
-            TempData["ErrorMessage"] = "User not found";
-            return Redirect(HttpContext.Request.Headers["Referer"].ToString());
+            var userData = await userService.GetByID(id);
+            var recipeData = await recipeService.GetByUser(id);
+            ViewBag.RecipeData = recipeData;
+            return View(userData);
         }
+
         [ValidateTokenForUser]
         public async Task<IActionResult> Recipes()
         {
-            // Fetching profile data
-            var responseProfile = await _httpClient.GetAsync("auth/profile");
-            var dataProfile = await responseProfile.Content.ReadFromJsonAsync<APIResponse<JsonElement>>();
-            if (dataProfile != null && dataProfile.Success)
-            {
-                // Fetching recipes for the user
-                var responseRecipes = await _httpClient.GetAsync($"recipes/user");
-                var jsonResponse = await responseRecipes.Content.ReadAsStringAsync();
-
-                // Deserialize JSON thành JsonDocument để xử lý
-                var document = JsonDocument.Parse(jsonResponse);
-                JsonElement dataRecipes = document.RootElement;
-
-                // Kiểm tra xem response có chứa trường Success không và xử lý
-                if (dataRecipes.TryGetProperty("success", out JsonElement successElement) && successElement.GetBoolean())
-                {
-                    ViewBag.Recipes = dataRecipes.GetProperty("data").EnumerateArray();
-                }
-                else
-                {
-                    ViewBag.Recipes = new List<JsonElement>(); // Trả về list rỗng nếu không thành công
-                }
-             
-                return View(dataProfile.Data);
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "User not found";
-                return Redirect(HttpContext.Request.Headers["Referer"].ToString());
-            }        
+            var dataProfile = await authService.GetProfile();
+            ViewBag.Profile = dataProfile;
+            var dataRecipes = await recipeService.GetOfUser();
+            if (dataRecipes == null) return RedirectToAction("Dashboard");
+            ViewBag.Recipes = dataRecipes;
+            return View();           
         }
         [ValidateTokenForUser]
         public async Task<IActionResult> Profile()
         {
-            var response = await _httpClient.GetAsync("auth/profile");
-            var data = await response.Content.ReadFromJsonAsync<APIResponse<UpdateProfileDTO>>();
-            if (data != null)
+            var userDTO = await authService.GetProfile();
+            if (userDTO != null)
             {
-                if (data.Success)
+                var updateProfile = new UpdateProfileDTO
                 {
-                    return View(data.Data);
-                }
+                    Fullname = userDTO.Fullname,
+                    Email = userDTO.Email,
+                    Avatar = userDTO.Avatar??string.Empty,
+                    Bio = userDTO.Bio
+                };
+                return View(updateProfile);
             }
-            else
-            {
-                TempData["ErrorMessgae"] = "Some thing went wrong. Please try again";
-            }
+            NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Profile");
         }
         [ValidateTokenForUser]
@@ -349,47 +299,26 @@ namespace FoodieHub.MVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                using (var content = new MultipartFormDataContent())
+                var result = await authService.UpdateProfile(user);
+                if (result != null)
                 {
-                    content.Add(new StringContent(user.Fullname), "Fullname");
-
-                    if (!string.IsNullOrEmpty(user.Bio))
+                    if (result.Success)
                     {
-                        content.Add(new StringContent(user.Bio), "Bio");
-                    }
-                    if (!string.IsNullOrEmpty(user.OldPassword) && !string.IsNullOrEmpty(user.NewPassword))
-                    {
-                        content.Add(new StringContent(user.OldPassword), "OldPassword");
-                        content.Add(new StringContent(user.NewPassword), "NewPassword");
-                    }
-                    if (user.File != null && user.File.Length > 0)
-                    {
-                        var fileContent = new StreamContent(user.File.OpenReadStream());
-                        fileContent.Headers.ContentType = new MediaTypeHeaderValue(user.File.ContentType);
-                        content.Add(fileContent, "File", user.File.FileName);
-                    }
-
-                    var httpResponse = await _httpClient.PutAsync("auth", content);
-                    var data = await httpResponse.Content.ReadFromJsonAsync<APIResponse>();
-                    if (data != null)
-                    {
-                        if (data.Success)
+                        NotificationHelper.SetSuccessNotification(this,result.Message);
+                        var opt = new CookieOptions
                         {
-                            TempData["SuccessMessage"] = data.Message;
-                            var opt = new CookieOptions
-                            {
-                                HttpOnly = false,
-                                Expires = DateTime.Now.AddDays(30)
-                            };
-                            Response.Cookies.Append("Name", user.Fullname, opt);
-                            return RedirectToAction("Dashboard");
-                        }
-                        else
-                        {
-                            TempData["ErrorMessage"] = data.Message;
-                        }
+                            HttpOnly = false,
+                            Expires = DateTime.Now.AddDays(30)
+                        };
+                        Response.SetCookie("FullName", user.Fullname);
+                        return RedirectToAction("Dashboard");
+                    }
+                    else
+                    {
+                        NotificationHelper.SetErrorNotification(this, result.Message);
                     }
                 }
+                else NotificationHelper.SetErrorNotification(this, "Please try again.");
             }
             return View(user);
         }
@@ -412,23 +341,24 @@ namespace FoodieHub.MVC.Controllers
             if (result) NotificationHelper.SetSuccessNotification(this);
             else NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Favorite");
-        }      
+        }
 
         [HttpGet("orders/qrcode/{id}")]
         public async Task<IActionResult> OrderQRCode(string id)
         {
-            var response = await _httpClient.GetAsync("orders/" + id);
-            if (response.IsSuccessStatusCode)
+            if (!int.TryParse(id, out int orderId))
             {
-                var data = await response.Content.ReadFromJsonAsync<APIResponse<GetDetailOrder>>();
-                if (data.Data.PaymentStatus)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-                return View(data.Data);
+                NotificationHelper.SetErrorNotification(this, "Invalid order ID");
+                return RedirectToAction("Order", "Account");
             }
-            TempData["ErrorMessage"] = "Not found this order";
-            return RedirectToAction("Order", "Account");
+
+            var order = await orderService.GetByID(orderId);
+            if (order == null)
+            {
+                NotificationHelper.SetErrorNotification(this, "Order not found");
+                return RedirectToAction("Order", "Account");
+            }
+            return View(order);
         }
 
         [Route("confirmregister")]

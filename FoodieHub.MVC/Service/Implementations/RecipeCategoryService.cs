@@ -20,7 +20,7 @@ namespace FoodieHub.MVC.Service.Implementations
         // Lấy danh sách tất cả Recipe Categories
         public async Task<List<GetRecipeCategoryDTO>> GetAll()
         {
-            var response = await _httpClient.GetAsync("RecipeCategory/getallrecipecategory");
+            var response = await _httpClient.GetAsync("RecipeCategory");
             if (response.IsSuccessStatusCode) 
             {
                 var content = await response.Content.ReadFromJsonAsync<List<GetRecipeCategoryDTO>>();
@@ -47,7 +47,7 @@ namespace FoodieHub.MVC.Service.Implementations
             }
 
             // Gửi POST request tới API
-            var response = await _httpClient.PostAsync("RecipeCategory/addnewrecipecategory", content);
+            var response = await _httpClient.PostAsync("RecipeCategory", content);
 
             // Xử lý phản hồi và trả về APIResponse
             if (response.IsSuccessStatusCode)

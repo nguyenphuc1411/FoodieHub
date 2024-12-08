@@ -19,8 +19,7 @@ namespace FoodieHub.API.Migrations
                 {
                     CategoryID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CategoryName = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    CategoryName = table.Column<string>(type: "nvarchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -114,9 +113,7 @@ namespace FoodieHub.API.Migrations
                     CategoryID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CategoryName = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    ImageURL = table.Column<string>(type: "varchar(255)", nullable: false),
-                    IsActice = table.Column<bool>(type: "bit", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    ImageURL = table.Column<string>(type: "varchar(255)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -152,9 +149,8 @@ namespace FoodieHub.API.Migrations
                     Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     MainImage = table.Column<string>(type: "varchar(255)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CategoryID = table.Column<int>(type: "int", nullable: false)
                 },
@@ -702,8 +698,8 @@ namespace FoodieHub.API.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "Avatar", "Bio", "ConcurrencyStamp", "Email", "EmailConfirmed", "Fullname", "IsActive", "JoinedAt", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "NotificationSubscription", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { "b6d4f2fd-ae9a-475f-a186-264597704bae", 0, null, null, "50db0005-7ca9-4aed-a361-84364875c9a7", "admin@gmail.com", false, "NguyenThanhPhuc", true, new DateTime(2024, 12, 7, 18, 22, 8, 173, DateTimeKind.Local).AddTicks(8601), false, null, "ADMIN@GMAIL.COM", "ADMIN@GMAIL.COM", false, "AQAAAAIAAYagAAAAEKI7ESn0O5YJOGi8aYmzCMAZ2zlI6AfgznoDU6lwEMXN3/8oW+U4mmY5yfS5cFP/mg==", null, false, "2bd50681-fcf6-47d2-8a32-cf496e8870cc", false, "admin@gmail.com" },
-                    { "b6d4f2fd-ae9a-475f-a186-264597704bat", 0, null, null, "9d0ffa50-ae13-411f-b00e-0e1c0865ad8c", "user@gmail.com", false, "User Name", true, new DateTime(2024, 12, 7, 18, 22, 8, 173, DateTimeKind.Local).AddTicks(8626), false, null, "USER@GMAIL.COM", "USER@GMAIL.COM", false, "AQAAAAIAAYagAAAAEMeLDM1B/WLxqOoV1KfCCakquMf9/v0W6KXzxId03P3qBk2kARVorLmxsEB0uLO5YQ==", null, false, "650f73d8-f230-48e7-adcb-96690e7d3519", false, "user@gmail.com" }
+                    { "b6d4f2fd-ae9a-475f-a186-264597704bae", 0, null, null, "e1b5d55c-557f-4da3-9311-0628f7746ffd", "admin@gmail.com", false, "NguyenThanhPhuc", true, new DateTime(2024, 12, 8, 21, 36, 12, 207, DateTimeKind.Local).AddTicks(2959), false, null, "ADMIN@GMAIL.COM", "ADMIN@GMAIL.COM", false, "AQAAAAIAAYagAAAAEIqEp5Vsa8V+i5suifACXzDmKZrAOt7DMW8gIEdMk/wC7Iy/s0r1A1e8dNfkAMahTQ==", null, false, "7bd2ce10-cd59-40d7-ae10-031cdc1e498c", false, "admin@gmail.com" },
+                    { "b6d4f2fd-ae9a-475f-a186-264597704bat", 0, null, null, "fb3ec440-3816-44ec-97b4-9957b5c53d3a", "user@gmail.com", false, "User Name", true, new DateTime(2024, 12, 8, 21, 36, 12, 207, DateTimeKind.Local).AddTicks(2982), false, null, "USER@GMAIL.COM", "USER@GMAIL.COM", false, "AQAAAAIAAYagAAAAEFgPd6PWSwSV4hFSZIjA692zQAo2YIgLn0soeoLFuSJxIei+dZC88FxZBVhgPIWEcw==", null, false, "a0734801-1dcd-4113-9fac-2313287928d7", false, "user@gmail.com" }
                 });
 
             migrationBuilder.InsertData(

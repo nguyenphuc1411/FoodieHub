@@ -6,7 +6,7 @@
         public string Title { get; set; } = default!;
         public string MainImage { get; set; } = default!;
         public string Description { get; set; } = default!;
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public string UserID { get; set; } = default!;
         public string FullName { get; set; } = default!;

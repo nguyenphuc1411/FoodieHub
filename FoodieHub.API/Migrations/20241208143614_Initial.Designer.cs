@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FoodieHub.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241207112210_Initial")]
+    [Migration("20241208143614_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -113,19 +113,19 @@ namespace FoodieHub.API.Migrations
                         {
                             Id = "b6d4f2fd-ae9a-475f-a186-264597704bat",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "9d0ffa50-ae13-411f-b00e-0e1c0865ad8c",
+                            ConcurrencyStamp = "fb3ec440-3816-44ec-97b4-9957b5c53d3a",
                             Email = "user@gmail.com",
                             EmailConfirmed = false,
                             Fullname = "User Name",
                             IsActive = true,
-                            JoinedAt = new DateTime(2024, 12, 7, 18, 22, 8, 173, DateTimeKind.Local).AddTicks(8626),
+                            JoinedAt = new DateTime(2024, 12, 8, 21, 36, 12, 207, DateTimeKind.Local).AddTicks(2982),
                             LockoutEnabled = false,
                             NormalizedEmail = "USER@GMAIL.COM",
                             NormalizedUserName = "USER@GMAIL.COM",
                             NotificationSubscription = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEMeLDM1B/WLxqOoV1KfCCakquMf9/v0W6KXzxId03P3qBk2kARVorLmxsEB0uLO5YQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFgPd6PWSwSV4hFSZIjA692zQAo2YIgLn0soeoLFuSJxIei+dZC88FxZBVhgPIWEcw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "650f73d8-f230-48e7-adcb-96690e7d3519",
+                            SecurityStamp = "a0734801-1dcd-4113-9fac-2313287928d7",
                             TwoFactorEnabled = false,
                             UserName = "user@gmail.com"
                         },
@@ -133,19 +133,19 @@ namespace FoodieHub.API.Migrations
                         {
                             Id = "b6d4f2fd-ae9a-475f-a186-264597704bae",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "50db0005-7ca9-4aed-a361-84364875c9a7",
+                            ConcurrencyStamp = "e1b5d55c-557f-4da3-9311-0628f7746ffd",
                             Email = "admin@gmail.com",
                             EmailConfirmed = false,
                             Fullname = "NguyenThanhPhuc",
                             IsActive = true,
-                            JoinedAt = new DateTime(2024, 12, 7, 18, 22, 8, 173, DateTimeKind.Local).AddTicks(8601),
+                            JoinedAt = new DateTime(2024, 12, 8, 21, 36, 12, 207, DateTimeKind.Local).AddTicks(2959),
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
                             NotificationSubscription = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEKI7ESn0O5YJOGi8aYmzCMAZ2zlI6AfgznoDU6lwEMXN3/8oW+U4mmY5yfS5cFP/mg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIqEp5Vsa8V+i5suifACXzDmKZrAOt7DMW8gIEdMk/wC7Iy/s0r1A1e8dNfkAMahTQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "2bd50681-fcf6-47d2-8a32-cf496e8870cc",
+                            SecurityStamp = "7bd2ce10-cd59-40d7-ae10-031cdc1e498c",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         });
@@ -169,7 +169,7 @@ namespace FoodieHub.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(MAX)");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<string>("MainImage")
@@ -179,9 +179,6 @@ namespace FoodieHub.API.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserID")
                         .IsRequired()
@@ -207,9 +204,6 @@ namespace FoodieHub.API.Migrations
                     b.Property<string>("CategoryName")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.HasKey("CategoryID");
 
@@ -744,12 +738,6 @@ namespace FoodieHub.API.Migrations
                     b.Property<string>("ImageURL")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
-
-                    b.Property<bool>("IsActice")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.HasKey("CategoryID");
 

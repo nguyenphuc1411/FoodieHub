@@ -3,10 +3,7 @@ using FoodieHub.MVC.Service.Interfaces;
 using FoodieHub.MVC.Models.Article;
 using System.Text.Json;
 using FoodieHub.MVC.Configurations;
-using FoodieHub.MVC.Models.Response;
-using System.IdentityModel.Tokens.Jwt;
 using FoodieHub.MVC.Models.Comment;
-using FoodieHub.API.Data.Entities;
 using FoodieHub.API.Models.DTOs.Favorite;
 using FoodieHub.MVC.Helpers;
 

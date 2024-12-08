@@ -3,7 +3,6 @@ using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 
 namespace FoodieHub.API.Controllers
 {
@@ -18,28 +17,28 @@ namespace FoodieHub.API.Controllers
             _service = service;
         }
 
-        [HttpGet("getallreview/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             var result = await _service.GetListReview(id);
             return Ok(result);
         }
         [Authorize]
-        [HttpPost("addnewreview")]
+        [HttpPost]
         public async Task<IActionResult> Post(ReviewDTO reviewDTO)
         {
             var result = await _service.AddNewReview(reviewDTO);
             return StatusCode(result.StatusCode, result);
         }
         [Authorize]
-        [HttpPut("updatereview")]
+        [HttpPut]
         public async Task<IActionResult> Put(ReviewDTO reviewDTO)
         {
             var result = await _service.UpdateReview(reviewDTO);
             return StatusCode(result.StatusCode,result);
         }
         [Authorize]
-        [HttpDelete("deletereview/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteNewReview(id);

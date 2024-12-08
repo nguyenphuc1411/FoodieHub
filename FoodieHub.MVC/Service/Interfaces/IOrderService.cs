@@ -1,4 +1,5 @@
-﻿using FoodieHub.API.Models.QueryModel;
+﻿using FoodieHub.API.Models.DTOs.Order;
+using FoodieHub.API.Models.QueryModel;
 using FoodieHub.API.Models.Response;
 using FoodieHub.MVC.Models.Order;
 using FoodieHub.MVC.Models.Response;
@@ -13,5 +14,6 @@ namespace FoodieHub.MVC.Service.Interfaces
         Task<PaginatedModel<GetOrder>?> GetForUser(QueryOrderModel queryOrder);
 
         Task<GetDetailOrder?> GetByID(int id);
+        Task<APIResponse?> ChangeStatus(int orderID,string status,string cancellationReason);
     }
 }

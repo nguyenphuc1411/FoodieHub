@@ -26,6 +26,7 @@ namespace FoodieHub.API.Repositories.Implementations
             var userID = _authService.GetUserID();
             return await _context.Favorites
                 .Where(f => f.UserID == userID && f.RecipeID==null)
+                .Select(f=>f.Article)
                 .ProjectTo<GetArticleDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
@@ -33,9 +34,10 @@ namespace FoodieHub.API.Repositories.Implementations
         {
             var userID = _authService.GetUserID();
             return await _context.Favorites
-                .Where(f => f.UserID == userID && f.RecipeID == null)
-                .ProjectTo<GetRecipeDTO>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+               .Where(f => f.UserID == userID && f.ArticleID == null && f.Recipe != null) 
+               .Select(f => f.Recipe) 
+               .ProjectTo<GetRecipeDTO>(_mapper.ConfigurationProvider)
+               .ToListAsync();
         }
         
         public async Task<Favorite?> Create(CreateFavoriteDTO favorite)

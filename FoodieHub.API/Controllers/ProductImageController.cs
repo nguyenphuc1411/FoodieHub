@@ -16,7 +16,7 @@ namespace FoodieHub.API.Controllers
             _service = productImageService;
         }
 
-        [HttpGet("getallimages")]
+        [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var response = await _service.GetAllImg();
@@ -24,7 +24,7 @@ namespace FoodieHub.API.Controllers
         }
 
         // Thêm hình ảnh sản phẩm
-        [HttpPost("addimage")]
+        [HttpPost]
         public async Task<IActionResult> AddImage([FromForm] ProductImageDTO img)
         {
             var response = await _service.AddImage(img);
@@ -44,7 +44,7 @@ namespace FoodieHub.API.Controllers
         }
 
         // Xóa hình ảnh sản phẩm
-        [HttpDelete("deleteimage/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteImage(int id)
         {
             var response = await _service.DeleteImage(id);

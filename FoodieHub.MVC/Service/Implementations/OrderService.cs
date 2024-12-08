@@ -1,4 +1,6 @@
-﻿using FoodieHub.API.Models.QueryModel;
+﻿using FoodieHub.API.Data.Entities;
+using FoodieHub.API.Models.DTOs.Order;
+using FoodieHub.API.Models.QueryModel;
 using FoodieHub.API.Models.Response;
 using FoodieHub.MVC.Helpers;
 using FoodieHub.MVC.Models.Order;
@@ -17,9 +19,15 @@ namespace FoodieHub.MVC.Service.Implementations
             _httpClient = httpClientFactory.CreateClient("MyAPI");
         }
 
+        public async Task<APIResponse?> ChangeStatus(int orderID,string status,string cancellationReason)
+        {
+            var response = await _httpClient.PatchAsync($"Orders/ChangeStatusUser/{orderID}?status={status}&cancellationReason={cancellationReason}", null);
+            return await response.Content.ReadFromJsonAsync<APIResponse>();
+        }
+
         public async Task<GetDetailOrder?> GetByID(int id)
         {
-            var response = await _httpClient.GetAsync($"Orders/{id}");
+            var response = await _httpClient.GetAsync($"orders/{id}");
             return await response.Content.ReadFromJsonAsync<GetDetailOrder>();
         }
         public async Task<PaginatedModel<GetOrder>?> GetForAdmin(QueryOrderModel queryOrder)

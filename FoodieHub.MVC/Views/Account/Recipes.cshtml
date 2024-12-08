@@ -1,4 +1,4 @@
-﻿@using System.Text.Json
+﻿@using FoodieHub.API.Models.DTOs.Recipe
 @inject IConfiguration config;
 
 @{
@@ -6,7 +6,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = config["BaseHost"];
 }
-
+@{
+    var recipes = ViewBag.Recipes as IEnumerable<GetRecipeDTO> ?? new List<GetRecipeDTO>();
+    var publishRecipes = recipes.Where(x => x.IsActive);
+    var draftRecipes = recipes.Where(x => !x.IsActive);
+}
 
 <link rel="stylesheet" href="~/css/profile.css">
 <div class="container py-5">
@@ -32,69 +36,74 @@
                 <!-- Public Recipes Tab -->
                 <div class="tab-pane fade show active" id="public-recipes" role="tabpanel" aria-labelledby="public-recipes-tab">
                     <div class="row g-4">
-                        <div class="col-12 col-md-4">
-                            <div class="card recipe-card shadow-sm">
-                                <img src="recipe-image.jpg" class="card-img-top" alt="Recipe Image">
-                                <div class="card-body">
-                                    <h5 class="card-title">Recipe Title</h5>
-                                    <p class="card-text">A brief description of the recipe...</p>
-                                    <div class="recipe-stats">
-                                        <span>Created on: 01/12/2024</span>
-                                        <span>Likes: 120</span>
-                                    </div>
-                                    <div class="recipe-stats">
-                                        <span>Rating: 4.5/5</span>
-                                        <span>Reviews: 50</span>
-                                    </div>
-                                    <!-- Menu Options -->
-                                    <div class="dropdown position-absolute top-0 end-0 p-2">
-                                        <button class="btn btn-link text-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fa-solid fa-ellipsis-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">Edit</a></li>
-                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
-                                        </ul>
+                        @foreach (var item in publishRecipes)
+                        {
+                            <div class="col-12 col-md-4">
+                                <div class="card recipe-card shadow-sm">
+                                    <img src=@(url+"images/"+item.ImageURL) class="card-img-top" alt="Recipe Image">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@item.Title</h5>
+                                        <p class="card-text">@item.Description</p>
+                                        <div class="recipe-stats">
+                                            <span>Created on: @item.CreatedAt</span>
+                                            <span>Likes: @item.TotalFavorites</span>
+                                        </div>
+                                        <div class="recipe-stats">
+                                            <span>Rating: @item.RatingAverage/5</span>
+                                            <span>Comments: @item.TotalComments</span>
+                                        </div>
+                                        <!-- Menu Options -->
+                                        <div class="dropdown position-absolute top-0 end-0 p-2">
+                                            <button class="btn btn-link text-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">Edit</a></li>
+                                                <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Thêm các công thức khác ở đây (3 công thức mỗi hàng) -->
+                        }
+                       
                     </div>
                 </div>
 
                 <!-- Draft Recipes Tab -->
                 <div class="tab-pane fade" id="draft-recipes" role="tabpanel" aria-labelledby="draft-recipes-tab">
                     <div class="row g-4">
-                        <div class="col-12 col-md-4">
-                            <div class="card recipe-card shadow-sm">
-                                <img src="recipe-image.jpg" class="card-img-top" alt="Recipe Image">
-                                <div class="card-body">
-                                    <h5 class="card-title">Recipe Title</h5>
-                                    <p class="card-text">A brief description of the recipe...</p>
-                                    <div class="recipe-stats">
-                                        <span>Created on: 01/12/2024</span>
-                                        <span>Likes: 120</span>
-                                    </div>
-                                    <div class="recipe-stats">
-                                        <span>Rating: 4.5/5</span>
-                                        <span>Reviews: 50</span>
-                                    </div>
-                                    <!-- Menu Options -->
-                                    <div class="dropdown position-absolute top-0 end-0 p-2">
-                                        <button class="btn btn-link text-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fa-solid fa-ellipsis-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">Edit</a></li>
-                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
-                                        </ul>
+                        @foreach (var item in draftRecipes)
+                        {
+                            <div class="col-12 col-md-4">
+                                <div class="card recipe-card shadow-sm">
+                                    <img src=@(url+"images/"+item.ImageURL) class="card-img-top" alt="Recipe Image">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@item.Title</h5>
+                                        <p class="card-text">@item.Description</p>
+                                        <div class="recipe-stats">
+                                            <span>Created on: @item.CreatedAt</span>
+                                            <span>Likes: @item.TotalFavorites</span>
+                                        </div>
+                                        <div class="recipe-stats">
+                                            <span>Rating: @item.RatingAverage/5</span>
+                                            <span>Comments: @item.TotalComments</span>
+                                        </div>
+                                        <!-- Menu Options -->
+                                        <div class="dropdown position-absolute top-0 end-0 p-2">
+                                            <button class="btn btn-link text-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">Edit</a></li>
+                                                <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
+                        }
+                   
                         <!-- Thêm các công thức nháp khác ở đây (3 công thức mỗi hàng) -->
                     </div>
                 </div>

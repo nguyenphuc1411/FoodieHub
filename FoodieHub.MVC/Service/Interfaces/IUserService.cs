@@ -13,5 +13,7 @@ namespace FoodieHub.MVC.Service.Interfaces
         Task<PaginatedModel<UserDTO>?> Get(QueryUserModel query);
 
         Task<APIResponse> Create(CreateUserDTO createUserDTO);
+
+        Task<UserDTO?> GetByID(string id);
     }
 }

@@ -1,6 +1,5 @@
-﻿using FoodieHub.MVC.Libraries;
-using FoodieHub.MVC.Models;
-using FoodieHub.MVC.Models.Order;
+﻿using FoodieHub.API.Models.DTOs.Order;
+using FoodieHub.MVC.Libraries;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Models.VnPay;
 using FoodieHub.MVC.Service.Interfaces;

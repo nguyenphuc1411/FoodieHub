@@ -1,7 +1,7 @@
-﻿using FoodieHub.MVC.Configurations;
+﻿using FoodieHub.API.Models.DTOs.Order;
+using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Models;
 using FoodieHub.MVC.Models.Cart;
-using FoodieHub.MVC.Models.Order;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -81,7 +81,7 @@ namespace FoodieHub.MVC.Controllers
                     var productResponse = await response.Content.ReadFromJsonAsync<APIResponse<GetProductDTO>>();
                     if (productResponse != null && productResponse.Success)
                     {
-                        orderDto.OrderDetails.Add(new Models.Order.OrderDetailDto
+                        orderDto.OrderDetails.Add(new OrderDetailDtO
                         {
                             ProductID = productResponse.Data.ProductID,
                             Quantity = item.Quantity// Ensure to retrieve the price of the product
@@ -266,7 +266,7 @@ namespace FoodieHub.MVC.Controllers
             return Redirect(refererUrl ?? Url.Action("Checkout"));
         }
         [ValidateTokenForUser]
-        public async Task<IActionResult> RemoveFromCart(int id)
+        public IActionResult RemoveFromCart(int id)
         {
             // Lấy danh sách giỏ hàng hiện tại từ cookie
             var cartItemsJson = Request.Cookies["cart"] ?? "[]";
@@ -296,7 +296,7 @@ namespace FoodieHub.MVC.Controllers
             return RedirectToAction("Checkout"); // Hoặc chuyển hướng đến trang giỏ hàng
         }
         [ValidateTokenForUser]
-        public async Task<IActionResult> RemoveFromCartLayout(int id)
+        public IActionResult RemoveFromCartLayout(int id)
         {
             // Lấy danh sách giỏ hàng hiện tại từ cookie
             var cartItemsJson = Request.Cookies["cart"] ?? "[]";

@@ -20,7 +20,7 @@ namespace FoodieHub.MVC.Service.Implementations
         public async Task<IEnumerable<CategoryDTO>> GetAll()
         {
 
-            var response = await _httpClient.GetAsync("Categories/getallcategories");
+            var response = await _httpClient.GetAsync("Categories");
 
             if (response.IsSuccessStatusCode)
             {
@@ -39,7 +39,7 @@ namespace FoodieHub.MVC.Service.Implementations
         {
 
 
-            var httpResponse = await _httpClient.PostAsJsonAsync("Categories/addcategory", categoryDTO);
+            var httpResponse = await _httpClient.PostAsJsonAsync("Categories", categoryDTO);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -61,7 +61,7 @@ namespace FoodieHub.MVC.Service.Implementations
         {
 
 
-            var httpResponse = await _httpClient.DeleteAsync($"Categories/deletecategory/{id}");
+            var httpResponse = await _httpClient.DeleteAsync($"Categories/{id}");
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -83,7 +83,7 @@ namespace FoodieHub.MVC.Service.Implementations
         {
 
 
-            var httpResponse = await _httpClient.PutAsJsonAsync("Categories/updatecategory", categoryDTO);
+            var httpResponse = await _httpClient.PutAsJsonAsync("Categories", categoryDTO);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -104,7 +104,7 @@ namespace FoodieHub.MVC.Service.Implementations
         public async Task<CategoryDTO> GetProductCategoryById(int id)
         {
 
-            var httpResponse = await _httpClient.GetAsync($"Categories/getcategorybyid/{id}");
+            var httpResponse = await _httpClient.GetAsync($"Categories/{id}");
 
             if (httpResponse.IsSuccessStatusCode)
             {

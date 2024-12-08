@@ -35,7 +35,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
 
             // Gửi yêu cầu POST bất đồng bộ tới API và chờ phản hồi
-            var response = await _httpClient.PostAsync($"ProductImage/addimage", content);
+            var response = await _httpClient.PostAsync($"ProductImage", content);
 
             // Kiểm tra phản hồi từ API
             if (response.IsSuccessStatusCode)
@@ -75,7 +75,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<APIResponse> DeleteImage(int id)
         {
-            var response = await _httpClient.DeleteAsync($"ProductImage/deleteimage/{id}");
+            var response = await _httpClient.DeleteAsync($"ProductImage/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -91,7 +91,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<List<GetProductImages>> GetAllImg()
         {
-            var response = await _httpClient.GetAsync("ProductImage/getallimages");
+            var response = await _httpClient.GetAsync("ProductImage");
 
             if (response.IsSuccessStatusCode)
             {

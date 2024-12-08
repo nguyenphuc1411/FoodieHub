@@ -14,6 +14,11 @@ namespace FoodieHub.API.Models.DTOs.Order
         public string PhoneNumber { get; set; } = default!;
         public string? Note { get; set; }
         public bool PaymentMethod { get; set; }
-        public List<OrderDetailDto> OrderDetails { get; set; } = new List<OrderDetailDto>();
+        public List<OrderDetailDtO> OrderDetails { get; set; } = new List<OrderDetailDtO>();
+    }
+    public class OrderDetailDtO
+    {
+        public int ProductID { get; set; }
+        public int Quantity { get; set; }
     }
 }

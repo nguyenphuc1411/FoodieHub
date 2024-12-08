@@ -11,6 +11,6 @@ namespace FoodieHub.API.Repositories.Interfaces
         Task<ServiceResponse> Create(CreateUserDTO createUser);
         Task<bool> Disable(string id);
         Task<bool> Restore(string id);
-        Task<ServiceResponse> GetByID(string id);
+        Task<UserDTO?> GetByID(string id);
     }
 }

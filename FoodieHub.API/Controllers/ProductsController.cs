@@ -21,7 +21,7 @@ namespace FoodieHub.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("getallproducts")]
+        [HttpGet]
         public async Task<IActionResult> Get()
         {
             var result = await _service.GetProducts();
@@ -29,7 +29,7 @@ namespace FoodieHub.API.Controllers
 
         }
 
-        [HttpGet("getproductbyid/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetProductByID(id);
@@ -43,14 +43,14 @@ namespace FoodieHub.API.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpPost("addproduct")]
+        [HttpPost]
         public async Task<IActionResult> Post([FromForm] ProductDTO product)
         {
             var result = await _service.AddProduct(product);
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpPut("updateproduct")]
+        [HttpPut]
         public async Task<IActionResult> Put([FromForm] ProductDTO product)
         {
             var result = await _service.UpdateProduct(product);
@@ -86,14 +86,11 @@ namespace FoodieHub.API.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpDelete("deleteproduct/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteProduct(id);
             return StatusCode(result.StatusCode, result);
         }
-
-
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using FoodieHub.MVC.Models.Contact;
+﻿using FoodieHub.MVC.Helpers;
+using FoodieHub.MVC.Models.Contact;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -18,15 +19,15 @@ namespace FoodieHub.MVC.Controllers
         {
             var httpResponse = await _httpClient.PostAsJsonAsync("Contact/AddContact", contact);
             var apiResponse = await httpResponse.Content.ReadFromJsonAsync<APIResponse>();
-            if (apiResponse.Success)
+            if (apiResponse!=null && apiResponse.Success)
             {
-                TempData["SuccessMessage"] = apiResponse.Message;
+                NotificationHelper.SetSuccessNotification(this,apiResponse.Message);
                 var refererUrl = Request.Headers["Referer"].ToString();
                 return Redirect(refererUrl ?? Url.Action("Index", "Products"));
             }
             else
             {
-                TempData["ErrorMessage"] = apiResponse.Message;
+                NotificationHelper.SetErrorNotification(this, apiResponse?.Message);
                 return View(contact);
             }
         }

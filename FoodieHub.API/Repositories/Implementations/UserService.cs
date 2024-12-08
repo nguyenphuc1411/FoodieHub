@@ -173,21 +173,10 @@ namespace FoodieHub.API.Repositories.Implementations
             return result.Paginate(query.PageSize,query.Page);
         }
 
-        public async Task<ServiceResponse> GetByID(string id)
+        public async Task<UserDTO?> GetByID(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return new ServiceResponse
-            {
-                Success = false,
-                Message = "Not found user",
-                StatusCode = 404
-            };
-            return new ServiceResponse
-            {
-                Success = true,
-                Data = _mapper.Map<UserDTO>(user),
-                StatusCode = 200
-            };
+            return _mapper.Map<UserDTO>(user);
         }
     }
 }

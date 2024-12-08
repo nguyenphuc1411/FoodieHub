@@ -1,7 +1,9 @@
-﻿using FoodieHub.API.Models.DTOs.Authentication;
+﻿using Azure;
+using FoodieHub.API.Models.DTOs.Authentication;
 using FoodieHub.API.Models.DTOs.User;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
+using System.Net.Http.Headers;
 
 namespace FoodieHub.MVC.Service.Implementations
 {
@@ -55,6 +57,32 @@ namespace FoodieHub.MVC.Service.Implementations
                 return await response.Content.ReadAsStringAsync();
             }
             return null;
+        }
+
+        public async Task<APIResponse?> UpdateProfile(UpdateProfileDTO user)
+        {
+            using (var content = new MultipartFormDataContent())
+            {
+                content.Add(new StringContent(user.Fullname), "Fullname");
+
+                if (!string.IsNullOrEmpty(user.Bio))
+                {
+                    content.Add(new StringContent(user.Bio), "Bio");
+                }
+                if (!string.IsNullOrEmpty(user.OldPassword) && !string.IsNullOrEmpty(user.NewPassword))
+                {
+                    content.Add(new StringContent(user.OldPassword), "OldPassword");
+                    content.Add(new StringContent(user.NewPassword), "NewPassword");
+                }
+                if (user.File != null && user.File.Length > 0)
+                {
+                    var fileContent = new StreamContent(user.File.OpenReadStream());
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(user.File.ContentType);
+                    content.Add(fileContent, "File", user.File.FileName);
+                }
+                var httpResponse = await httpClient.PutAsync("auth", content);
+                return await httpResponse.Content.ReadFromJsonAsync<APIResponse>();               
+            }
         }
     }
 }

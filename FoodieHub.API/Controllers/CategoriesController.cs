@@ -17,21 +17,21 @@ namespace FoodieHub.API.Controllers
             _service = service;
         }
 
-        [HttpGet("getallcategories")]
+        [HttpGet]
         public async Task<IActionResult> Get()
         {
             var result = await _service.GetAllCategories();
             return Ok(result);
         }
 
-        [HttpGet("getcategorybyid/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetByID(int id)
         {
             var obj = await _service.GetCategoryById(id);
             return Ok(obj);
         }
 
-        [HttpPost("addcategory")]
+        [HttpPost]
 
         public async Task<IActionResult> Post(CategoryDTO category)
         {
@@ -39,14 +39,14 @@ namespace FoodieHub.API.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpPut("updatecategory")]
+        [HttpPut]
         public async Task<IActionResult> Put(CategoryDTO category)
         {
             var result = await _service.UpdateCategory(category);
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpDelete("deletecategory/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteCategory(id);

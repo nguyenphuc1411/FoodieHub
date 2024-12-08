@@ -45,10 +45,11 @@ namespace FoodieHub.API.Controllers
             return result ? Ok() : BadRequest();
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetByID([FromRoute] string id)
+        public async Task<ActionResult<UserDTO>> GetByID([FromRoute] string id)
         {
             var result = await _service.GetByID(id);
-            return StatusCode(result.StatusCode, result);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
     }
 }

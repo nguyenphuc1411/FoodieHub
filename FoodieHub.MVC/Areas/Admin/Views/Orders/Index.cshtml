@@ -1,5 +1,6 @@
-﻿@inject IConfiguration config;
-@model IEnumerable<FoodieHub.MVC.Models.Order.GetOrder>
+﻿@using FoodieHub.API.Models.DTOs.Order
+@inject IConfiguration config;
+@model IEnumerable<GetOrder>
 
 @{
     ViewData["Title"] = "Index";
