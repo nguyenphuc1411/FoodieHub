@@ -1,7 +1,7 @@
-﻿using FoodieHub.MVC.Configurations;
-using FoodieHub.MVC.Models.Article;
+﻿using FoodieHub.API.Models.DTOs.Recipe;
+using FoodieHub.API.Models.Response;
+using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Models.Category;
-using FoodieHub.MVC.Models.Recipe;
 using FoodieHub.MVC.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -46,7 +46,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             var urlWithQuery = QueryHelpers.AddQueryString(baseUrl, queryParams);
 
             var httpResponse = await _httpClient.GetAsync(urlWithQuery);
-            var data = await httpResponse.Content.ReadFromJsonAsync<APIResponse<PaginatedResult<JsonElement>>>();
+            var data = await httpResponse.Content.ReadFromJsonAsync<APIResponse<PaginatedModel<JsonElement>>>();
 
             if (data != null)
             {
@@ -139,21 +139,16 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
 
             if (data != null && data.Success)
             {
-                var preptime = TimeOnly.Parse(data.Data.GetProperty("prepTime").GetString());
-                var cooktime = TimeOnly.Parse(data.Data.GetProperty("cookTime").GetString());
-                var recipe = new EditRecipe
+               /* var recipe = new RecipeDTO
                 {
                     RecipeID = data.Data.GetProperty("recipeID").GetInt32(),
                     Title = data.Data.GetProperty("title").GetString(),
-                    PrepHours = preptime.Hour,
-                    PrepMinutes = preptime.Minute,
-                    CookHours = cooktime.Hour,
-                    CookMinutes = cooktime.Minute,
+                    CookTime = 
                     Serves = data.Data.GetProperty("serves").GetInt32(),
                     Ingredients = data.Data.GetProperty("ingredients").ToString(),
                     Directions = data.Data.GetProperty("directions").ToString(),
                     CategoryID = data.Data.GetProperty("categoryID").GetInt32()
-                };
+                };*/
                 HttpContext.Session.SetString("ImageEditRecipe", data.Data.GetProperty("imageURL").ToString());
                 ViewBag.CurrentImage = data.Data.GetProperty("imageURL").ToString();
                 var response = await _httpClient.GetFromJsonAsync<List<GetCategoryDTO>>("RecipeCategory/getallrecipecategory");
@@ -161,7 +156,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 {
                     ViewBag.Category = response.Where(x => x.IsDeleted == false).ToList();
                 }
-                return View(recipe);
+                return View();
             }
             else if (data != null)
             {
@@ -173,11 +168,11 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
         [HttpPost]
-        public async Task<IActionResult> Edit(EditRecipe edit)
+        public async Task<IActionResult> Edit(CreateRecipeDTO edit)
         {
             if (ModelState.IsValid)
             {
-                using (var content = new MultipartFormDataContent())
+                /*using (var content = new MultipartFormDataContent())
                 {
                     TimeOnly preptime = new TimeOnly(edit.PrepHours, edit.PrepMinutes);
                     TimeOnly cooktime = new TimeOnly(edit.CookHours, edit.CookMinutes);
@@ -216,7 +211,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                     {
                         TempData["ErrorMessage"] = "Server Error. Please try again.";
                     }
-                }
+                }*/
             }
             var response = await _httpClient.GetFromJsonAsync<List<GetCategoryDTO>>("RecipeCategory/getallrecipecategory");
             if (response != null)
@@ -304,7 +299,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             var urlWithQuery = QueryHelpers.AddQueryString(baseUrl, queryParams);
 
             var httpResponse = await _httpClient.GetAsync(urlWithQuery);
-            var data = await httpResponse.Content.ReadFromJsonAsync<APIResponse<PaginatedResult<JsonElement>>>();
+            var data = await httpResponse.Content.ReadFromJsonAsync<APIResponse<PaginatedModel<JsonElement>>>();
 
             if (data != null)
             {

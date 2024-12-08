@@ -1,9 +1,6 @@
 ﻿using FoodieHub.MVC.Models.DTOs;
-using FoodieHub.MVC.Models;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace FoodieHub.MVC.Service.Implementations

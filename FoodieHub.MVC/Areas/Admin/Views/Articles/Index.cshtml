@@ -1,4 +1,4 @@
-﻿@using FoodieHub.MVC.Models.Response
+﻿@using FoodieHub.API.Models.Response
 @using System.Text.Json
 @inject IConfiguration config
 @{
@@ -6,7 +6,7 @@
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var url = config["BaseHost"];
 }
-@model PaginatedResult<JsonElement>
+@model PaginatedModel<JsonElement>
 
 <div class="container py-4">
     <!-- Header Section with Create Button, Filter, Search, and Total Count -->
@@ -103,21 +103,21 @@
         <nav aria-label="Page navigation example">
             <ul class="pagination pagination-sm mb-0">
                 <!-- Nút Previous (ẩn nếu đang ở trang đầu tiên) -->
-                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.CurrentPage - 1)">Previous</a>
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page - 1)">Previous</a>
                 </li>
 
                 <!-- Tạo danh sách các trang -->
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
-                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
                         <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@i">@i</a>
                     </li>
                 }
 
                 <!-- Nút Next (ẩn nếu đang ở trang cuối) -->
-                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.CurrentPage + 1)">Next</a>
+                <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page + 1)">Next</a>
                 </li>
             </ul>
         </nav>

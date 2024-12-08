@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using FoodieHub.API.Models.DTOs.Product;
-using FoodieHub.API.Services.Interfaces;
+using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

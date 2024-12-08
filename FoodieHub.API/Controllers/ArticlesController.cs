@@ -1,6 +1,8 @@
 ﻿using FoodieHub.API.Data.Entities;
 using FoodieHub.API.Models.DTOs.Article;
-using FoodieHub.API.Services.Interfaces;
+using FoodieHub.API.Models.QueryModel;
+using FoodieHub.API.Models.Response;
+using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,53 +20,46 @@ namespace FoodieHub.API.Controllers
             _service = service;
         }
         [Authorize(Policy = "RequireAdmin")]
-        [HttpGet("foradmin")]
-        public async Task<IActionResult> GetForAdmin(string? search, int? categoryID, bool? isDeleted, int pageSize, int currentPage)
+        [HttpGet]
+        public async Task<ActionResult<PaginatedModel<GetArticleDTO>>> Get([FromQuery] QueryModel query, [FromQuery] int? categoryID)
         {
-            var result = await _service.GetForAdmin(search, categoryID, isDeleted, pageSize, currentPage);
-            return StatusCode(result.StatusCode, result);
+            var result = await _service.Get(query,categoryID);
+            return Ok(result);
         }
-        [Authorize(Policy = "RequireAdmin")]
-        [HttpGet("foradmin/{articleID}")]
-        public async Task<IActionResult> GetDetailForAdmin(int articleID)
+        [HttpGet("users/{userID}")]
+        public async Task<ActionResult<PaginatedModel<GetArticleDTO>>> GetOfUser([FromRoute]string userID, [FromQuery] QueryModel query)
         {
-            var result = await _service.GetDetailForAdmin(articleID);
-            return StatusCode(result.StatusCode, result);
+            var result = await _service.GetOfUser(query,userID);
+            return Ok(result);
+        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<GetArticleDTO>> GetByID([FromRoute]int id)
+        {
+            var result = await _service.GetByID(id);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
         [Authorize(Policy = "RequireAdmin")]
         [HttpPost]
-        public async Task<IActionResult> Create(CreateArticle articleDTO)
+        public async Task<IActionResult> Create(CreateArticleDTO articleDTO)
         {
             var result = await _service.Create(articleDTO);
-            return StatusCode(result.StatusCode, result);
+            return result? Ok():BadRequest();
         }
         [Authorize(Policy = "RequireAdmin")]
-        [HttpPut("{articleID}")]
-        public async Task<IActionResult> Update(int articleID,UpdateArticle articleDTO)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id,UpdateArticleDTO articleDTO)
         {
-            var result = await _service.Update(articleID, articleDTO);
-            return StatusCode(result.StatusCode, result);
+            if(id!=articleDTO.ArticleID) return BadRequest();
+            var result = await _service.Update(articleDTO);
+            return result ? NoContent() : BadRequest();
         }
         [Authorize(Policy = "RequireAdmin")]
-        [HttpDelete("soft/{articleID}")]
-        public async Task<IActionResult> SoftDelete(int articleID)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute]int id)
         {
-            var result = await _service.SoftDelete(articleID);
-            return StatusCode(result.StatusCode, result);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetDetail(int id)
-        {
-            var result = await _service.GetDetail(id);
-            return StatusCode(result.StatusCode, result);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Get(string? search, int? pageSize, int? currentPage)
-        {
-            var result = await _service.Get(search,pageSize,currentPage);
-            return StatusCode(result.StatusCode, result);
-        }
+            var result = await _service.Delete(id);
+            return result? NoContent():BadRequest();
+        }      
     }
 }

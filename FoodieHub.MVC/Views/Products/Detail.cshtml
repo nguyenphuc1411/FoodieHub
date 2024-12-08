@@ -7,7 +7,7 @@
 @inject IReviewService _reviewService;
 @inject IProductService _productService;
 @inject IOrderService _orderService;
-@inject IGetCurrentUserID _currentUserIdService;
+@inject IAuthService _authService;
 @inject IHttpContextAccessor HttpContextAccessor
 
 @{
@@ -27,7 +27,7 @@
     var productID = Model.Data.ProductID;
 
     bool hasOrder = false;
-    var currentUserId = _currentUserIdService.GetCurrentUserId();
+    var currentUserId = _authService.GetProfile();
 
     var listProduct = await _productService.GetAll();
 

@@ -1,5 +1,8 @@
 ﻿using FoodieHub.API.Data.Entities;
-using FoodieHub.API.Services.Interfaces;
+using FoodieHub.API.Models.DTOs.Article;
+using FoodieHub.API.Models.DTOs.Favorite;
+using FoodieHub.API.Models.DTOs.Recipe;
+using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,14 +14,12 @@ namespace FoodieHub.API.Controllers
     public class FavoritesController : ControllerBase
     {
         private readonly IFavoriteService _service;
-
         public FavoritesController(IFavoriteService service)
         {
             _service = service;
         }
-        [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Favorite>> Create([FromBody]Favorite favorite)
+        public async Task<ActionResult<Favorite>> Create([FromBody] CreateFavoriteDTO favorite)
         {
             var result = await _service.Create(favorite);
             if (result == null) return BadRequest();
@@ -31,12 +32,19 @@ namespace FoodieHub.API.Controllers
             bool result = await _service.Delete(id);
             return result? NoContent():BadRequest();
         }
-
-       /* [HttpGet("ArticleRanking")]
-        public async Task<IActionResult> GetArticleRanking()
+        [Authorize]
+        [HttpGet("recipes")]
+        public async Task<ActionResult<IEnumerable<GetRecipeDTO>>> GetFR()
         {
-            var result = await _service.GetArticleRanking();
-            return StatusCode(result.StatusCode, result);
-        }*/
+            var result = await _service.GetFavoriteRecipe();
+            return Ok(result);
+        }
+        [Authorize]
+        [HttpGet("articles")]
+        public async Task<ActionResult<IEnumerable<GetArticleDTO>>> GetFA()
+        {
+            var result = await _service.GetFavoriteArticle();
+            return Ok(result);
+        }
     }
 }

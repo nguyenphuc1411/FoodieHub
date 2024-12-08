@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Models.Order;
-using System.Text;
-using System.Net.Http;
-using System.Net.Http.Json;
 using FoodieHub.MVC.Configurations;
+using FoodieHub.API.Models.Response;
 
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
@@ -39,7 +37,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadFromJsonAsync<APIResponse<FoodieHub.MVC.Models.Order.PaginatedResult<GetOrder>>>();
+                var content = await response.Content.ReadFromJsonAsync<APIResponse<PaginatedModel<GetOrder>>>();
                 var orderList = content?.Data.Items;
 
                 int totalOrders = content?.Data.TotalItems ?? 0;

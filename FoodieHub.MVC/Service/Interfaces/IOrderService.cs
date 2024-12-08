@@ -1,6 +1,7 @@
-﻿using FoodieHub.MVC.Models.Order;
+﻿using FoodieHub.API.Models.QueryModel;
+using FoodieHub.API.Models.Response;
+using FoodieHub.MVC.Models.Order;
 using FoodieHub.MVC.Models.Response;
-using FoodieHub.MVC.Models.User;
 
 namespace FoodieHub.MVC.Service.Interfaces
 {
@@ -8,7 +9,9 @@ namespace FoodieHub.MVC.Service.Interfaces
     {
         Task<APIResponse<List<GetOrderDetailsByProductIdDTO>>> GetOrderDetailsWithProductID();
         Task<APIResponse<List<GetOrderByUserIdDTO>>> GetOrderWithUserId();
+        Task<PaginatedModel<GetOrder>?> GetForAdmin(QueryOrderModel queryOrder);
+        Task<PaginatedModel<GetOrder>?> GetForUser(QueryOrderModel queryOrder);
 
-        
+        Task<GetDetailOrder?> GetByID(int id);
     }
 }

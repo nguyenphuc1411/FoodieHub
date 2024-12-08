@@ -1,7 +1,7 @@
-﻿using System.Net.Http.Json;
-using FoodieHub.MVC.Models.Response;
+﻿using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Models.Article;
 using FoodieHub.MVC.Service.Interfaces;
+using FoodieHub.API.Models.DTOs.Article;
 
 namespace FoodieHub.MVC.Service.Implementations
 {
@@ -32,18 +32,18 @@ namespace FoodieHub.MVC.Service.Implementations
             return new List<GetArticle>();
         }
 
-        public async Task<APIResponse<GetArticleDetail>> GetDetail(int id)
+        public async Task<APIResponse<GetArticleDTO>> GetDetail(int id)
         {
             var response = await _httpClient.GetAsync($"Articles/{id}");
 
             if (response.IsSuccessStatusCode)
             {
                 // Sử dụng APIResponse<GetArticleDetail> cho phản hồi chi tiết bài viết
-                var content = await response.Content.ReadFromJsonAsync<APIResponse<GetArticleDetail>>();
+                var content = await response.Content.ReadFromJsonAsync<APIResponse<GetArticleDTO>>();
 
                 if (content != null)
                 {
-                    return new APIResponse<GetArticleDetail>
+                    return new APIResponse<GetArticleDTO>
                     {
                         Success = content.Success,
                         Message = content.Message,
@@ -53,7 +53,7 @@ namespace FoodieHub.MVC.Service.Implementations
                 }
             }
 
-            return new APIResponse<GetArticleDetail>
+            return new APIResponse<GetArticleDTO>
             {
                 Success = false,
                 Message = "Failed to retrieve article by ID.",

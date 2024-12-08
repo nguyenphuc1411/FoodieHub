@@ -1,5 +1,5 @@
 ﻿using FoodieHub.API.Models.DTOs.UploadImage;
-using FoodieHub.API.Services.Interfaces;
+using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,12 +16,6 @@ namespace FoodieHub.API.Controllers
             this.service = service;
         }
 
-        [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok("This is a GET request");
-        }
-
         [HttpPost]
         public async Task<ActionResult> Create([FromForm] UploadImageDTO dto)
         {
@@ -29,5 +23,20 @@ namespace FoodieHub.API.Controllers
 
             return result ? Ok(): BadRequest();
         }
+
+        [HttpDelete("{path}")]
+        public async Task<ActionResult> Delete([FromRoute] string path)
+        {
+            try
+            {
+                await service.DeleteImage(path);
+                return Ok();
+            }
+            catch
+            {
+                return BadRequest();
+            }       
+        }
+
     }
 }

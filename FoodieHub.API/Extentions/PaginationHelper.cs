@@ -4,15 +4,15 @@ namespace FoodieHub.API.Extentions
 {
     public static class PaginationHelper
     {
-        public static PaginatedResult<T> Paginate<T>(this IEnumerable<T> items, int pageSize, int currentPage)
+        public static PaginatedModel<T> Paginate<T>(this IEnumerable<T> items, int pageSize, int currentPage)
         {
             if (items == null || !items.Any())
             {
-                return new PaginatedResult<T>
+                return new PaginatedModel<T>
                 {
                     TotalItems = 0,
                     TotalPages = 1, 
-                    CurrentPage = 1,
+                    Page = 1,
                     PageSize = pageSize,
                     Items = new List<T>() 
                 };
@@ -22,11 +22,11 @@ namespace FoodieHub.API.Extentions
 
             var pagedItems = items.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
 
-            return new PaginatedResult<T>
+            return new PaginatedModel<T>
             {
                 TotalItems = totalItems,
                 TotalPages = totalPages,
-                CurrentPage = currentPage,
+                Page = currentPage,
                 PageSize = pageSize,
                 Items = pagedItems
             };

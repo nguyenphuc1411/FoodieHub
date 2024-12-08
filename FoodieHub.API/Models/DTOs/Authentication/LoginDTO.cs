@@ -6,8 +6,8 @@ namespace FoodieHub.API.Models.DTOs.Authentication
     {
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email")]
-        public string Email { get; set; }
+        public string Email { get; set; } = default!;
         [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d]).{6,}", ErrorMessage = "Password invalid")]
-        public string Password { get; set; }
+        public string Password { get; set; } = default!;
     }
 }

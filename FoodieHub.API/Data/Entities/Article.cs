@@ -18,12 +18,8 @@ namespace FoodieHub.API.Data.Entities
 
         [Column(TypeName = "nvarchar(MAX)")]
         public string Description { get; set; } = default!;
-
+        public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
-        public bool IsDeleted { get; set; } = false;
 
         // Foregin Key Property
 
@@ -38,7 +34,6 @@ namespace FoodieHub.API.Data.Entities
         public  ArticleCategory ArticleCategory { get; set; } = default!;
 
         // Foreign Key Collections
-
         public ICollection<Comment> ArticleComments { get; set; } = default!;
         public ICollection<Favorite> FavoriteArticles { get; set; } = default!;
     }

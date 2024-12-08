@@ -3,7 +3,7 @@
     public class UploadImageResult
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
-        public object FilePath { get; set; }
+        public string Message { get; set; } = default!;
+        public object FilePath { get; set; } = default!;
     }
 }

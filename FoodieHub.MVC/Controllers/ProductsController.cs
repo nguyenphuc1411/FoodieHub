@@ -1,7 +1,6 @@
-﻿using FoodieHub.MVC.Models.Product;
+﻿using FoodieHub.API.Extentions;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Globalization;
 using System.Text;
 
@@ -63,7 +62,7 @@ namespace FoodieHub.MVC.Controllers
             // Phân trang
             var paginatedResult = products.Paginate(pageSize, page);
 
-            ViewBag.CurrentPage = paginatedResult.CurrentPage;
+            ViewBag.CurrentPage = paginatedResult.Page;
             ViewBag.TotalPages = paginatedResult.TotalPages;
             ViewBag.PageSize = paginatedResult.PageSize;
 

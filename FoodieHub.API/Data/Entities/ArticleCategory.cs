@@ -11,8 +11,6 @@ namespace FoodieHub.API.Data.Entities
         [Column(TypeName = "nvarchar(50)")]
         public string CategoryName { get; set; } = default!;
 
-        public bool IsDeleted { get; set; } = false;
-
         // Foreign Key Collections
         public ICollection<Article> Articles { get; set; } = default!;
     }

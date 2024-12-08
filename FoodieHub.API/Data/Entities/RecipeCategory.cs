@@ -16,10 +16,6 @@ namespace FoodieHub.API.Data.Entities
         [Column(TypeName = "varchar(255)")]
         public string ImageURL { get; set; } = default!;
 
-        public bool IsActice { get; set; } = true;
-
-        public bool IsDeleted { get; set; } = false;
-
         // Foreign Key Collections
         public ICollection<Recipe> Recipes { get; set; } = default!;
     }

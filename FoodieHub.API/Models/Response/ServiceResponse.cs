@@ -3,8 +3,8 @@
     public class ServiceResponse
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
-        public object Data { get; set; }
+        public string Message { get; set; } = default!;
+        public object Data { get; set; } = default!;
         public int StatusCode { get; set; }
     }
 }

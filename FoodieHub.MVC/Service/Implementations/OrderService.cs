@@ -1,6 +1,8 @@
-﻿using FoodieHub.MVC.Models.Order;
+﻿using FoodieHub.API.Models.QueryModel;
+using FoodieHub.API.Models.Response;
+using FoodieHub.MVC.Helpers;
+using FoodieHub.MVC.Models.Order;
 using FoodieHub.MVC.Models.Response;
-using FoodieHub.MVC.Models.User;
 using FoodieHub.MVC.Service.Interfaces;
 using System.Net.Http;
 
@@ -14,6 +16,27 @@ namespace FoodieHub.MVC.Service.Implementations
         {
             _httpClient = httpClientFactory.CreateClient("MyAPI");
         }
+
+        public async Task<GetDetailOrder?> GetByID(int id)
+        {
+            var response = await _httpClient.GetAsync($"Orders/{id}");
+            return await response.Content.ReadFromJsonAsync<GetDetailOrder>();
+        }
+        public async Task<PaginatedModel<GetOrder>?> GetForAdmin(QueryOrderModel queryOrder)
+        {
+            var queryString = queryOrder.ToQueryString();
+            var response = await _httpClient.GetAsync($"Orders{queryString}");
+
+            return await response.Content.ReadFromJsonAsync<PaginatedModel<GetOrder>>();
+        }
+        public async Task<PaginatedModel<GetOrder>?> GetForUser(QueryOrderModel queryOrder)
+        {
+            var queryString = queryOrder.ToQueryString();
+            var response = await _httpClient.GetAsync($"Orders/ordered{queryString}");
+
+            return await response.Content.ReadFromJsonAsync<PaginatedModel<GetOrder>>();
+        }
+
         public async Task<APIResponse<List<GetOrderDetailsByProductIdDTO>>> GetOrderDetailsWithProductID()
         {
             var response = await _httpClient.GetAsync("Orders/OrderDetailsByProductId");
@@ -37,7 +60,6 @@ namespace FoodieHub.MVC.Service.Implementations
                     {
                         Success = false,
                         Message = "The returned data is empty.",
-                        Data = null
                     };
                 }
             }
@@ -46,8 +68,7 @@ namespace FoodieHub.MVC.Service.Implementations
                 return new APIResponse<List<GetOrderDetailsByProductIdDTO>>
                 {
                     Success = false,
-                    Message = $"Error when calling the API: {response.StatusCode}",
-                    Data = null
+                    Message = $"Error when calling the API: {response.StatusCode}"
                 };
             }
         }
@@ -75,8 +96,7 @@ namespace FoodieHub.MVC.Service.Implementations
                     return new APIResponse<List<GetOrderByUserIdDTO>>
                     {
                         Success = false,
-                        Message = "The returned data is empty.",
-                        Data = null
+                        Message = "The returned data is empty."
                     };
                 }
             }
@@ -85,8 +105,7 @@ namespace FoodieHub.MVC.Service.Implementations
                 return new APIResponse<List<GetOrderByUserIdDTO>>
                 {
                     Success = false,
-                    Message = $"Error when calling the API: {response.StatusCode}",
-                    Data = null
+                    Message = $"Error when calling the API: {response.StatusCode}"
                 };
             }
         }

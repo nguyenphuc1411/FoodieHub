@@ -1,120 +1,91 @@
-﻿
-@model FoodieHub.MVC.Models.Recipe.GetRecipeDetail
-@using FoodieHub.MVC.Models.Response
-@using System.Text.Json
-@inject IConfiguration config;
+﻿@using FoodieHub.API.Models.DTOs.Recipe
+@model DetailRecipeDTO
+@inject IConfiguration config
 @{
     var url = config["BaseHost"];
-    ViewData["Title"] = "Detail"; // Đặt tiêu đề trang là tên công thức
+    ViewData["Title"] = "Detail";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-
-
 
 <div class="container">
     <div class="row">
         <p class="mt-3">@Model.CategoryName</p>
+
         <!-- Left Column -->
         <div class="col-md-12 text-center mt-1">
             <p>QUICK AND EASY</p>
             <hr>
             <h2 class="mb-3">@Model.Title</h2>
-            <p><strong>By:</strong> @Model.Fullname | <strong>@Model.CreatedAt.ToString("MMMM dd, yyyy")</strong></p>
+            <p><strong>By:</strong> @Model.FullName | <strong>@Model.CreatedAt</strong></p>
             <div class="star-rating mb-3">
-               @*  <span id="ratingStars">
-                    ⭐⭐⭐⭐⭐
-                </span>
-                <span id="ratingValue" class="text-muted">5</span> <!-- Hiển thị số sao --> *@
                 <span class="text-muted"> | <a href="#reviews">View comments</a></span>
             </div>
-
-
-
         </div>
 
-        <!-- Left Column -->
+        <!-- Left Column (Image and Directions) -->
         <div class="col-md-6">
-            <img src="@(url + "/images/" + Model.ImageURL?.ToString())" alt="Recipe Image" class="img-fluid mb-3">
+            <img src="@(url + "/images/" + Model.ImageURL)" alt="Recipe Image" class="img-fluid mb-3">
             <h5>Directions</h5>
-            <p>@Html.Raw(Model.Directions) </p>
+            <p>@Html.Raw(Model.Description)</p>
         </div>
 
-        <!-- Right Column -->
-        
+        <!-- Right Column (Save and Ingredients) -->
         <div class="col-md-6">
             <div class="col-12 d-flex align-items-center mb-1">
                 <a asp-action="Favorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary me-2">Save</a>
-                 <a asp-action="UnFavorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary me-2">UnSave</a>
-               @*  <div class="star-rating d-flex align-items-center">
-                    <p class="mb-0 me-2">Rate this recipe</p>
-                    <span class="star" data-value="1">★</span>
-                    <span class="star" data-value="2">★</span>
-                    <span class="star" data-value="3">★</span>
-                    <span class="star" data-value="4">★</span>
-                    <span class="star" data-value="5">★</span>
-                </div>
-
-                <style>
-                    .star {
-                        font-size: 2rem;
-                        cursor: pointer;
-                        color: #ccc; /* Màu sao mặc định */
-                    }
-
-                        .star.selected {
-                            color: #f5c518; /* Màu sao khi được chọn */
-                        }
-                </style> *@
-
+                <a asp-action="UnFavorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary me-2">UnSave</a>
             </div>
             <div class="col-12 mb-3 d-flex text-center bg-light">
-                <p class="col-4 my-2"><strong>Prep Time:</strong> <br> @Model.PrepTime.ToString(@"HH\:mm")</p>
                 <p class="col-4 my-2"><strong>Cook Time:</strong> <br> @Model.CookTime.ToString(@"HH\:mm")</p>
                 <p class="col-4 my-2"><strong>Serves:</strong> <br>@Model.Serves</p>
             </div>
             <h5>Ingredients</h5>
             <hr>
-            <p>@Html.Raw(Model.Ingredients) </p>
+            <ul>
+                @foreach (var ingredient in Model.Ingredients)
+                {
+                    <li>@ingredient.Quantity @ingredient.Unit @ingredient.Name</li>
+                }
+            </ul>
             <hr>
             <a href="/recipes/create" class="create-recipe-btn">CREATE A RECIPE</a>
             <p class="mt-3">Enter one of our contests, or share that great thing you made for dinner last night.</p>
             <hr>
+
+            <!-- Recipe By Section -->
             <div class="recipe-by">
                 <div class="recipe-by-info">
                     <img src="@($"{url}/images/{Model.Avatar}")" alt="User Image">
-
-                    <p class="mb-0"><strong>Recipe By: <br></strong> @Model.Fullname</p>
+                    <p class="mb-0"><strong>Recipe By: <br></strong> @Model.FullName</p>
                 </div>
-                <a @* href=@("/account/userinfo/"+Model.u) *@ class="btn btn-outline-secondary">View Profile</a>
+                <a href=@("/account/userinfo/"+Model.UserID) class="btn btn-outline-secondary">View Profile</a>
             </div>
         </div>
     </div>
+
     <hr>
 
     <!-- Reviews Section -->
     <div class="mt-4" id="reviews">
         <h5>REVIEWS(@ViewBag.TotalComment)</h5>
 
-        <!-- Thông báo lỗi nếu có -->
+        <!-- Error Message -->
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
         }
 
-        <!-- Form tạo bình luận mới -->
+        <!-- Create Comment Form -->
         <form asp-action="CreateComment" method="post">
             <input type="hidden" name="recipeID" value="@Model.RecipeID" />
             <input type="hidden" name="order" value="@ViewBag.Order" />
 
-          
-            <!-- Nút submit và ô nhập nội dung bình luận -->
             <div class="col-6 d-flex">
                 <textarea name="commentContent" class="form-control mb-3" rows="3" placeholder="Enter a Review"></textarea>
                 <button type="submit" class="btn btn-dark ms-2" style="height:75px">Submit Review</button>
             </div>
 
-            <!-- Dropdown chọn thứ tự sắp xếp -->
+            <!-- Dropdown to order comments -->
             <div class="d-flex align-items-center mb-3">
                 <label for="order-by" class="me-2"><strong>Order By:</strong></label>
                 <select id="order-by" class="form-select" style="width: auto;" onchange="location.href='?order=' + this.value">
@@ -124,8 +95,7 @@
             </div>
         </form>
 
-
-        <!-- Hiển thị danh sách bình luận -->
+        <!-- Comments List -->
         <div id="commentsList">
             @if (ViewBag.Comments != null)
             {
@@ -133,26 +103,17 @@
                 {
                     <div class="review d-flex align-items-center">
                         <img src="@($"{url}/images/{comment.Avatar}")" alt="Avatar" class="img-fluid rounded-circle">
-
-
                         <div class="col-9">
-
                             <p><strong>@comment.FullNameComment</strong> - @comment.CommentAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
                             <p>@comment.CommentContent</p>
                         </div>
-
-                        <!-- Cột 3: Nút Xóa căn giữa theo chiều dọc -->
                         @if (comment.UserID == ViewBag.UserID)
                         {
                             <div class="col-2 d-flex justify-content-end">
-
                                 <a asp-action="DeleteComment" asp-route-id="@comment.CommentID" class="btn btn-danger d-flex align-items-center">Xóa</a>
-                            
                             </div>
                         }
                     </div>
-
-
                 }
             }
             else
@@ -162,7 +123,8 @@
         </div>
     </div>
 </div>
-<!-- Modal xác nhận xóa -->
+
+<!-- Modal Confirm Deletion -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -180,155 +142,9 @@
         </div>
     </div>
 </div>
-<script>
-    function confirmDelete(commentID) {
-        // Lưu ID của bình luận vào biến toàn cục
-        window.commentIDToDelete = commentID;
 
-        // Hiển thị modal xác nhận
-        var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-        modal.show();
-    }
-
-    // Xử lý khi người dùng nhấn "Có" để xóa bình luận
-    document.getElementById('confirmDeleteButton').addEventListener('click', function () {
-        // Submit form xóa bình luận
-        document.getElementById("deleteForm_" + window.commentIDToDelete).submit();
-
-        // Đóng modal sau khi đã xóa
-        var modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
-        modal.hide();
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const stars = document.querySelectorAll('.star');
-        const recipeId = @Model.RecipeID ?? 0;
-        const initialRatingValue = @Model.Rating ?? 0; // Set the initial rating value from the model
-        let selectedRating = initialRatingValue; // Keep track of the selected rating
-
-        console.log('RecipeID:', recipeId);
-        console.log('Initial Rating:', initialRatingValue);
-
-        // Initialize the star rating display based on the initial rating value
-        highlightStars(initialRatingValue);
-        updateRatingStars(initialRatingValue);
-
-        stars.forEach(star => {
-            star.addEventListener('click', function () {
-                const value = this.getAttribute('data-value');
-                selectedRating = value; // Save the selected rating
-                highlightStars(value); // Update star visual
-                submitRating(recipeId, value); // Submit the rating
-            });
-        });
-
-        function highlightStars(value) {
-            stars.forEach(star => {
-                if (star.getAttribute('data-value') <= value) {
-                    star.classList.add('selected');
-                } else {
-                    star.classList.remove('selected');
-                }
-            });
-        }
-
-        function updateRatingStars(ratingValue) {
-            const fullStars = '★'.repeat(ratingValue); // Full stars based on the rating
-            const emptyStars = '☆'.repeat(5 - ratingValue); // Empty stars based on the rating
-            document.getElementById("ratingStars").innerHTML = fullStars + emptyStars; // Update the stars display
-            document.getElementById("ratingValue").textContent = ratingValue; // Update the rating value text
-        }
-
-        async function submitRating(recipeId, ratingValue) {
-            try {
-                const token = getCookie("TokenUser"); // Get user token from cookies
-                const response = await fetch(`https://localhost:7087/api/Recipes/Rating`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ RecipeID: recipeId, RatingValue: ratingValue }),
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    updateRatingStars(ratingValue); // Update stars and value
-                    alert(result.message); // Show success message
-                } else {
-                    alert(result.message); // Show error message
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Something went wrong. Please try again.');
-            }
-        }
-    });
-    
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) {
-            return decodeURIComponent(parts.pop().split(';').shift()); // Decode cookie value
-        }
-        return null;
-    }
-</script>
-
-
-<style>
-    .star-rating {
-        color: #f5c518;
-    }
-
-    .ingredient-list, .directions-list {
-        list-style: none;
-        padding: 0;
-    }
-
-    .star {
-        pointer-events: auto; /* Bảo đảm các ngôi sao có thể nhấp */
-    }
-    .review {
-        border-top: 1px solid #ddd;
-        padding-top: 10px;
-        margin-top: 10px;
-        display: flex;
-        align-items: center;
-    }
-
-        .review img, .recipe-by img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-    .recipe-by {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .recipe-by-info {
-        display: flex;
-        align-items: center;
-    }
-
-    .create-recipe-btn {
-        background-color: #243849; /* Dark blue button color */
-        color: #ffffff;
-        padding: 15px 30px; /* Increased padding for the button */
-        border: none;
-        font-size: 14px;
-        cursor: pointer;
-        text-transform: uppercase;
-        transition: background-color 0.3s;
-    }
-
-        .create-recipe-btn:hover {
-            background-color: #1a2b35; /* Darker shade on hover */
-        }
-</style>
+@section Scripts {
+    <script>
+        // Add any necessary JavaScript here
+    </script>
+}

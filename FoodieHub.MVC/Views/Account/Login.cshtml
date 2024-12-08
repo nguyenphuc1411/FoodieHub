@@ -1,10 +1,10 @@
-﻿@using FoodieHub.MVC.Models.Request
+﻿@using FoodieHub.API.Models.DTOs.Authentication
 
 @{
     ViewData["Title"] = "Login";
     Layout = "~/Views/Shared/_LayoutLogin.cshtml";
 }
-@model LoginVM
+@model LoginDTO
 <form asp-action="Login" method="post" class="form bg-white py-4 px-5 rounded p-4">
     <h1>Login</h1>
 

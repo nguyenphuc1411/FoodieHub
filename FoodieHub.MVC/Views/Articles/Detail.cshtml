@@ -1,6 +1,6 @@
-﻿@model FoodieHub.MVC.Models.Article.GetArticleDetail
-@using FoodieHub.MVC.Models.Response
+﻿@model GetArticleDTO
 @using System.Text.Json
+@using FoodieHub.API.Models.DTOs.Article
 @inject IConfiguration config
 
 @{
@@ -15,8 +15,8 @@
         <p class="mt-3">Article / @Model.CategoryName</p>
         <div class="col-md-12 text-center mt-1">
             <h2 class="mb-3">@Model.Title</h2>
-            <p><strong>By:</strong> @Model.FullName | <strong>@Model.UpdatedAt.ToString("MMMM dd, yyyy")</strong></p>
-            <a href="#reviews">View @Model.TotalComment comments</a>
+            <p><strong>By:</strong> @Model.FullName | <strong>@Model.CreatedAt</strong></p>
+            <a href="#reviews">View TotalComment comments</a>
         </div>
 
         <div class="col-md-6">

@@ -1,5 +1,5 @@
 ﻿using FoodieHub.API.Models.DTOs.Contact;
-using FoodieHub.API.Services.Interfaces;
+using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodieHub.API.Controllers

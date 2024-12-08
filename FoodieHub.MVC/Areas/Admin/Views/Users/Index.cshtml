@@ -1,12 +1,12 @@
-﻿@using System.Text.Json
-@using FoodieHub.MVC.Models.Response
+﻿@using FoodieHub.API.Models.DTOs.User
+@using FoodieHub.API.Models.Response
 @inject IConfiguration config
 @{
     ViewData["Title"] = "Users";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var url = config["BaseHost"];
 }
-@model PaginatedResult<JsonElement>
+@model PaginatedModel<UserDTO>
 <div class="container py-4">
     <!-- Header Section with Create Button, Filter, and Search -->
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -66,22 +66,22 @@
                 {
                     foreach (var item in Model.Items)
                     {
-                        var imgurl = !string.IsNullOrEmpty(item.GetProperty("avatar").ToString()) ? $"{url + "images/" +item.GetProperty("avatar")}" : "/images/profile.jpg";
+                        var imgurl = !string.IsNullOrEmpty(item.Avatar.ToString()) ? $"{url + "images/" +item.Avatar}" : "/images/profile.jpg";
                         <tr>
-                            <td>@item.GetProperty("fullname").GetString()</td>
+                            <td>@item.Fullname</td>
                             <td>
                                 <img src=@(imgurl) alt="Avatar Image" class="img-thumbnail" style="width:50px;height:50px" />
                             </td>
-                            <td>@item.GetProperty("email").GetString()</td>
-                            <td>@item.GetProperty("joinedAt").GetDateTime().ToString("dd/MM/yyyy")</td>
-                            <td>@item.GetProperty("role").GetString()</td>
-                            <td>@item.GetProperty("isActive").GetBoolean()</td>
+                            <td>@item.Email</td>
+                            <td>@item.JoinedAt</td>
+                            <td>@item.Role</td>
+                            <td>@item.IsActive</td>
                             <td>
-                                <a asp-action="Detail" asp-route-id="@item.GetProperty("id").GetString()" class="btn btn-info btn-sm">Detail</a>
-                                @if (item.GetProperty("role").ToString() != "Admin")
+                                <a asp-action="Detail" asp-route-id="@item.Id" class="btn btn-info btn-sm">Detail</a>
+                                @if (item.Role != "Admin")
                                 {
-                                    var userid = item.GetProperty("id");
-                                    if (item.GetProperty("isActive").GetBoolean())
+                                    var userid = item.Id;
+                                    if (item.IsActive)
                                     {
                                         <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="@("#model" + userid)">Terminate User</button>
 
@@ -98,7 +98,7 @@
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                        <a asp-action="Disable" asp-route-id="@item.GetProperty("id")" class="btn btn-danger btn-sm">Terminate</a>
+                                                        <a asp-action="Disable" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Terminate</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -121,7 +121,7 @@
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                        <a asp-action="Restore" asp-route-id="@item.GetProperty("id")" class="btn btn-danger btn-sm">Restore</a>
+                                                        <a asp-action="Restore" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Restore</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -160,21 +160,21 @@
         <nav aria-label="Page navigation example">
             <ul class="pagination pagination-sm mb-0">
                 <!-- Nút Previous (ẩn nếu đang ở trang đầu tiên) -->
-                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.CurrentPage - 1)">Previous</a>
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page - 1)">Previous</a>
                 </li>
 
                 <!-- Tạo danh sách các trang -->
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
-                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
                         <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@i">@i</a>
                     </li>
                 }
 
                 <!-- Nút Next (ẩn nếu đang ở trang cuối) -->
-                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.CurrentPage + 1)">Next</a>
+                <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page + 1)">Next</a>
                 </li>
             </ul>
         </nav>

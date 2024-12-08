@@ -1,6 +1,6 @@
 ﻿using FoodieHub.API.Models.DTOs.Authentication;
 using FoodieHub.API.Models.DTOs.User;
-using FoodieHub.API.Services.Interfaces;
+using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -57,21 +57,22 @@ namespace FoodieHub.API.Controllers
             return StatusCode(result.StatusCode, result);
         }
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(ResetPassword resetPassword)
+        public async Task<IActionResult> ResetPassword(ResetPasswordDTO resetPassword)
         {       
             var result = await _service.ResetPassword(resetPassword);
-            return StatusCode(result.StatusCode, result);         
+            return result? Ok():BadRequest();         
         }
         [Authorize]
         [HttpGet("profile")]
-        public async Task<IActionResult> GetUserProfile()
+        public async Task<ActionResult<UserDTO>> GetUserProfile()
         {
-            var result = await _service.GetProfile();
-            return StatusCode(result.StatusCode, result);
+            var result = await _service.GetCurrentUserDTO();
+            if(result == null) return BadRequest();
+            return Ok(result);
         }
         [Authorize]
         [HttpPut]
-        public async Task<IActionResult> Update(UpdateUser user)
+        public async Task<IActionResult> Update(UpdateProfileDTO user)
         {
             var result = await _service.UpdateUser(user);
             return StatusCode(result.StatusCode, result);
@@ -96,13 +97,6 @@ namespace FoodieHub.API.Controllers
         {
             string result = await _service.GoogleCallback();     
             return Redirect(result);
-        }
-
-        [HttpGet("getcurrentuser")]
-        public async Task<IActionResult> GetCurrentUser()
-        {
-            var result = await _service.GetCurrentUser();
-            return Ok(result);
         }
     }
 }

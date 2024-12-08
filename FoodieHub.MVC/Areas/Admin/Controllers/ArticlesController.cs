@@ -1,4 +1,5 @@
 ﻿using Azure;
+using FoodieHub.API.Models.Response;
 using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Models;
 using FoodieHub.MVC.Models.Article;
@@ -44,7 +45,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             var urlWithQuery = QueryHelpers.AddQueryString(baseUrl, queryParams);
 
             var httpResponse = await _httpClient.GetAsync(urlWithQuery);
-            var data = await httpResponse.Content.ReadFromJsonAsync<APIResponse<PaginatedResult<JsonElement>>>();
+            var data = await httpResponse.Content.ReadFromJsonAsync<APIResponse<PaginatedModel<JsonElement>>>();
 
             if (data != null)
             {
@@ -281,7 +282,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             queryParams["isDeleted"] = true.ToString();
             var urlWithQuery = QueryHelpers.AddQueryString(baseUrl, queryParams);
 
-            var response = await _httpClient.GetFromJsonAsync<APIResponse<PaginatedResult<JsonElement>>>(urlWithQuery);
+            var response = await _httpClient.GetFromJsonAsync<APIResponse<PaginatedModel<JsonElement>>>(urlWithQuery);
 
             if (response != null)
             {

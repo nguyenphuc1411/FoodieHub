@@ -1,14 +1,11 @@
 ﻿using Azure;
+using FoodieHub.API.Models.DTOs.User;
 using FoodieHub.MVC.Areas.Admin.Models;
 using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Models.Contact;
-using FoodieHub.MVC.Models.Coupon;
 using FoodieHub.MVC.Models.Order;
 using FoodieHub.MVC.Models.Response;
-using FoodieHub.MVC.Models.User;
 using Microsoft.AspNetCore.Mvc;
-using System.Drawing.Printing;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
@@ -32,7 +29,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             string revenuereport = "7days"
             )
         {
-            var responseProfile = await _httpClient.GetFromJsonAsync<APIResponse<UserDTO>>("auth/profile");
+            var responseProfile = await _httpClient.GetFromJsonAsync<APIResponse<UpdateProfileDTO>>("auth/profile");
             if (responseProfile != null && responseProfile.Success)
             {
                 var opt = new CookieOptions

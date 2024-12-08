@@ -1,5 +1,6 @@
-﻿@inject IConfiguration Configuration
-@model List<FoodieHub.MVC.Models.Recipe.GetRecipes>
+﻿@using FoodieHub.API.Models.DTOs.Recipe
+@inject IConfiguration Configuration
+@model IEnumerable<GetRecipeDTO>
 
 @{
     ViewData["Title"] = "ViewAll";

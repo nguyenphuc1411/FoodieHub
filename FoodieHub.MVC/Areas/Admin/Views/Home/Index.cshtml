@@ -775,91 +775,87 @@
 
 </div><!-- End #main -->
 
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@section Scripts{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        var revenueReportData = @Html.Raw(Json.Serialize(ViewBag.RevenueReportData));
+
+        // Các nhãn (Label) lấy từ orderReportData
+        const labels = orderReportData.map(x => x.Label); // Lấy các nhãn (Label)
+        const data = orderReportData.map(x => x.Data); // Lấy dữ liệu (Data) của các đơn hàng
+
+        // Lấy phần tử canvas từ HTML để vẽ biểu đồ
+        const ctx = document.getElementById('reportsChartOrder').getContext('2d');
+
+        // Tạo biểu đồ với dữ liệu ban đầu
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Orders",
+                    data: data,
+                    backgroundColor: data.map((_, index) => {
+                        // Sinh màu nền động cho mỗi cột
+                        return `rgba(${(index * 30) % 255}, ${(index * 60) % 255}, 132, 0.2)`;
+                    }),
+                    borderColor: data.map((_, index) => {
+                        // Sinh màu viền động cho mỗi cột
+                        return `rgb(${(index * 30) % 255}, ${(index * 60) % 255}, 132)`;
+                    }),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+
+
         // Chuyển đổi dữ liệu từ ViewBag thành dạng JSON để sử dụng trong JavaScript
-        var orderReportData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.OrderReportData));
+        var revenueReportData = @Html.Raw(Json.Serialize(ViewBag.RevenueReportData));
 
-    // Các nhãn (Label) lấy từ orderReportData
-    const labels = orderReportData.map(x => x.Label); // Lấy các nhãn (Label)
-    const data = orderReportData.map(x => x.Data); // Lấy dữ liệu (Data) của các đơn hàng
+        const labelRevenues = revenueReportData.map(x => x.Label);
+        const dataRevenue = revenueReportData.map(x => x.Data);
 
-    // Lấy phần tử canvas từ HTML để vẽ biểu đồ
-    const ctx = document.getElementById('reportsChartOrder').getContext('2d');
+        // Lấy phần tử canvas từ HTML để vẽ biểu đồ
+        const ctxRevenue = document.getElementById('reportsChartRevenue').getContext('2d');
 
-    // Tạo biểu đồ với dữ liệu ban đầu
-    const chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Orders",
-                data: data,
-                backgroundColor: data.map((_, index) => {
-                    // Sinh màu nền động cho mỗi cột
-                    return `rgba(${(index * 30) % 255}, ${(index * 60) % 255}, 132, 0.2)`;
-                }),
-                borderColor: data.map((_, index) => {
-                    // Sinh màu viền động cho mỗi cột
-                    return `rgb(${(index * 30) % 255}, ${(index * 60) % 255}, 132)`;
-                }),
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+        // Tạo biểu đồ với dữ liệu ban đầu
+        const chartRevenue = new Chart(ctxRevenue, {
+            type: 'bar',
+            data: {
+                labels: labelRevenues,
+                datasets: [{
+                    label: "Revenue",
+                    data: dataRevenue,
+                    backgroundColor: dataRevenue.map((_, index) => {
+                        // Sinh màu nền động cho mỗi cột
+                        return `rgba(${(index * 30) % 255}, ${(index * 60) % 255}, 132, 0.2)`;
+                    }),
+                    borderColor: dataRevenue.map((_, index) => {
+                        // Sinh màu viền động cho mỗi cột
+                        return `rgb(${(index * 30) % 255}, ${(index * 60) % 255}, 132)`;
+                    }),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
-    });
-
-
-
-    // Chuyển đổi dữ liệu từ ViewBag thành dạng JSON để sử dụng trong JavaScript
-    var revenueReportData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.RevenueReportData));
-
-    const labelRevenues = revenueReportData.map(x => x.Label); 
-    const dataRevenue = revenueReportData.map(x => x.Data); 
-
-    // Lấy phần tử canvas từ HTML để vẽ biểu đồ
-    const ctxRevenue = document.getElementById('reportsChartRevenue').getContext('2d');
-
-    // Tạo biểu đồ với dữ liệu ban đầu
-    const chartRevenue = new Chart(ctxRevenue, {
-        type: 'bar',
-        data: {
-            labels: labelRevenues,
-            datasets: [{
-                label: "Revenue",
-                data: dataRevenue,
-                backgroundColor: dataRevenue.map((_, index) => {
-                    // Sinh màu nền động cho mỗi cột
-                    return `rgba(${(index * 30) % 255}, ${(index * 60) % 255}, 132, 0.2)`;
-                }),
-                borderColor: dataRevenue.map((_, index) => {
-                    // Sinh màu viền động cho mỗi cột
-                    return `rgb(${(index * 30) % 255}, ${(index * 60) % 255}, 132)`;
-                }),
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-</script>
-
-
-
-
+        });
+    </script>
+}
 
 
 <style>

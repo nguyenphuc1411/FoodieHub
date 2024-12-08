@@ -1,5 +1,5 @@
-﻿@model IEnumerable<FoodieHub.MVC.Models.Recipe.GetRecipes>
-@using FoodieHub.MVC.Models.Response
+﻿@using FoodieHub.API.Models.DTOs.Recipe
+@model IEnumerable<GetRecipeDTO>
 @inject IConfiguration config
 @{
     ViewData["Title"] = "Recipes by Category";
@@ -32,7 +32,7 @@
                                 <div class="rating-comments d-flex align-items-center">
                                     <p class="mb-0 me-2">Rating: @recipe.RatingAverage</p>
                                     ⭐
-                                    <p class="mb-0 ms-2">Comments: @recipe.TotalComment</p>
+                                    <p class="mb-0 ms-2">Comments: @recipe.TotalComments</p>
                                 </div>
 
                                 <!-- View Detail Button -->

@@ -1,12 +1,9 @@
-﻿using FoodieHub.MVC.Configurations;
-using FoodieHub.MVC.Models.Request;
+﻿using FoodieHub.API.Models.DTOs.Authentication;
+using FoodieHub.API.Models.DTOs.User;
+using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Models.Response;
-using FoodieHub.MVC.Models.User;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
@@ -23,7 +20,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Login(LoginVM login)
+        public async Task<IActionResult> Login(LoginDTO login)
         {
             if(!ModelState.IsValid) return View(login);
 
@@ -83,7 +80,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         public async Task<IActionResult> UpdateProfile()
         {
             var response = await _httpClient.GetAsync("auth/profile");
-            var data = await response.Content.ReadFromJsonAsync<APIResponse<UpdateUser>>();
+            var data = await response.Content.ReadFromJsonAsync<APIResponse<UpdateProfileDTO>>();
             if (data != null)
             {
                 if (data.Success)
@@ -99,7 +96,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         }
         [ValidateTokenForAdmin]
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(UpdateUser user)
+        public async Task<IActionResult> UpdateProfile(UpdateProfileDTO user)
         {
             if (ModelState.IsValid)
             {

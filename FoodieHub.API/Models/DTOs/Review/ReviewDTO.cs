@@ -5,7 +5,7 @@
         public int ReviewID { get; set; }
 
         public int RatingValue { get; set; }
-        public string ReviewContent { get; set; }
+        public string ReviewContent { get; set; } = default!;
 
         public DateTime ReviewedAt { get; set; } = DateTime.Now;
 

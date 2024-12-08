@@ -6,7 +6,7 @@ namespace FoodieHub.API.Models.DTOs.Authentication
     {
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email")]
-        public string Email { get; set; }
-        public string Data { get; set; }
+        public string Email { get; set; } = default!;
+        public string Data { get; set; } = default!;
     }
 }

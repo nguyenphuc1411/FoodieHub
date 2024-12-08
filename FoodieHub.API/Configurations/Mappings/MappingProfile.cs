@@ -18,7 +18,7 @@ namespace FoodieHub.API.Configurations.Mappings
     {
         public MappingProfile()
         {
-            CreateMap<ApplicationUser, UserDTO>().ReverseMap();
+            CreateMap<ApplicationUser, UserDTO>();
 
             CreateMap<CategoryDTO, Category>().ReverseMap();
             CreateMap<RecipeCategoryDTO, RecipeCategory>().ReverseMap();
@@ -68,39 +68,44 @@ namespace FoodieHub.API.Configurations.Mappings
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName))
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Product.MainImage));
 
-            CreateMap<Article, GetArticleDetail>()
+
+            // Article
+            CreateMap<Article, GetArticleDTO>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.Fullname))
+                .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.User.Avatar))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ArticleCategory.CategoryName))
-                .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.User.Avatar));
-            CreateMap<Article, GetArticles>()
-              .ForMember(dest => dest.Fulllname, opt => opt.MapFrom(src => src.User.Fullname))
-              .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ArticleCategory.CategoryName))
-              .ForMember(dest => dest.TotalComments, opt => opt.MapFrom(src => src.ArticleComments.Count))
-              .ForMember(dest => dest.TotalFavorites, opt => opt.MapFrom(src => src.FavoriteArticles.Count));
+                .ForMember(dest => dest.TotalComments, opt => opt.MapFrom(src => src.ArticleComments.Count()))
+                .ForMember(dest => dest.TotalFavorites, opt => opt.MapFrom(src => src.FavoriteArticles.Count()));
+            CreateMap<UpdateArticleDTO, Article>();
 
-            CreateMap<Article, GetArticlesForAdmin>()
-             .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.User.Fullname))
-             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ArticleCategory.CategoryName));
 
+       
+            // Recipes
             CreateMap<CreateRecipeDTO, Recipe>();
-            CreateMap<UpdateRecipe, Recipe>();
-            CreateMap<Recipe, GetRecipeDetail>()
-                .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.User.Fullname))
+            CreateMap<UpdateRecipeDTO, Recipe>();
+            CreateMap<Recipe, GetRecipeDTO>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.Fullname))
                 .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.User.Avatar))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.RecipeCategory.CategoryName))
-                .ForMember(dest => dest.TotalRating, opt => opt.MapFrom(src => src.Ratings.Count))
-                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Ratings.Average(x=>x.RatingValue)));
-            CreateMap<Recipe, GetRecipes>()
-                .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.User.Fullname))
-                .ForMember(dest => dest.TotalComment, opt => opt.MapFrom(src => src.Comments.Where(x=>x.RecipeID!=null).Count()))
-                .ForMember(dest => dest.TotalRating, opt => opt.MapFrom(src => src.Ratings.Count))
+                .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Count()))
                 .ForMember(dest => dest.RatingAverage, opt => opt.MapFrom(src => src.Ratings.Average(x => x.RatingValue)))
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.RecipeCategory.CategoryName));
-            CreateMap<Recipe, GetRecipesForAdmin>()
-            .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.User.Fullname))
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.RecipeCategory.CategoryName));
-
-
+                .ForMember(dest => dest.TotalComments, opt => opt.MapFrom(src => src.Comments.Count()))
+                .ForMember(dest => dest.TotalFavorites, opt => opt.MapFrom(src => src.Favorites.Count()));
+            // Detail
+            CreateMap<Ingredient, GetIngredient>();
+            CreateMap<RecipeStep, GetRecipeStep>();
+            CreateMap<Recipe, DetailRecipeDTO>()
+                           .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.Fullname))
+                           .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.User.Avatar))
+                           .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.RecipeCategory.CategoryName))
+                           .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Count()))
+                           .ForMember(dest => dest.RatingAverage, opt => opt.MapFrom(src => src.Ratings.Average(x => x.RatingValue)))
+                           .ForMember(dest => dest.TotalComments, opt => opt.MapFrom(src => src.Comments.Count()))
+                           .ForMember(dest => dest.TotalFavorites, opt => opt.MapFrom(src => src.Favorites.Count()))
+                           .ForMember(dest => dest.Ingredients, opt => opt.MapFrom(src => src.Ingredients))
+                           .ForMember(dest => dest.Steps, opt => opt.MapFrom(src => src.RecipeSteps))
+                           .ForMember(dest => dest.RelativeProducts, opt => opt.MapFrom(src => src.RecipeProducts.Select(x => x.ProductID)));
+                        
             // Comment
             CreateMap<Comment, CommentDTO>()
                 .ForMember(x => x.FullName, opt => opt.MapFrom(src => src.User.Fullname))
