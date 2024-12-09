@@ -91,7 +91,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddHttpContextAccessor();
 
-string origin = builder.Configuration["OriginFE"] ??"";
+/*string origin = builder.Configuration["OriginFE"] ??"";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", builder =>
@@ -101,7 +101,7 @@ builder.Services.AddCors(options =>
                .AllowAnyMethod();
     });
 });
-
+*/
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
