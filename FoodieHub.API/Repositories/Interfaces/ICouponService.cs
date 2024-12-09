@@ -6,11 +6,11 @@ namespace FoodieHub.API.Repositories.Interfaces
 {
     public interface ICouponService
     {
-        Task<Coupon?> Create(Coupon enntity);
+        Task<Coupon?> Create(CouponDTO enntity);
         Task<ServiceResponse> GetByCode(string couponCode);
-        Task<ServiceResponse> Get();
-        Task<ServiceResponse> GetDetail(int couponID);
-        Task<bool> Update(int couponID,Coupon coupon);
+        Task<IEnumerable<GetCoupon>> Get();
+        Task<GetCoupon?> GetDetail(int couponID);
+        Task<bool> Update(int couponID,CouponDTO coupon);
         Task<bool> Delete(int couponID);
     }
 }

@@ -22,6 +22,7 @@ builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddHttpContextAccessor();
 
 // paypal client configuration
@@ -33,7 +34,8 @@ builder.Services.AddSingleton(x => new PaypalClient(
 
 builder.Services.AddHttpClient("MyAPI", opts =>
 {
-    opts.BaseAddress = new Uri(builder.Configuration["BaseUrl"]?? throw new Exception("Not found base URL"));
+    var url = builder.Configuration["BaseHost"] + "api/";
+    opts.BaseAddress = new Uri(url);
 })
 .AddHttpMessageHandler<CustomHttpClientHandler>();
 

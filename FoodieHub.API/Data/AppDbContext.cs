@@ -210,10 +210,10 @@ namespace FoodieHub.API.Data
             {
                 Id = "b6d4f2fd-ae9a-475f-a186-264597704bae",
                 Fullname = "NguyenThanhPhuc",
-                Email = "admin@gmail.com",
-                UserName = "admin@gmail.com",
-                NormalizedUserName = "ADMIN@GMAIL.COM",
-                NormalizedEmail = "ADMIN@GMAIL.COM",
+                Email = "nguyenphuc14112003@gmail.com",
+                UserName = "nguyenphuc14112003@gmail.com",
+                NormalizedUserName = "NGUYENPHUC14112003@GMAIL.COM",
+                NormalizedEmail = "NGUYENPHUC14112003@GMAIL.COM",
                 IsActive = true,
                 JoinedAt = DateTime.Now
             };

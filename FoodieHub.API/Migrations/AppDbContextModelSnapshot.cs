@@ -110,19 +110,19 @@ namespace FoodieHub.API.Migrations
                         {
                             Id = "b6d4f2fd-ae9a-475f-a186-264597704bat",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "fb3ec440-3816-44ec-97b4-9957b5c53d3a",
+                            ConcurrencyStamp = "ad1a5961-dbe6-4397-835e-42234a42413c",
                             Email = "user@gmail.com",
                             EmailConfirmed = false,
                             Fullname = "User Name",
                             IsActive = true,
-                            JoinedAt = new DateTime(2024, 12, 8, 21, 36, 12, 207, DateTimeKind.Local).AddTicks(2982),
+                            JoinedAt = new DateTime(2024, 12, 9, 13, 59, 17, 178, DateTimeKind.Local).AddTicks(3856),
                             LockoutEnabled = false,
                             NormalizedEmail = "USER@GMAIL.COM",
                             NormalizedUserName = "USER@GMAIL.COM",
                             NotificationSubscription = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEFgPd6PWSwSV4hFSZIjA692zQAo2YIgLn0soeoLFuSJxIei+dZC88FxZBVhgPIWEcw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMaV0ydwUPfbAp8+aYfq9tAFMxkwYUtWIal6Ce3YjlCM5l1tJxj6oFZpRt8nEbQgqA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "a0734801-1dcd-4113-9fac-2313287928d7",
+                            SecurityStamp = "48cad03b-e5a4-4ca5-ab3f-ab02f36d4e9e",
                             TwoFactorEnabled = false,
                             UserName = "user@gmail.com"
                         },
@@ -130,21 +130,21 @@ namespace FoodieHub.API.Migrations
                         {
                             Id = "b6d4f2fd-ae9a-475f-a186-264597704bae",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "e1b5d55c-557f-4da3-9311-0628f7746ffd",
-                            Email = "admin@gmail.com",
+                            ConcurrencyStamp = "5b5e8dec-8532-41b1-95ed-e15a8ed01b4b",
+                            Email = "nguyenphuc14112003@gmail.com",
                             EmailConfirmed = false,
                             Fullname = "NguyenThanhPhuc",
                             IsActive = true,
-                            JoinedAt = new DateTime(2024, 12, 8, 21, 36, 12, 207, DateTimeKind.Local).AddTicks(2959),
+                            JoinedAt = new DateTime(2024, 12, 9, 13, 59, 17, 178, DateTimeKind.Local).AddTicks(3832),
                             LockoutEnabled = false,
-                            NormalizedEmail = "ADMIN@GMAIL.COM",
-                            NormalizedUserName = "ADMIN@GMAIL.COM",
+                            NormalizedEmail = "NGUYENPHUC14112003@GMAIL.COM",
+                            NormalizedUserName = "NGUYENPHUC14112003@GMAIL.COM",
                             NotificationSubscription = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEIqEp5Vsa8V+i5suifACXzDmKZrAOt7DMW8gIEdMk/wC7Iy/s0r1A1e8dNfkAMahTQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHBW09k+A7XCqRQQ93zhJ+tWBHzr1xnn57+/DEdRuFgqXG6uxju2kGtvWtLorAzyrQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "7bd2ce10-cd59-40d7-ae10-031cdc1e498c",
+                            SecurityStamp = "360e812c-b988-4a2e-aa88-0933001f9b3e",
                             TwoFactorEnabled = false,
-                            UserName = "admin@gmail.com"
+                            UserName = "nguyenphuc14112003@gmail.com"
                         });
                 });
 

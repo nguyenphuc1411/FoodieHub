@@ -23,7 +23,7 @@ namespace FoodieHub.API.Controllers
 
         [Authorize(Policy = "RequireAdmin")]
         [HttpPost]
-        public async Task<ActionResult<Coupon>> Create(Coupon coupon)
+        public async Task<ActionResult<Coupon>> Create(CouponDTO coupon)
         {
             var result = await _service.Create(coupon);
             if (result == null) return BadRequest();
@@ -31,9 +31,8 @@ namespace FoodieHub.API.Controllers
         }
         [Authorize(Policy = "RequireAdmin")]
         [HttpPut("{couponID}")]
-        public async Task<ActionResult> Update(int couponID,[FromBody]Coupon coupon)
+        public async Task<ActionResult> Update(int couponID,[FromBody]CouponDTO coupon)
         {
-            if(couponID!=coupon.CouponID) return BadRequest();
             bool result = await _service.Update(couponID, coupon);
             return result ? NoContent() : BadRequest();
         }
@@ -47,17 +46,18 @@ namespace FoodieHub.API.Controllers
         }
         [Authorize(Policy = "RequireAdmin")]
         [HttpGet("{couponID}")]
-        public async Task<IActionResult> GetDetail(int couponID)
+        public async Task<ActionResult<GetCoupon>> GetDetail(int couponID)
         {
             var result = await _service.GetDetail(couponID);
-            return StatusCode(result.StatusCode, result);
+            if(result == null) return NotFound();
+            return Ok(result);
         }
         [Authorize(Policy = "RequireAdmin")]
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<GetCoupon>>> Get()
         {
             var result = await _service.Get();
-            return StatusCode(result.StatusCode, result);
+            return Ok(result);
         }
         [HttpGet("couponcode/{couponCode}")]
         public async Task<IActionResult> GetForUserUse(string couponCode)

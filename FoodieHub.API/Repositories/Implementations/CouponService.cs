@@ -4,7 +4,6 @@ using AutoMapper.QueryableExtensions;
 using FoodieHub.API.Data;
 using FoodieHub.API.Data.Entities;
 using FoodieHub.API.Models.DTOs.Coupon;
-using FoodieHub.API.Models.DTOs.Order;
 using FoodieHub.API.Models.Response;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -21,13 +20,14 @@ namespace FoodieHub.API.Repositories.Implementations
             _mapper = mapper;
         }
 
-        public async Task<Coupon?> Create(Coupon entity)
+        public async Task<Coupon?> Create(CouponDTO entity)
         {
             bool isExistCouponCode = await _context.Coupons.AnyAsync(x=>x.CouponCode == entity.CouponCode);      
             if(isExistCouponCode) return null;
-            await _context.Coupons.AddAsync(entity);
+            var newEntity = _mapper.Map<Coupon>(entity);
+            await _context.Coupons.AddAsync(newEntity);
             var result = await _context.SaveChangesAsync();
-            return result>0?entity: null;
+            return result>0? newEntity : null;
         }
 
         public async Task<bool> Delete(int couponID)
@@ -38,30 +38,16 @@ namespace FoodieHub.API.Repositories.Implementations
             return await _context.SaveChangesAsync()>0;
         }
 
-        public async Task<ServiceResponse> Get()
+        public async Task<IEnumerable<GetCoupon>> Get()
         {
-            var coupons = await _context.Coupons.OrderByDescending(x=>x.CreatedAt).ToListAsync();        
-            return new ServiceResponse
-            {
-                Success = true,
-                Message = "Get coupons successfully",
-                Data = _mapper.Map<List<GetCoupon>>(coupons),
-                StatusCode = 200
-            };
+            return await _context.Coupons.OrderByDescending(x=>x.CreatedAt)
+                .ProjectTo<GetCoupon>(_mapper.ConfigurationProvider).ToListAsync();
         }
-        public async Task<ServiceResponse> GetDetail(int couponID)
+        public async Task<GetCoupon?> GetDetail(int couponID)
         {
-            var coupon = await _context.Coupons.FindAsync(couponID);
-            if (coupon == null)
-            {
-                return new ServiceResponse
-                {
-                    Success = false,
-                    Message = "No coupon found with given ID",
-                    StatusCode = 404
-                };
-            }
-            if(coupon.IsUsed)
+            return await _context.Coupons.ProjectTo<GetCoupon>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(x=>x.CouponID==couponID);
+           /* if(coupon.IsUsed)
             {
                 var order = await _context.Orders.Where(x=>x.CouponID==couponID)
                     .ProjectTo<GetOrder>(_mapper.ConfigurationProvider)
@@ -71,21 +57,7 @@ namespace FoodieHub.API.Repositories.Implementations
                     Coupon = _mapper.Map<GetCoupon>(coupon),
                     Order = order,
                 };
-                return new ServiceResponse
-                {
-                    Success = true,
-                    Message = "Get coupon successfully",
-                    Data = data,
-                    StatusCode = 200
-                };
-            }
-            return new ServiceResponse
-            {
-                Success = true,
-                Message = "Get coupon successfully",
-                Data = _mapper.Map<GetCoupon>(coupon),
-                StatusCode = 200
-            };
+            }*/
         }
         public async Task<ServiceResponse> GetByCode(string couponCode)
         {
@@ -141,11 +113,11 @@ namespace FoodieHub.API.Repositories.Implementations
             };
         }
 
-        public async Task<bool> Update(int couponID,Coupon coupon)
+        public async Task<bool> Update(int couponID,CouponDTO coupon)
         {
             var existCoupon = await _context.Coupons.FindAsync(couponID);
             if (existCoupon == null) return false;
-            existCoupon = coupon;
+            _mapper.Map(coupon, existCoupon);
             _context.Coupons.Update(existCoupon);
             var result = await _context.SaveChangesAsync();
             return await _context.SaveChangesAsync() > 0;
