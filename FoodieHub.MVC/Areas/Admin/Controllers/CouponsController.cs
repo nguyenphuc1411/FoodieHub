@@ -1,7 +1,8 @@
 ﻿using FoodieHub.MVC.Configurations;
+using FoodieHub.MVC.Helpers;
 using FoodieHub.MVC.Models.Coupon;
 using FoodieHub.MVC.Models.Response;
-using Microsoft.AspNetCore.Http;
+using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Text;
@@ -14,31 +15,19 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
     public class CouponsController : Controller
     {
         private readonly IConfiguration _config;
-        private readonly IHttpClientFactory _httpClientFactory;
-        public CouponsController(IConfiguration config, IHttpClientFactory httpClientFactory)
+        private readonly ICouponService couponService;
+        public CouponsController(IConfiguration config, ICouponService couponService)
         {
             _config = config;
-            _httpClientFactory = httpClientFactory;
+            this.couponService = couponService;
         }
 
         // Phương thức hiển thị danh sách coupon
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var client = _httpClientFactory.CreateClient("MyAPI");
-
-            var response = await client.GetAsync("Coupons");
-            var content = await response.Content.ReadFromJsonAsync<APIResponse<List<GetCoupon>>>();
-
-            if (content.Success)
-            {
-                return View(content.Data);
-            }
-            else
-            {
-                TempData["ErrorMessage"] = content.Message;
-                return View(new List<GetCoupon>());
-            }
+            var coupons = await couponService.Get();
+            return View(coupons);
         }
 
         private string GenerateDefaultCouponCode()
@@ -59,38 +48,15 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCoupon(CouponDTO coupon)
         {
-            // Validate the model state
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) return View(coupon);
+            var result = await couponService.Create(coupon);
+            if (result)
             {
-                return View(coupon); // Return the view with the current coupon data
+                NotificationHelper.SetSuccessNotification(this);
+                return RedirectToAction("Index");
             }
-
-            var client = _httpClientFactory.CreateClient("MyAPI");
-
-            var jsonContent = new StringContent(JsonSerializer.Serialize(coupon), Encoding.UTF8, "application/json");
-
-            // Send POST request to the API endpoint
-            var response = await client.PostAsync("Coupons", jsonContent);
-
-            var data = await response.Content.ReadFromJsonAsync<APIResponse>();
-            if (data != null)
-            {
-                if (data.Success)
-                {
-                    TempData["SuccessMessage"] = data.Message; // Store success message
-                    return RedirectToAction("Index"); // Redirect to Index action
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = data.Message; // Store error message
-                }
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again."; // Handle unexpected error
-            }
-
-            return View(coupon); // Return the view with the current coupon data
+            NotificationHelper.SetErrorNotification(this);
+            return View(coupon);
         }
 
         // GET: Admin/Coupons/EditCoupon/5
