@@ -5,10 +5,10 @@ namespace FoodieHub.API.Repositories.Interfaces
 {
     public interface ICommentService
     {
-        Task<Comment?> Create(Comment entity);
-        Task<bool> Edit(int id,Comment entity);
-        Task<IEnumerable<CommentDTO>> GetByRecipe(int id);
-        Task<IEnumerable<CommentDTO>> GetByArticle(int id);
+        Task<Comment?> Create(CommentDTO entity);
+        Task<bool> Edit(int id, CommentDTO entity);
+        Task<IEnumerable<GetCommentDTO>> GetByRecipe(int id);
+        Task<IEnumerable<GetCommentDTO>> GetByArticle(int id);
         Task<bool> Delete(int commentID);
     }
 }

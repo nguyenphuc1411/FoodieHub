@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FoodieHub.API.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -28,8 +29,6 @@ namespace FoodieHub.API.Controllers
             var result = await _service.Create(createUser);
             return StatusCode(result.StatusCode, result);
         }
-
-        [Authorize(Policy = "RequireAdmin")]
         [HttpPatch("disable/{id}")]
         public async Task<IActionResult> Disble([FromRoute] string id)
         {
@@ -37,7 +36,6 @@ namespace FoodieHub.API.Controllers
 
             return result ? Ok() : BadRequest();
         }
-        [Authorize(Policy = "RequireAdmin")]
         [HttpPatch("restore/{id}")]
         public async Task<IActionResult> Restore([FromRoute] string id)
         {

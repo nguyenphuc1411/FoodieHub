@@ -1,5 +1,4 @@
-﻿using FoodieHub.MVC.Models.Response;
-using FoodieHub.MVC.Service.Interfaces;
+﻿using FoodieHub.MVC.Service.Interfaces;
 using FoodieHub.API.Models.DTOs.Recipe;
 using System.Net.Http.Headers;
 
@@ -14,7 +13,7 @@ namespace FoodieHub.MVC.Service.Implementations
             _httpClient = httpClientFactory.CreateClient("MyAPI");
         }
 
-        //hien thi search
+        /*//hien thi search
         public async Task<IEnumerable<GetRecipeDTO>> GetRecipes(string? search, int? pageSize, int? currentPage)
         {
             // Xây dựng URL query
@@ -38,34 +37,8 @@ namespace FoodieHub.MVC.Service.Implementations
             }
 
             return new List<GetRecipeDTO>();
-        }
-
-
-        public async Task<APIResponse<DetailRecipeDTO>> GetRecipeDetail(int recipeID)
-        {
-            var response = await _httpClient.GetAsync($"Recipes/{recipeID}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadFromJsonAsync<APIResponse<DetailRecipeDTO>>();
-
-                if (content != null && content.Success)
-                {
-                    return new APIResponse<DetailRecipeDTO>
-                    {
-                        Success = true,
-                        Data = content.Data
-                    };
-                }
-            }
-
-            return new APIResponse<DetailRecipeDTO>
-            {
-                Success = false,
-                Message = "Failed to retrieve recipe details."
-            };
-        }
-
+        }*/
+  
         public async Task<bool> Rating(CreateRatingDTO ratingDTO)
         {
             var response = await _httpClient.PostAsJsonAsync("recipes/ratings",ratingDTO);
@@ -127,12 +100,23 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<IEnumerable<GetRecipeDTO>?> GetOfUser()
         {
-            return await _httpClient.GetFromJsonAsync<IEnumerable<GetRecipeDTO>>("recipes/user");
+            return await _httpClient.GetFromJsonAsync<IEnumerable<GetRecipeDTO>>("recipes/users");
         }
 
         public async Task<IEnumerable<GetRecipeDTO>?> GetByUser(string userId)
         {
-            return await _httpClient.GetFromJsonAsync<IEnumerable<GetRecipeDTO>>("recipes/user/"+userId);
+            return await _httpClient.GetFromJsonAsync<IEnumerable<GetRecipeDTO>>("recipes/users/"+userId);
+        }
+
+        public async Task<bool> Delete(int id)
+        {
+            var response = await _httpClient.DeleteAsync("recipes/" + id);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<DetailRecipeDTO?> GetByID(int id)
+        {
+            return await _httpClient.GetFromJsonAsync<DetailRecipeDTO>("recipes/" + id);
         }
     }
 }

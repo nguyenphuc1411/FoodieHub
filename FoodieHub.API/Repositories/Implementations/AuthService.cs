@@ -131,7 +131,7 @@ namespace FoodieHub.API.Repositories.Implementations
                 return new ServiceResponse
                 {
                     Success = true,
-                    Message = "The account has been successfully created",
+                    Message = "The account has been successfully created. Check email to confirm registion.",
                     StatusCode = 200
                 };
             }

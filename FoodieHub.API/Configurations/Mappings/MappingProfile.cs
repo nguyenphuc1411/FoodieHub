@@ -87,10 +87,12 @@ namespace FoodieHub.API.Configurations.Mappings
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.Fullname))
                 .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.User.Avatar))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.RecipeCategory.CategoryName))
-                .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Count()))
-                .ForMember(dest => dest.RatingAverage, opt => opt.MapFrom(src => src.Ratings.Average(x => x.RatingValue)))
-                .ForMember(dest => dest.TotalComments, opt => opt.MapFrom(src => src.Comments.Count()))
-                .ForMember(dest => dest.TotalFavorites, opt => opt.MapFrom(src => src.Favorites.Count()));
+                .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Any()? src.Ratings.Count():0))
+                .ForMember(dest => dest.RatingAverage, opt => opt.MapFrom(src => src.Ratings.Any()? src.Ratings.Average(x => x.RatingValue):0))
+                .ForMember(dest => dest.TotalComments, opt => opt.MapFrom(src => src.Comments.Any()? src.Comments.Count():0))
+                .ForMember(dest => dest.TotalFavorites, opt => opt.MapFrom(src => src.Favorites.Any()? src.Favorites.Count():0));
+
+
             // Detail
             CreateMap<Ingredient, GetIngredient>();
             CreateMap<RecipeStep, GetRecipeStep>();
@@ -98,18 +100,20 @@ namespace FoodieHub.API.Configurations.Mappings
                            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.Fullname))
                            .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.User.Avatar))
                            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.RecipeCategory.CategoryName))
-                           .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Count()))
-                           .ForMember(dest => dest.RatingAverage, opt => opt.MapFrom(src => src.Ratings.Average(x => x.RatingValue)))
-                           .ForMember(dest => dest.TotalComments, opt => opt.MapFrom(src => src.Comments.Count()))
-                           .ForMember(dest => dest.TotalFavorites, opt => opt.MapFrom(src => src.Favorites.Count()))
+                           .ForMember(dest => dest.TotalRatings, opt => opt.MapFrom(src => src.Ratings.Any() ? src.Ratings.Count(): 0))
+                           .ForMember(dest => dest.RatingAverage, opt => opt.MapFrom(src => src.Ratings.Any() ? src.Ratings.Average(x => x.RatingValue) : 0))
+                           .ForMember(dest => dest.TotalComments, opt => opt.MapFrom(src => src.Comments.Any() ? src.Comments.Count() : 0))
+                           .ForMember(dest => dest.TotalFavorites, opt => opt.MapFrom(src => src.Favorites.Any() ? src.Favorites.Count() : 0))
                            .ForMember(dest => dest.Ingredients, opt => opt.MapFrom(src => src.Ingredients))
                            .ForMember(dest => dest.Steps, opt => opt.MapFrom(src => src.RecipeSteps))
                            .ForMember(dest => dest.RelativeProducts, opt => opt.MapFrom(src => src.RecipeProducts.Select(x => x.ProductID)));
+
                         
             // Comment
-            CreateMap<Comment, CommentDTO>()
+            CreateMap<Comment, GetCommentDTO>()
                 .ForMember(x => x.FullName, opt => opt.MapFrom(src => src.User.Fullname))
-                .ForMember(x => x.FullName, opt => opt.MapFrom(src => src.User.Avatar));
+                .ForMember(x => x.Avatar, opt => opt.MapFrom(src => src.User.Avatar));
+            CreateMap<CommentDTO, Comment>();
         }
     }
 }

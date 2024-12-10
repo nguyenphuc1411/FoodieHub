@@ -11,7 +11,7 @@ namespace FoodieHub.API.Models.DTOs.Recipe
         public int Serves { get; set; }
         public bool IsAdminUpload { get; set; }
         public DateTime CreatedAt { get; set; }
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; set; }
 
         public string UserID { get; set; } = default!;
         public string FullName { get; set; } = default!;

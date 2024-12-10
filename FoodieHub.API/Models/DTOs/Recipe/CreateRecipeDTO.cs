@@ -24,14 +24,11 @@ namespace FoodieHub.API.Models.DTOs.Recipe
         public bool IsActive { get; set; } = true;
 
         [Required(ErrorMessage = "CategoryID is required.")]
-        [Range(1, int.MaxValue, ErrorMessage = "CategoryID must be a positive integer.")]
         public int CategoryID { get; set; }
         [Required(ErrorMessage = "Ingredients are required.")]
-        [MinLength(1, ErrorMessage = "At least one ingredient is required.")]
         public List<CreateIngredient> Ingredients { get; set; } = new List<CreateIngredient>();
 
         [Required(ErrorMessage = "Recipe steps are required.")]
-        [MinLength(1, ErrorMessage = "At least one recipe step is required.")]
         public List<CreateRecipeSteps> RecipeSteps { get; set; } = new List<CreateRecipeSteps>();
 
         public List<int> RelativeProducts { get; set; } = new List<int>();

@@ -5,8 +5,6 @@
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
-}
-@{
     var categories = await categoryService.GetAll() ?? new List<GetRecipeCategoryDTO>();
 }
 @model CreateRecipeDTO
@@ -94,7 +92,7 @@
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="button button-dark me-2" name="IsActive" value="true">PUBLISH</button>
                         <button type="submit" class="button button-light me-2" name="IsActive" value="false">SAVE AS DRAFT</button>
-                        <a href="/recipes" class="btn btn-secondary">CANCEL</a>
+                        <a href="/account/recipes" class="btn btn-secondary">CANCEL</a>
                     </div>
                 </form>
             </div>

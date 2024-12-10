@@ -22,9 +22,10 @@ namespace FoodieHub.MVC.Controllers
             
             if (!string.IsNullOrEmpty(token))
             {
-                var user = await authService.GetProfile();
+                var user = await authService.GetProfile();            
                 if(user != null)
                 {
+                    Response.SetCookie("UserID",user.Id);
                     Response.SetCookie("FullName", user.Fullname);
                     if (!string.IsNullOrEmpty(user?.Avatar))
                     {

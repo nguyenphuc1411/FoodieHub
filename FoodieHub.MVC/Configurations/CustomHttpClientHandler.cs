@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using FoodieHub.MVC.Helpers;
+using System.Net.Http.Headers;
 
 namespace FoodieHub.MVC.Configurations
 {
@@ -13,8 +14,8 @@ namespace FoodieHub.MVC.Configurations
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var tokenAdmin = _httpContextAccessor.HttpContext.Request.Cookies["TokenAdmin"];
-            var tokenUser = _httpContextAccessor.HttpContext.Request.Cookies["TokenUser"];
+            var tokenAdmin = _httpContextAccessor.HttpContext.Request.GetCookie("TokenAdmin");
+            var tokenUser = _httpContextAccessor.HttpContext.Request.GetCookie("TokenUser");
             if (!string.IsNullOrEmpty(tokenUser))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenUser);

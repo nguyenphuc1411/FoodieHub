@@ -19,20 +19,20 @@ namespace FoodieHub.API.Controllers
         }
 
         [HttpGet("recipes/{id}")]
-        public async Task<ActionResult<IEnumerable<CommentDTO>>> GetByRecipe(int id)
+        public async Task<ActionResult<IEnumerable<GetCommentDTO>>> GetByRecipe(int id)
         {
             var result = await _service.GetByRecipe(id);
             return Ok(result);
         }
         [HttpGet("articles/{id}")]
-        public async Task<ActionResult<IEnumerable<CommentDTO>>> GetByArticle(int id)
+        public async Task<ActionResult<IEnumerable<GetCommentDTO>>> GetByArticle(int id)
         {
             var result = await _service.GetByArticle(id);
             return Ok(result);
         }
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Comment>> Create([FromBody]Comment comment)
+        public async Task<ActionResult> Create([FromBody]CommentDTO comment)
         {
             var result = await _service.Create(comment);
             if(result==null) return BadRequest();
@@ -40,7 +40,7 @@ namespace FoodieHub.API.Controllers
         }
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<ActionResult> Edit(int id,[FromBody] Comment comment)
+        public async Task<ActionResult> Edit(int id,[FromBody] CommentDTO comment)
         {
             bool result = await _service.Edit(id,comment);
             return result? NoContent():BadRequest();

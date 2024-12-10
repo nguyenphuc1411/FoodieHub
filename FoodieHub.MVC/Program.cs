@@ -64,10 +64,6 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
 app.UseSession();
 // Khai báo Route cho Admin
 app.MapControllerRoute(

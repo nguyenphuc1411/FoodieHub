@@ -3,7 +3,6 @@ using AutoMapper.QueryableExtensions;
 using FoodieHub.API.Data;
 using FoodieHub.API.Data.Entities;
 using FoodieHub.API.Models.DTOs.Comment;
-using FoodieHub.API.Models.Response;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,16 +20,14 @@ namespace FoodieHub.API.Repositories.Implementations
             _mapper = mapper;
         }
 
-        public async Task<Comment?> Create(Comment entity)
+        public async Task<Comment?> Create(CommentDTO entity)
         {
             string userID = _authService.GetUserID();
-
-            entity.UserID = userID;
-            if (entity.UserID == null) return null;
-
-            await _context.Comments.AddAsync(entity);
+            var newComment = _mapper.Map<Comment>(entity);
+            newComment.UserID = userID;
+            await _context.Comments.AddAsync(newComment);
             var result = await _context.SaveChangesAsync();
-            if (result > 0) return entity;
+            if (result > 0) return newComment;
             return null;
         }
         public async Task<bool> Delete(int commentID)
@@ -41,13 +38,11 @@ namespace FoodieHub.API.Repositories.Implementations
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> Edit(int id, Comment entity)
+        public async Task<bool> Edit(int id, CommentDTO entity)
         {
             var comment = await _context.Comments.FindAsync(id);
             if (comment == null) return false;
-            string userId = _authService.GetUserID();
-            if(comment.UserID!=userId) return false;
-            comment = entity;
+            _mapper.Map(entity, comment);
             _context.Comments.Update(comment);
             return await _context.SaveChangesAsync() > 0;
         }
@@ -66,16 +61,18 @@ namespace FoodieHub.API.Repositories.Implementations
             return comments;
         }
 
-        public async Task<IEnumerable<CommentDTO>> GetByArticle(int id)
+        public async Task<IEnumerable<GetCommentDTO>> GetByArticle(int id)
         {
             return await _context.Comments.Where(x => x.ArticleID == id)
-                .ProjectTo<CommentDTO>(_mapper.ConfigurationProvider).ToListAsync();
+                .ProjectTo<GetCommentDTO>(_mapper.ConfigurationProvider)
+                .OrderByDescending(x=>x.CommentedAt).ToListAsync();
         }
 
-        public async Task<IEnumerable<CommentDTO>> GetByRecipe(int id)
+        public async Task<IEnumerable<GetCommentDTO>> GetByRecipe(int id)
         {
             return await _context.Comments.Where(x => x.RecipeID == id)
-               .ProjectTo<CommentDTO>(_mapper.ConfigurationProvider).ToListAsync();
+               .ProjectTo<GetCommentDTO>(_mapper.ConfigurationProvider)
+                .OrderByDescending(x => x.CommentedAt).ToListAsync();
         }
     }
 }

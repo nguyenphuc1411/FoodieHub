@@ -264,9 +264,9 @@ namespace FoodieHub.API.Repositories.Implementations
 
         public async Task<DetailRecipeDTO?> GetByID(int id)
         {
-            return await _context.Recipes.
-                Where(x => x.RecipeID == id)
-                .ProjectTo<DetailRecipeDTO>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+            return await _context.Recipes
+                .ProjectTo<DetailRecipeDTO>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(x=>x.RecipeID==id);
         }
     }
 }

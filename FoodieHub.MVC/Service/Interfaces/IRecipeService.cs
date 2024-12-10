@@ -3,8 +3,7 @@ namespace FoodieHub.MVC.Service.Interfaces
 {
     public interface IRecipeService
     {
-/*        Task<IEnumerable<GetRecipes>> GetRecipes(string? search, int? pageSize, int? currentPage);
-        Task<APIResponse<GetRecipeDetail>> GetRecipeDetail(int recipeID);*/
+        Task<DetailRecipeDTO?> GetByID(int id);
 
         Task<bool> Rating(CreateRatingDTO ratingDTO);
 
@@ -12,5 +11,7 @@ namespace FoodieHub.MVC.Service.Interfaces
 
         Task<IEnumerable<GetRecipeDTO>?> GetOfUser();
         Task<IEnumerable<GetRecipeDTO>?> GetByUser(string userId);
+
+        Task<bool> Delete(int id);
     }
 }

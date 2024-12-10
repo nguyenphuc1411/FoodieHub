@@ -1,5 +1,4 @@
-﻿using Azure;
-using FoodieHub.API.Models.DTOs.Recipe;
+﻿using FoodieHub.API.Models.DTOs.Recipe;
 using FoodieHub.API.Models.QueryModel;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -19,7 +18,7 @@ namespace FoodieHub.API.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create(CreateRecipeDTO recipeDTO)
+        public async Task<IActionResult> Create([FromForm]CreateRecipeDTO recipeDTO)
         {
             if (!recipeDTO.Ingredients.Any() || !recipeDTO.RecipeSteps.Any())
             {

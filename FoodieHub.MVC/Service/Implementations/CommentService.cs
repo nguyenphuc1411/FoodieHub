@@ -1,5 +1,4 @@
 ﻿using FoodieHub.API.Models.DTOs.Comment;
-using FoodieHub.MVC.Models.Comment;
 using FoodieHub.MVC.Service.Interfaces;
 
 namespace FoodieHub.MVC.Service.Implementations
@@ -13,45 +12,23 @@ namespace FoodieHub.MVC.Service.Implementations
             _httpClient = httpClientFactory.CreateClient("MyAPI");
         }
 
-        public async Task<IEnumerable<CommentDTO>> GetCommentRecipe(int id)
+        public async Task<IEnumerable<GetCommentDTO>> GetCommentRecipe(int id)
         {
-            var response = await _httpClient.GetAsync($"comments/recipes/{id}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var comments = await response.Content.ReadFromJsonAsync<IEnumerable<CommentDTO>>();
-                return comments ?? Enumerable.Empty<CommentDTO>();
-            }
-            else
-            {
-                throw new HttpRequestException($"Error fetching comments: {response.StatusCode}");
-            };
+            return await _httpClient.GetFromJsonAsync<IEnumerable<GetCommentDTO>>($"comments/recipes/{id}") ?? new List<GetCommentDTO>();        
         }
-        public async Task<IEnumerable<CommentDTO>> GetCommentArticle(int id)
+        public async Task<IEnumerable<GetCommentDTO>> GetCommentArticle(int id)
         {
-            var response = await _httpClient.GetAsync($"comments/articles/{id}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var comments = await response.Content.ReadFromJsonAsync<IEnumerable<CommentDTO>>();
-                return comments ?? Enumerable.Empty<CommentDTO>();
-            }
-            else
-            {
-                throw new HttpRequestException($"Error fetching comments: {response.StatusCode}");
-            };
+            return await _httpClient.GetFromJsonAsync<IEnumerable<GetCommentDTO>>($"comments/articles/{id}") ?? new List<GetCommentDTO>();
         }
         public async Task<bool> Delete(int id)
         {          
             var response = await _httpClient.DeleteAsync($"comments/{id}");
             return response.IsSuccessStatusCode;
         }
-        public async Task<bool> Create(CreateCommentDTO comment)
+        public async Task<bool> Create(CommentDTO comment)
         {
             var response = await _httpClient.PostAsJsonAsync("comments", comment);
             return response.IsSuccessStatusCode;
         }
-
-
     }
 }

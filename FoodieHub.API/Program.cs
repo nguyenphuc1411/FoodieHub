@@ -1,4 +1,3 @@
-using FoodieHub.API.Configurations.CustomAuthorization;
 using FoodieHub.API.Configurations.Mappings;
 using FoodieHub.API.Data;
 using FoodieHub.API.Extentions;
@@ -6,7 +5,6 @@ using FoodieHub.API.Repositories.Implementations;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-
+builder.Services.AddHttpContextAccessor();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDbContext<AppDbContext>(options =>
@@ -29,38 +27,7 @@ else
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("AppDBProduction")));
 }
-// Khai báo các DI
-builder.Services.AddTransient<ImageExtentions>();
-builder.Services.AddTransient<IMailService, SendMailService>();
-builder.Services.AddTransient<IImgService, ImgService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IArticleService, ArticleService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IContactService, ContactService>();
-builder.Services.AddScoped<IRecipeCategoryService, RecipeCategoryService>();
-builder.Services.AddScoped<IArticleCategoryService, ArticleCategoryService>();
-builder.Services.AddScoped<ICouponService, CouponService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IRecipeService, RecipeService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<IFavoriteService, FavoriteService>();
-builder.Services.AddScoped<ICommentService, CommentService>();
-builder.Services.AddScoped<IStatisticsService, StatisticsService>();
-builder.Services.AddScoped<IQRCodeService, QRCodeService>();
-builder.Services.AddScoped<IImageService, ImageService>();
 
-builder.Services.AddScoped<IAuthorizationHandler, AdminRequirementHandler>();
-
-builder.Services.AddAuthorization(opt =>
-{
-    opt.AddPolicy("RequireAdmin", policy =>
-    {
-        policy.AddRequirements(new AdminRequirement());
-    });
-});
 
 // C?u hình Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -95,8 +62,30 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+// Khai báo các DI
+builder.Services.AddTransient<ImageExtentions>();
+builder.Services.AddTransient<IMailService, SendMailService>();
+builder.Services.AddTransient<IImgService, ImgService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<IRecipeCategoryService, RecipeCategoryService>();
+builder.Services.AddScoped<IArticleCategoryService, ArticleCategoryService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IQRCodeService, QRCodeService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthorization();
 
 //string origin = builder.Configuration["OriginFE"] ?? "";
 builder.Services.AddCors(options =>

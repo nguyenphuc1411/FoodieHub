@@ -1,14 +1,15 @@
-﻿namespace FoodieHub.API.Models.DTOs.Comment
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FoodieHub.API.Models.DTOs.Comment
 {
     public class CommentDTO
     {
-        public int CommentID { get; set; }
         public int? RecipeID { get; set; }
+
         public int? ArticleID { get; set; }
+
+        [Required(ErrorMessage = "Comment content is required.")]
+        [StringLength(255, ErrorMessage = "Comment content cannot be longer than 500 characters.")]
         public string CommentContent { get; set; } = default!;
-        public DateTime CommentAt { get; set; }
-        public string UserID { get; set; } = default!;
-        public string Avatar { get; set; } = default!;
-        public string FullName { get; set; } = default!;
     }
 }

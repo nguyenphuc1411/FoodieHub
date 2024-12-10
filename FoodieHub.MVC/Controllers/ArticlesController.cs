@@ -3,9 +3,9 @@ using FoodieHub.MVC.Service.Interfaces;
 using FoodieHub.MVC.Models.Article;
 using System.Text.Json;
 using FoodieHub.MVC.Configurations;
-using FoodieHub.MVC.Models.Comment;
 using FoodieHub.API.Models.DTOs.Favorite;
 using FoodieHub.MVC.Helpers;
+using FoodieHub.API.Models.DTOs.Comment;
 
 namespace FoodieHub.MVC.Controllers
 {
@@ -196,7 +196,7 @@ namespace FoodieHub.MVC.Controllers
 
         [ValidateTokenForUser]
         [HttpPost]
-        public async Task<IActionResult> CreateComment(CreateCommentDTO comment, string order = "desc")
+        public async Task<IActionResult> CreateComment(CommentDTO comment, string order = "desc")
         {
             if (ModelState.IsValid)
             {
