@@ -1,12 +1,8 @@
 ﻿using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Helpers;
 using FoodieHub.MVC.Models.Coupon;
-using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
 
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
@@ -14,11 +10,9 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
     [ValidateTokenForAdmin]
     public class CouponsController : Controller
     {
-        private readonly IConfiguration _config;
         private readonly ICouponService couponService;
-        public CouponsController(IConfiguration config, ICouponService couponService)
+        public CouponsController(ICouponService couponService)
         {
-            _config = config;
             this.couponService = couponService;
         }
 
@@ -62,18 +56,25 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         // GET: Admin/Coupons/EditCoupon/5
         public async Task<IActionResult> EditCoupon(int id)
         {
-            var client = _httpClientFactory.CreateClient("MyAPI");
-
-            var response = await client.GetAsync($"Coupons/{id}");
-            var content = await response.Content.ReadFromJsonAsync<APIResponse<CouponDTO>>();
-
-            if (content.Success)
+            var result = await couponService.GetDetail(id);
+            if (result == null)
             {
-                return View(content.Data);
+                NotificationHelper.SetErrorNotification(this);
+                return RedirectToAction("Index");
             }
 
-            TempData["ErrorMessage"] = content.Message;
-            return RedirectToAction("Index");
+            var editCoupon = new CouponDTO
+            {
+                CouponCode =result.CouponCode,
+                DiscountType = result.DiscountType,
+                DiscountValue = result.DiscountValue,
+                MinimumOrderAmount = result.MinimumOrderAmount,
+                StartDate = result.StartDate,
+                EndDate = result.EndDate,
+                Note = result.Note,
+                IsActive = result.IsActive,
+            };
+            return View(editCoupon);
         }
 
         // POST: Admin/Coupons/EditCoupon
@@ -84,49 +85,19 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             {
                 return View(coupon);
             }
+            var result = await couponService.Update(id, coupon);
 
-            var client = _httpClientFactory.CreateClient("MyAPI");
-
-            var jsonContent = new StringContent(JsonSerializer.Serialize(coupon), Encoding.UTF8, "application/json");
-
-            var response = await client.PutAsync($"Coupons/{id}", jsonContent);
-
-            var data = await response.Content.ReadFromJsonAsync<APIResponse>();
-            if (data != null)
-            {
-                if (data.Success)
-                {
-                    TempData["SuccessMessage"] = data.Message;
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = data.Message;
-                }
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again.";
-            }
-
+            if (result) NotificationHelper.SetSuccessNotification(this);
+            else NotificationHelper.SetErrorNotification(this);
             return View(coupon);
         }
 
         public async Task<IActionResult> DeleteCoupon(int id)
         {
-            var client = _httpClientFactory.CreateClient("MyAPI");
+            bool result = await couponService.Delete(id);
 
-            var response = await client.DeleteAsync($"Coupons/{id}");
-            var data = await response.Content.ReadFromJsonAsync<APIResponse>();
-
-            if (data.Success)
-            {
-                TempData["SuccessMessage"] = data.Message;
-            }
-            else
-            {
-                TempData["ErrorMessage"] = data.Message;
-            }
+            if (result) NotificationHelper.SetSuccessNotification(this);
+            else NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Index");
         }
     }
