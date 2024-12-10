@@ -25,20 +25,8 @@ namespace FoodieHub.MVC.Controllers
             _favoriteService = favoriteService;
         }
         [ValidateTokenForUser]
-        public async Task<IActionResult> Create()
-        {
-            var response = await _httpClient.GetFromJsonAsync<List<CategoryDTO>>("RecipeCategory/getallrecipecategory");
-            if (response != null)
-            {
-                ViewBag.Category = response.ToList();
-            }
-            var responseIngredients = await _httpClient.GetFromJsonAsync<List<IngredientDTO>>("ingredients");
-            if(responseIngredients!=null)
-            {
-                ViewBag.Ingredients = responseIngredients;
-            }
-
-
+        public IActionResult Create()
+        {          
             return View();
         }
         [HttpPost]
@@ -53,12 +41,7 @@ namespace FoodieHub.MVC.Controllers
                     return Redirect("/account/recipe");
                 }
                 else NotificationHelper.SetErrorNotification(this);               
-            }
-            var response = await _httpClient.GetFromJsonAsync<List<CategoryDTO>>("RecipeCategory/getallrecipecategory");
-            if (response != null)
-            {
-                ViewBag.Category = response.ToList();
-            }
+            }         
             return View(recipe);
         }
 

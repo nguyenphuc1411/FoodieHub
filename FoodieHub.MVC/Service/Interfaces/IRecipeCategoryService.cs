@@ -6,7 +6,7 @@ namespace FoodieHub.MVC.Service.Interfaces
 {
     public interface IRecipeCategoryService
     {
-        Task<List<GetRecipeCategoryDTO>> GetAll();
+        Task<IEnumerable<GetRecipeCategoryDTO>> GetAll();
 
         Task<APIResponse> AddRecipeCategory(RecipeCategoryDTO recipeCategoryDTO);
 

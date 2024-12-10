@@ -18,15 +18,10 @@ namespace FoodieHub.MVC.Service.Implementations
 
 
         // Lấy danh sách tất cả Recipe Categories
-        public async Task<List<GetRecipeCategoryDTO>> GetAll()
+        public async Task<IEnumerable<GetRecipeCategoryDTO>?> GetAll()
         {
-            var response = await _httpClient.GetAsync("RecipeCategory");
-            if (response.IsSuccessStatusCode) 
-            {
-                var content = await response.Content.ReadFromJsonAsync<List<GetRecipeCategoryDTO>>();
-                return content;
-            }
-            return  new List<GetRecipeCategoryDTO>();
+            var response = await _httpClient.GetAsync("RecipeCategories");
+            return await response.Content.ReadFromJsonAsync<IEnumerable<GetRecipeCategoryDTO>>();          
         }
         // Thêm mới Recipe Category
         public async Task<APIResponse> AddRecipeCategory(RecipeCategoryDTO recipeCategoryDTO)
@@ -47,7 +42,7 @@ namespace FoodieHub.MVC.Service.Implementations
             }
 
             // Gửi POST request tới API
-            var response = await _httpClient.PostAsync("RecipeCategory", content);
+            var response = await _httpClient.PostAsync("RecipeCategories", content);
 
             // Xử lý phản hồi và trả về APIResponse
             if (response.IsSuccessStatusCode)
@@ -66,14 +61,14 @@ namespace FoodieHub.MVC.Service.Implementations
         // Xóa Recipe Category
         public async Task<APIResponse> DeleteRecipeCategory(RecipeCategoryDTO recipeCategoryDTO)
         {
-            var response = await _httpClient.DeleteAsync($"api/RecipeCategory/{recipeCategoryDTO.CategoryID}");
+            var response = await _httpClient.DeleteAsync($"api/RecipeCategories/{recipeCategoryDTO.CategoryID}");
             return await HandleResponse(response);
         }
 
         public async Task<APIResponse> UpdateRecipeStatus(RecipeCategoryStatusDTO recipeCategoryStatusDTO)
         {
             var jsonContent = JsonContent.Create(recipeCategoryStatusDTO);
-            var response = await _httpClient.PutAsync("RecipeCategory/updatestatusrecipecategory", jsonContent);
+            var response = await _httpClient.PutAsync("RecipeCategories/updatestatusrecipecategory", jsonContent);
 
             if (response.IsSuccessStatusCode)
             {
@@ -95,7 +90,7 @@ namespace FoodieHub.MVC.Service.Implementations
         public async Task<APIResponse> UpdateRecipeCategoryNoneImg(RecipeCategoryNoneImgDTO recipeCategoryDTO)
         {
             var jsonContent = JsonContent.Create(recipeCategoryDTO);
-            var response = await _httpClient.PutAsync("RecipeCategory/updaterecipecategorynoneimg", jsonContent);
+            var response = await _httpClient.PutAsync("RecipeCategories/updaterecipecategorynoneimg", jsonContent);
 
             if (response.IsSuccessStatusCode)
             {
@@ -127,7 +122,7 @@ namespace FoodieHub.MVC.Service.Implementations
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(recipeCategoryDTO.ImageURL.ContentType);
                 content.Add(fileContent, "ImageURL", recipeCategoryDTO.ImageURL.FileName);
             }
-            var response = await _httpClient.PutAsync("RecipeCategory/updaterecipecategorytwithimg", content);
+            var response = await _httpClient.PutAsync("RecipeCategories/updaterecipecategorytwithimg", content);
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<APIResponse>();

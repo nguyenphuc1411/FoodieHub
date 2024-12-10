@@ -32,6 +32,7 @@ builder.Services.AddSingleton(x => new PaypalClient(
         builder.Configuration["PaypalOptions:Mode"]??""
 ));
 
+
 builder.Services.AddHttpClient("MyAPI", opts =>
 {
     var url = builder.Configuration["BaseHost"] + "api/";

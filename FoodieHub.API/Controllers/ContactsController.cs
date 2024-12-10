@@ -6,10 +6,10 @@ namespace FoodieHub.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ContactController : Controller
+    public class ContactsController : Controller
     {
         private readonly IContactService _service;
-        public ContactController(IContactService service)
+        public ContactsController(IContactService service)
         {
             _service = service;
         }

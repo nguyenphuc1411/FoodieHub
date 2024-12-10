@@ -1,5 +1,6 @@
 ﻿using Azure;
 using FoodieHub.API.Models.DTOs.Recipe;
+using FoodieHub.API.Models.QueryModel;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -49,6 +50,11 @@ namespace FoodieHub.API.Controllers
         {
             var result = await _service.Rating(ratingDTO);
             return result ? Ok() : BadRequest();
+        }
+        [HttpGet]
+        public async Task<ActionResult<GetRecipeDTO>> Get([FromQuery] QueryRecipeModel query)
+        {
+            return Ok(await _service.Get(query));
         }
 
         [HttpGet("users/{userid}")]

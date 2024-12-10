@@ -7,11 +7,11 @@ namespace FoodieHub.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RecipeCategoryController : ControllerBase
+    public class RecipeCategoriesController : ControllerBase
     {
         private readonly IRecipeCategoryService _service;
 
-        public RecipeCategoryController(IRecipeCategoryService recipeCategoryService)
+        public RecipeCategoriesController(IRecipeCategoryService recipeCategoryService)
         {
             _service = recipeCategoryService;
         }

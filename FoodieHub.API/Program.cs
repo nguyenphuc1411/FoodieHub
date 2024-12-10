@@ -19,9 +19,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AppDB")));
-
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("AppDBDevelopment")));
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("AppDBProduction")));
+}
 // Khai báo các DI
 builder.Services.AddTransient<ImageExtentions>();
 builder.Services.AddTransient<IMailService, SendMailService>();
@@ -91,17 +98,17 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddHttpContextAccessor();
 
-/*string origin = builder.Configuration["OriginFE"] ??"";
+//string origin = builder.Configuration["OriginFE"] ?? "";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", builder =>
     {
-        builder.WithOrigins(origin)
+        builder.AllowAnyOrigin()
                .AllowAnyHeader()
                .AllowAnyMethod();
     });
 });
-*/
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

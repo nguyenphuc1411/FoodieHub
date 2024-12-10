@@ -19,7 +19,6 @@ namespace FoodieHub.API.Controllers
         {
             _service = service;
         }
-        [Authorize(Policy = "RequireAdmin")]
         [HttpGet]
         public async Task<ActionResult<PaginatedModel<GetArticleDTO>>> Get([FromQuery] QueryModel query, [FromQuery] int? categoryID)
         {

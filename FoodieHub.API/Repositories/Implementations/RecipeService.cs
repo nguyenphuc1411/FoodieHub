@@ -110,61 +110,7 @@ namespace FoodieHub.API.Repositories.Implementations
                 await transaction.RollbackAsync();
                 throw new Exception(ex.Message);
             }
-        }
-
-        public async Task<ServiceResponse> Get(string? search, int? pageSize, int? currentPage)
-        {
-            var recipes = _context.Recipes
-                .Where(x => x.IsActive)
-                .ProjectTo<GetRecipeDTO>(_mapper.ConfigurationProvider)
-                        .AsQueryable();
-            if (!string.IsNullOrEmpty(search))
-            {
-                recipes = recipes.Where(x => x.Title.ToLower().Contains(search.ToLower()));
-
-            }
-            if (pageSize.HasValue && currentPage.HasValue)
-            {
-                var list = await recipes.ToListAsync();
-                return new ServiceResponse
-                {
-                    Success = true,
-                    Message = "Get recipes successfully",
-                    Data = list.Paginate(pageSize.Value, currentPage.Value),
-                    StatusCode = 200
-                };
-            }
-            return new ServiceResponse
-            {
-                Success = true,
-                Message = "Get recipes successfully",
-                Data = await recipes.ToListAsync(),
-                StatusCode = 200
-            };
-        }
-
-        public async Task<ServiceResponse> GetDetail(int recipeID)
-        {
-            var result = await _context.Recipes
-                .Where(x => x.IsActive && x.RecipeID == recipeID)
-                .ProjectTo<DetailRecipeDTO>(_mapper.ConfigurationProvider)
-                            .FirstOrDefaultAsync();
-            if (result == null)
-                return new ServiceResponse
-                {
-                    Success = false,
-                    Message = "Not found this recipe",
-                    StatusCode = 404
-                };
-            return new ServiceResponse
-            {
-                Success = true,
-                Message = "Get detail success",
-                Data = result,
-                StatusCode = 200
-            };
-        }
-
+        } 
         public async Task<PaginatedModel<GetRecipeDTO>> Get(QueryRecipeModel query)
         {
             var listarticles = _context.Recipes.AsQueryable();

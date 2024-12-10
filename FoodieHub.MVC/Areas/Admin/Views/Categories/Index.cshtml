@@ -97,7 +97,6 @@
                             <th>Category ID</th>
                             <th>Category Name</th>
                             <th>Image</th>
-                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -106,41 +105,13 @@
                         {
                             @foreach (var item in listRecipeCategory)
                             {
-                                // Kiểm tra trạng thái của từng mục
-                                bool isActive = item.IsActice && !item.IsDeleted;
-
                                 <tr>
                                     <td>@item.CategoryID</td>
                                     <td>@item.CategoryName</td>
                                     <td><img src="@($"{apiUrl}Images/{item.ImageURL}")" alt="@item.CategoryName" width="40" height="40" /></td>
                                     <td>
-                                        @if (isActive)
-                                        {
-                                            <span class="text-success fw-bold">Enable</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-danger fw-bold">Disable</span>
-                                        }
-                                    </td>
-                                    <td>
                                         <a data-bs-toggle="modal" data-bs-target="#RecipeCategoryEdit@(item.CategoryID)"
                                            class="btn btn-warning mx-1">Edit</a>
-                                        @if (item.IsActice)
-                                        {
-                                            <!-- Nút mở modal Disable -->
-                                            <button type="button" class="btn btn-danger mx-1" data-bs-toggle="modal" data-bs-target="#disableArticleCategorymodal(@item.CategoryID)">
-                                                Disable
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <!-- Nút mở modal Enable -->
-                                            <button type="button" class="btn btn-success mx-1" data-bs-toggle="modal" data-bs-target="#enableArticleCategorymodal(@item.CategoryID)">
-                                                Enable
-                                            </button>
-                                        }
-
                                     </td>
                                 </tr>
                             }
@@ -470,67 +441,6 @@
         </div>
     </div>
 }
-
-
-
-@* Set Article Status *@
-@foreach (var item in listRecipeCategory)
-{
-    <!-- Modal Disable -->
-    @if (item.IsActice)
-    {
-        <div class="modal fade" id="disableArticleCategorymodal(@item.CategoryID)" tabindex="-1" aria-labelledby="disableArticleCategorymodal(@item.CategoryID)" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="disableArticleCategorymodal(@item.CategoryID)">Confirm Disable</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to disable the category <strong>@item.CategoryName</strong>?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form asp-action="SetRecipeCategoryOff" method="post" class="d-inline">
-                            <input type="hidden" name="CategoryID" value="@item.CategoryID" />
-                            <input type="hidden" name="CategoryName" value="@item.CategoryName" />
-                            <button type="submit" class="btn btn-danger">Yes, Disable</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-    <!-- Modal Enable -->
-    @if (!item.IsActice)
-    {
-        <div class="modal fade" id="enableArticleCategorymodal(@item.CategoryID)" tabindex="-1" aria-labelledby="enableArticleCategorymodal(@item.CategoryID)" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="enableArticleCategorymodal(@item.CategoryID)">Confirm Enable</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to enable the category <strong>@item.CategoryName</strong>?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form asp-action="SetRecipeCategoryOn" method="post" class="d-inline">
-                            <input type="hidden" name="CategoryID" value="@item.CategoryID" />
-                            <input type="hidden" name="CategoryName" value="@item.CategoryName" />
-                            <button type="submit" class="btn btn-success">Yes, Enable</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-}
-
-
-
 @* Set Recipe Status *@
 @foreach (var item in listArticleCategories) 
 {

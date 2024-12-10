@@ -1,8 +1,13 @@
 ﻿@using FoodieHub.API.Models.DTOs.Recipe
-
+@using FoodieHub.MVC.Models.Categories
+@using FoodieHub.MVC.Service.Interfaces
+@inject IRecipeCategoryService categoryService
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    var categories = await categoryService.GetAll() ?? new List<GetRecipeCategoryDTO>();
 }
 @model CreateRecipeDTO
 
@@ -76,12 +81,10 @@
                         <label asp-for="CategoryID" class="form-label">Category *</label>
                         <select asp-for="CategoryID" class="form-select">
                             <option selected>Select Category</option>
-                            @if (ViewBag.Category != null)
+                         
+                            @foreach (var item in categories)
                             {
-                                foreach (var item in ViewBag.Category)
-                                {
-                                    <option value="@item.CategoryID">@item.CategoryName</option>
-                                }
+                                <option value="@item.CategoryID">@item.CategoryName</option>
                             }
                         </select>
                         <span asp-validation-for="CategoryID" class="text-danger"></span>
