@@ -1,5 +1,5 @@
-﻿using FoodieHub.API.Models.DTOs.Authentication;
-using FoodieHub.API.Models.DTOs.User;
+﻿using FoodieHub.MVC.Models.Authentication;
+using FoodieHub.MVC.Models.User;
 using FoodieHub.MVC.Models.Response;
 namespace FoodieHub.MVC.Service.Interfaces
 {

@@ -1,11 +1,11 @@
 ﻿using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using FoodieHub.API.Models.DTOs.Favorite;
-using FoodieHub.API.Models.DTOs.Recipe;
+using FoodieHub.MVC.Models.Favorite;
+using FoodieHub.MVC.Models.Recipe;
 using FoodieHub.MVC.Helpers;
-using FoodieHub.API.Models.DTOs.Comment;
-
+using FoodieHub.MVC.Models.Comment;
+using FoodieHub.MVC.Models.QueryModel;
 
 namespace FoodieHub.MVC.Controllers
 {
@@ -90,21 +90,13 @@ namespace FoodieHub.MVC.Controllers
         }
 
 
-        /* public async Task<IActionResult> Index(string? search, int? pageSize, int? currentPage)
-         {
-             // Lấy danh sách công thức
-             var recipes = await _recipeService.GetRecipes(search, pageSize, currentPage);
+        public async Task<IActionResult> Index(QueryRecipeModel query)
+        {
+            // Lấy danh sách công thức
+            var recipes = await _recipeService.GetAll(query);
+            return View(recipes);
+        }
 
-             // Lấy danh sách danh mục từ API
-             var categoryResponse = await _httpClient.GetFromJsonAsync<List<CategoryDTO>>("RecipeCategory/getallrecipecategory");
-             var categories = categoryResponse?.Select(c => c.CategoryName).ToList(); // Chỉ lấy tên danh mục
-
-             // Truyền danh mục qua ViewData
-             ViewData["Categories"] = categories;
-
-             return View(recipes);
-         }
- */
 
 
         // Action hiển thị chi tiết bài viết

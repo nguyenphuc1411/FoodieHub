@@ -1,6 +1,6 @@
-﻿using FoodieHub.API.Models.DTOs.User;
-using FoodieHub.API.Models.QueryModel;
-using FoodieHub.API.Models.Response;
+﻿using FoodieHub.MVC.Models.User;
+using FoodieHub.MVC.Models.QueryModel;
+using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Models.Response;
 
 namespace FoodieHub.MVC.Service.Interfaces

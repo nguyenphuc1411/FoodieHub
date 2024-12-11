@@ -1,28 +1,32 @@
-﻿@using FoodieHub.API.Models.Response
-@using System.Text.Json
+﻿@using FoodieHub.MVC.Models.Recipe
+@using FoodieHub.MVC.Models.QueryModel
+@using FoodieHub.MVC.Models.Response
+@using FoodieHub.MVC.Service.Interfaces
+@inject IRecipeCategoryService category
 @inject IConfiguration config
 @{
     ViewData["Title"] = "Recipes";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var url = config["BaseHost"];
+    var categories = await category.GetAll();
+    var query = ViewBag.Query as QueryRecipeModel ?? new QueryRecipeModel();
 }
-@model PaginatedModel<JsonElement>
+@model PaginatedModel<GetRecipeDTO>
 
 <div class="container py-4">
     <!-- Header Section with Create Button, Filter, Search, and Total Count -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <a asp-action="Create" class="btn btn-primary">Create</a>
-            <a asp-action="Deleted" class="btn btn-secondary">Deleted Recipes</a>
+            <a href="recipes/create" class="btn btn-primary">Create</a>
         </div>
 
         <form method="post" class="d-flex align-items-center">
             <a class="btn btn-light me-2" asp-action="Index">Clear All Filter</a>
-            <label for="isActive" class="me-2">IsActive</label>
-            <select name="isActive" class="form-select form-select-sm me-2" style="width: 150px;">            
-                @if (ViewBag.IsActive != null)
+            <label for="IsActive" class="me-2">IsActive</label>
+            <select name="IsActive" class="form-select form-select-sm me-2" style="width: 150px;">            
+                @if (query.IsActive != null)
                 {    
-                    if(ViewBag.IsActive==true){
+                    if(query.IsActive==true){
                         <option value="">All</option>
                         <option selected value="true">Active</option>
                         <option value="false">Deactive</option>
@@ -42,18 +46,24 @@
                 }
 
             </select>
-            <label for="categoryID" class="me-2">Category Name</label>
-            <select name="categoryID" class="form-select form-select-sm me-2" style="width: 150px;">
-                <option value="0" selected>All</option>
-                @if (ViewBag.Category != null)
+            <label for="CategoryID" class="me-2">Category Name</label>
+            <select name="CategoryID" class="form-select form-select-sm me-2" style="width: 150px;">
+                <option value="" selected>All</option>
+                @if (categories != null)
                 {
-                    foreach (var item in ViewBag.Category)
+                    foreach (var item in categories)
                     {
-                        <option value="@item.CategoryID">@item.CategoryName</option>
+                        @if(query.CategoryID==item.CategoryID){
+                            <option selected value=@item.CategoryID>@item.CategoryName</option>
+                        }
+                        else{
+                            <option value=@item.CategoryID>@item.CategoryName</option>
+                        }
+                       
                     }
                 }
             </select>
-            <input type="text" name="search" value="@(ViewBag.Search != null ? ViewBag.Search : "")" class="form-control form-control-sm me-2" placeholder="Search articles..." style="width: 200px;" />
+            <input type="text" name="SearchItem" value=@query.SearchItem class="form-control form-control-sm me-2" placeholder="Search articles..." style="width: 200px;" />
             <button type="submit" class="btn btn-secondary">Search</button>
         </form>
     </div>
@@ -61,8 +71,6 @@
     <!-- Total Count of recipes -->
     <div class="mb-3">
         <strong>Total Recipes: </strong>@(Model != null ? Model.TotalItems : 0)
-
-        <a href="/admin/recipes/users" class="ms-2 btn btn-warning">View Recipes Of Users</a>
     </div>
 
     <!-- Table Section -->
@@ -74,35 +82,36 @@
                     <th>Title</th>
                     <th>Image</th>
                     <th>Created At</th>
-                    <th>Updated At</th>
                     <th>Author</th>
                     <th>Category</th>
                     <th>IsActive</th>
+                    <th>Upload By</th>
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
-                @if (Model.Items != null)
+            <tbody>               
+                @foreach (var item in Model.Items)
                 {
-                    foreach (var item in Model.Items)
-                    {
-                        <tr>
-                            <td>@item.GetProperty("recipeID")</td>
-                            <td>@item.GetProperty("title")</td>
-                            <td><img src=@($"{url}/images/{item.GetProperty("imageURL")}") alt="Recipe Image" class="img-thumbnail" style="width:50px;height:50px" /></td>
-                            <td>@DateTime.Parse(item.GetProperty("createdAt").GetString()).ToString("dd/MM/yyyy")</td>
-                            <td>@DateTime.Parse(item.GetProperty("updatedAt").GetString()).ToString("dd/MM/yyyy")</td>
-                            <td>@item.GetProperty("fullname")</td>
-                            <td>@item.GetProperty("categoryName")</td>
-                            <td>@item.GetProperty("isActive").GetBoolean()</td>
-
-                            <td>
-                                <a asp-action="Detail" asp-route-id="@item.GetProperty("recipeID")" class="btn btn-info btn-sm">Detail</a>
-                                <a asp-action="Edit" asp-route-id="@item.GetProperty("recipeID")" class="btn btn-warning btn-sm">Edit</a>
-                                <a asp-action="Delete" asp-route-id="@item.GetProperty("recipeID")" class="btn btn-danger btn-sm">Delete</a>
-                            </td>
-                        </tr>
-                    }
+                    <tr>
+                        <td>@item.RecipeID</td>
+                        <td>@item.Title</td>
+                        <td><img src=@($"{url}images/{item.ImageURL}") alt="Recipe Image" class="img-thumbnail" style="width:50px;height:50px" /></td>
+                        <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                        <td>@item.FullName</td>
+                        <td>@item.CategoryName</td>
+                        <td>@item.IsActive</td>
+                        <td>
+                            @{
+                                var result = item.IsAdminUpload ? "Admin" : "User";
+                                <span>@result</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Detail" asp-route-id="@item.RecipeID" class="btn btn-info btn-sm">Detail</a>
+                            <a asp-action="Edit" asp-route-id="@item.RecipeID" class="btn btn-warning btn-sm">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@item.RecipeID" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>

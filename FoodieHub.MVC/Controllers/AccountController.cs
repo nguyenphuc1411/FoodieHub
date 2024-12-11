@@ -1,16 +1,16 @@
-﻿using FoodieHub.API.Models.DTOs.Article;
-using FoodieHub.API.Models.DTOs.Authentication;
-using FoodieHub.API.Models.DTOs.Favorite;
-using FoodieHub.API.Models.DTOs.Recipe;
-using FoodieHub.API.Models.DTOs.User;
-using FoodieHub.API.Models.QueryModel;
+﻿
+using FoodieHub.MVC.Models.Authentication;
+using FoodieHub.MVC.Models.Favorite;
+using FoodieHub.MVC.Models.Recipe;
+using FoodieHub.MVC.Models.User;
 using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Helpers;
-using FoodieHub.MVC.Models.Favorite;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using FoodieHub.MVC.Models.QueryModel;
+using FoodieHub.MVC.Models.Article;
 
 
 namespace FoodieHub.MVC.Controllers

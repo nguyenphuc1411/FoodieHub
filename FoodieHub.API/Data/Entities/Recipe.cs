@@ -16,7 +16,7 @@ namespace FoodieHub.API.Data.Entities
         public TimeOnly CookTime { get; set; }
         public int Serves { get; set; }
         public bool IsAdminUpload { get; set; } = false;
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
 
         [Column(TypeName = "nvarchar(450)")]

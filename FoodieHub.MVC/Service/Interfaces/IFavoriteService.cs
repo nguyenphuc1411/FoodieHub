@@ -1,6 +1,6 @@
-﻿using FoodieHub.API.Models.DTOs.Article;
-using FoodieHub.API.Models.DTOs.Favorite;
-using FoodieHub.API.Models.DTOs.Recipe;
+﻿using FoodieHub.MVC.Models.Article;
+using FoodieHub.MVC.Models.Favorite;
+using FoodieHub.MVC.Models.Recipe;
 
 namespace FoodieHub.MVC.Service.Interfaces
 {

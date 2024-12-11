@@ -1,4 +1,4 @@
-﻿@using FoodieHub.API.Models.DTOs.Recipe
+﻿@using FoodieHub.MVC.Models.Recipe
 @using FoodieHub.MVC.Models.Categories
 @using FoodieHub.MVC.Service.Interfaces
 @inject IRecipeCategoryService categoryService
@@ -13,7 +13,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
             <div class="card shadow">
-                <form asp-controller="Recipes" asp-action="Create" method="post" enctype="multipart/form-data" class="card-body">
+                <form asp-action="Create" method="post" enctype="multipart/form-data" class="card-body">
                     <h2 class="card-title text-center mb-4">Add a New Recipe</h2>
                     <div class="py-1 text-center">
                         <img src="/images/horizontal-line1 1.png" alt="horizontal line">

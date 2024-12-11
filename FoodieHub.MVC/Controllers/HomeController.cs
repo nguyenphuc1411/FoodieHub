@@ -1,4 +1,4 @@
-﻿using FoodieHub.API.Models.DTOs.User;
+﻿using FoodieHub.MVC.Models.User;
 using FoodieHub.MVC.Helpers;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;

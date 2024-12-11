@@ -3,9 +3,9 @@ using FoodieHub.MVC.Service.Interfaces;
 using FoodieHub.MVC.Models.Article;
 using System.Text.Json;
 using FoodieHub.MVC.Configurations;
-using FoodieHub.API.Models.DTOs.Favorite;
+using FoodieHub.MVC.Models.Favorite;
 using FoodieHub.MVC.Helpers;
-using FoodieHub.API.Models.DTOs.Comment;
+using FoodieHub.MVC.Models.Comment;
 
 namespace FoodieHub.MVC.Controllers
 {

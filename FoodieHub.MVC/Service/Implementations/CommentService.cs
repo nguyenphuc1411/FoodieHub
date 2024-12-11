@@ -1,4 +1,4 @@
-﻿using FoodieHub.API.Models.DTOs.Comment;
+﻿using FoodieHub.MVC.Models.Comment;
 using FoodieHub.MVC.Service.Interfaces;
 
 namespace FoodieHub.MVC.Service.Implementations

@@ -1,10 +1,12 @@
-﻿@inject IConfiguration config
+﻿@using FoodieHub.MVC.Models.Recipe
+@using FoodieHub.MVC.Models.Response
+@inject IConfiguration config
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = config["BaseHost"];
 }
-
+@model PaginatedModel<GetRecipeDTO>
 <div class="container py-5">
     <h2 class="text-center mb-5">Recipe List</h2>
 
@@ -58,7 +60,7 @@
 
                 <!-- Clear Filters Button -->
                 <div class="d-grid gap-2 mt-2">
-                    <button class="button button-light">Clear Filters</button>
+                    <a href="recipes" class="button button-light">Clear Filters</a>
                 </div>
             </form>
         </div>
@@ -66,29 +68,32 @@
         <!-- Recipe Cards -->
         <div class="col-12 col-md-9">
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-               @*  @foreach (var recipe in Model)
+                @foreach (var recipe in Model.Items)
                 {
-                    <div class="col">
-                        <div class="card recipe-card shadow-sm">
-                            <img src="@url + recipe.ImageUrl" class="card-img-top" alt="Recipe Image">
-                            <div class="card-body">
-                                <h5 class="card-title">@recipe.Title</h5>
-                                <p class="card-text">@recipe.Description</p>
-                                <div class="recipe-stats">
-                                    <span>Created on: @recipe.CreatedDate.ToString("dd/MM/yyyy")</span>
-                                    <span>Likes: @recipe.Likes</span>
-                                </div>
-                                <div class="recipe-stats">
-                                    <span>Rating: @recipe.Rating</span>
-                                    <span>Reviews: @recipe.ReviewsCount</span>
-                                </div>
-                                <div class="recipe-stats">
-                                    <span>Cooking Time: @recipe.CookingTime mins</span>
+                    <a href="recipes/detail/@recipe.RecipeID">
+                        <div class="col">
+                            <div class="card recipe-card shadow-sm">
+                                <img src=@(url+"images/"+recipe.ImageURL) class="card-img-top" alt="Recipe Image">
+                                <div class="card-body">
+                                    <h5 class="card-title">@recipe.Title</h5>
+                                    <p class="card-text">@recipe.Description</p>
+                                    <div class="recipe-stats">
+                                        <span>Created on: @recipe.CreatedAt</span>
+                                        <span>Likes: @recipe.TotalFavorites</span>
+                                    </div>
+                                    <div class="recipe-stats">
+                                        <span>Rating: @recipe.RatingAverage/5 (@recipe.TotalRatings)</span>
+                                        <span>Comments: @recipe.TotalComments</span>
+                                    </div>
+                                    <div class="recipe-stats">
+                                        <span>Cooking Time: @recipe.CookTime</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                } *@
+                    </a>
+                   
+                }
             </div>
 
             <!-- Pagination -->

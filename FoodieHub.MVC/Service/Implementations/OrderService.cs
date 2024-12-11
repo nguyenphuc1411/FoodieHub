@@ -1,10 +1,7 @@
-﻿using FoodieHub.API.Data.Entities;
-using FoodieHub.API.Models.DTOs.Order;
-using FoodieHub.API.Models.QueryModel;
-using FoodieHub.API.Models.Response;
-using FoodieHub.MVC.Helpers;
-using FoodieHub.MVC.Models.Order;
+﻿using FoodieHub.MVC.Models.Order;
+using FoodieHub.MVC.Models.QueryModel;
 using FoodieHub.MVC.Models.Response;
+using FoodieHub.MVC.Helpers;
 using FoodieHub.MVC.Service.Interfaces;
 using System.Net.Http;
 

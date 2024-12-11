@@ -6,10 +6,5 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-	<ItemGroup>
-		<!-- Tham chiếu dự án API -->
-		<ProjectReference Include="..\FoodieHub.API\FoodieHub.API.csproj" />
-	</ItemGroup>
-
 
 </Project>

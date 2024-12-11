@@ -1,6 +1,5 @@
-﻿using Azure;
-using FoodieHub.API.Models.DTOs.Authentication;
-using FoodieHub.API.Models.DTOs.User;
+﻿using FoodieHub.MVC.Models.Authentication;
+using FoodieHub.MVC.Models.User;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using System.Net.Http.Headers;

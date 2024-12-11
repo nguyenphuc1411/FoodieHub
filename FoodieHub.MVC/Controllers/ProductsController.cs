@@ -1,4 +1,4 @@
-﻿using FoodieHub.API.Extentions;
+﻿using FoodieHub.MVC.Extentions;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;

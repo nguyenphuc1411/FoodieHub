@@ -1,7 +1,5 @@
-﻿using FoodieHub.API.Models.DTOs.Order;
-using FoodieHub.API.Models.QueryModel;
-using FoodieHub.API.Models.Response;
-using FoodieHub.MVC.Models.Order;
+﻿using FoodieHub.MVC.Models.Order;
+using FoodieHub.MVC.Models.QueryModel;
 using FoodieHub.MVC.Models.Response;
 
 namespace FoodieHub.MVC.Service.Interfaces

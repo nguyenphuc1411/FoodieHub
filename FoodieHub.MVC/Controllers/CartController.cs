@@ -1,4 +1,4 @@
-﻿using FoodieHub.API.Models.DTOs.Order;
+﻿using FoodieHub.MVC.Models.Order;
 using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Models;
 using FoodieHub.MVC.Models.Cart;

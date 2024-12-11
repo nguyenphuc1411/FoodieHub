@@ -3,7 +3,7 @@
 @using FoodieHub.MVC.Models.Product.TimeHelper
 @model FoodieHub.MVC.Models.Response.APIResponse<FoodieHub.MVC.Models.GetProductDTO>
 @inject IProductImageService _imgService;
-@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@inject IConfiguration Configuration
 @inject IReviewService _reviewService;
 @inject IProductService _productService;
 @inject IOrderService _orderService;
@@ -43,15 +43,16 @@
     // Lọc danh sách đánh giá theo ProductID của sản phẩm hiện tại
 
     int averageRating = 0;
-    if (listReview.Data.Any())
-    {
-        double totalRate = listReview.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
-        double avgRate = totalRate / listReview.Data.Count;  // Trung bình rate
-
-        // Làm tròn: nếu avgRate >= 3.5, làm tròn lên, nếu < 3.5, làm tròn xuống
-        averageRating = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
-    }
   
+      if (listReview.Data!=null&& listReview.Data.Any())
+          {
+          double totalRate = listReview.Data.Sum(x => x.RatingValue); // Total all rates
+          double avgRate = totalRate / listReview.Data.Count;  // Average rate
+
+          // Round: if avgRate >= 3.5, round up, if < 3.5, round down
+          averageRating = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
+    }
+   
 }
 
 <div class="container mt-3">

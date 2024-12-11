@@ -1,5 +1,4 @@
-﻿using Azure;
-using FoodieHub.API.Models.DTOs.User;
+﻿using FoodieHub.MVC.Models.User;
 using FoodieHub.MVC.Areas.Admin.Models;
 using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Models.Contact;

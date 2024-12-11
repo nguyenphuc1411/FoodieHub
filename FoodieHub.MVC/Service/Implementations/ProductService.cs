@@ -1,10 +1,6 @@
-﻿using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text.Json;
-using FoodieHub.MVC.Models;
+﻿using FoodieHub.MVC.Models;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
-using FoodieHub.MVC.Models.DTOs;
 using System.Net.Http.Headers;
 using FoodieHub.MVC.Models.Product;
 

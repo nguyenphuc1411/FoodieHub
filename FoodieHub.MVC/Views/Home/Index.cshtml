@@ -2,7 +2,7 @@
 @inject IProductService _productService;
 @inject IOrderService _orderService;
 @inject IReviewService _reviewService;
-@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Home Page";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -186,7 +186,7 @@
 
 
             int averageRatingOther = 0;
-            if (listReviewOrther.Data.Any())
+            if (listReviewOrther.Data!=null)
             {
                 double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
                 double avgRate = totalRate / listReviewOrther.Data.Count;  // Trung bình rate

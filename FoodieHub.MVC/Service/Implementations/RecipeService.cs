@@ -1,6 +1,9 @@
 ﻿using FoodieHub.MVC.Service.Interfaces;
-using FoodieHub.API.Models.DTOs.Recipe;
+using FoodieHub.MVC.Models.Recipe;
 using System.Net.Http.Headers;
+using FoodieHub.MVC.Models.Response;
+using FoodieHub.MVC.Models.QueryModel;
+using FoodieHub.MVC.Helpers;
 
 namespace FoodieHub.MVC.Service.Implementations
 {
@@ -11,34 +14,7 @@ namespace FoodieHub.MVC.Service.Implementations
         public RecipeService(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient("MyAPI");
-        }
-
-        /*//hien thi search
-        public async Task<IEnumerable<GetRecipeDTO>> GetRecipes(string? search, int? pageSize, int? currentPage)
-        {
-            // Xây dựng URL query
-            var query = new Dictionary<string, string>();
-            if (!string.IsNullOrWhiteSpace(search)) query.Add("search", search);
-            if (pageSize.HasValue) query.Add("pageSize", pageSize.Value.ToString());
-            if (currentPage.HasValue) query.Add("currentPage", currentPage.Value.ToString());
-
-            var queryString = string.Join("&", query.Select(kvp => $"{kvp.Key}={kvp.Value}"));
-            var url = string.IsNullOrWhiteSpace(queryString) ? "Recipes" : $"Recipes?{queryString}";
-
-            var response = await _httpClient.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadFromJsonAsync<APIResponse<List<GetRecipeDTO>>>();
-                if (content != null && content.Success)
-                {
-                    return content.Data ?? new List<GetRecipeDTO>();
-                }
-            }
-
-            return new List<GetRecipeDTO>();
-        }*/
-  
+        }     
         public async Task<bool> Rating(CreateRatingDTO ratingDTO)
         {
             var response = await _httpClient.PostAsJsonAsync("recipes/ratings",ratingDTO);
@@ -117,6 +93,12 @@ namespace FoodieHub.MVC.Service.Implementations
         public async Task<DetailRecipeDTO?> GetByID(int id)
         {
             return await _httpClient.GetFromJsonAsync<DetailRecipeDTO>("recipes/" + id);
+        }
+
+        public async Task<PaginatedModel<GetRecipeDTO>?> GetAll(QueryRecipeModel query)
+        {
+            var queryString = query.ToQueryString();
+            return await _httpClient.GetFromJsonAsync<PaginatedModel<GetRecipeDTO>>("recipes"+queryString);
         }
     }
 }

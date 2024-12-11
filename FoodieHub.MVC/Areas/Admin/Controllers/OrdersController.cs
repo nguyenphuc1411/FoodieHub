@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Configurations;
-using FoodieHub.API.Models.Response;
-using FoodieHub.API.Models.DTOs.Order;
+using FoodieHub.MVC.Models.Response;
+using FoodieHub.MVC.Models.Order;
 
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {

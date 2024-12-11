@@ -1,7 +1,4 @@
-﻿using Azure;
-using FoodieHub.API.Models.Response;
-using FoodieHub.MVC.Configurations;
-using FoodieHub.MVC.Models;
+﻿using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Models.Article;
 using FoodieHub.MVC.Models.Category;
 using FoodieHub.MVC.Models.Response;
