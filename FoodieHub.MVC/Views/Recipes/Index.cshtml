@@ -1,10 +1,12 @@
-﻿@using FoodieHub.MVC.Models.Recipe
+﻿@using FoodieHub.MVC.Models.QueryModel
+@using FoodieHub.MVC.Models.Recipe
 @using FoodieHub.MVC.Models.Response
 @inject IConfiguration config
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = config["BaseHost"];
+    var query = ViewBag.Query as QueryRecipeModel ?? new QueryRecipeModel(); 
 }
 @model PaginatedModel<GetRecipeDTO>
 <div class="container py-5">
@@ -96,21 +98,24 @@
                 }
             </div>
 
-            <!-- Pagination -->
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mt-4">
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination pagination-sm mb-0">
+                    <!-- Nút Previous (ẩn nếu đang ở trang đầu tiên) -->
+                    <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page - 1)">Previous</a>
                     </li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
+
+                    <!-- Tạo danh sách các trang -->
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.Page ? "active" : "")">
+                            <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@i">@i</a>
+                        </li>
+                    }
+
+                    <!-- Nút Next (ẩn nếu đang ở trang cuối) -->
+                    <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page + 1)">Next</a>
                     </li>
                 </ul>
             </nav>
