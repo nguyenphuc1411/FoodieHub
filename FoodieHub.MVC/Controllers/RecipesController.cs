@@ -34,7 +34,7 @@ namespace FoodieHub.MVC.Controllers
                 if (result)
                 {
                     NotificationHelper.SetSuccessNotification(this);
-                    return Redirect("/account/recipe");
+                    return Redirect("/account/recipes");
                 }
                 else NotificationHelper.SetErrorNotification(this);               
             }         
