@@ -16,7 +16,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<APIResponse> AddArticleCategory(ArticleCategoryDTO articleCategoryDTO)
         {
-            var response = await _httpClient.PostAsJsonAsync($"ArticleCategory", articleCategoryDTO);
+            var response = await _httpClient.PostAsJsonAsync($"ArticleCategories", articleCategoryDTO);
 
             if (response.IsSuccessStatusCode)
             {
@@ -33,7 +33,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<IEnumerable<ArticleCategoryDTO>> GetAll()
         {
-            var response = await _httpClient.GetAsync($"ArticleCategory");
+            var response = await _httpClient.GetAsync($"ArticleCategories");
 
             if (response.IsSuccessStatusCode)
             {
@@ -50,7 +50,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<APIResponse> GetById(int id)
         {
-            var response = await _httpClient.GetAsync($"ArticleCategory/{id}");
+            var response = await _httpClient.GetAsync($"ArticleCategories/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -83,7 +83,7 @@ namespace FoodieHub.MVC.Service.Implementations
             var jsonContent = JsonContent.Create(articleCategoryDTO);
 
             // Gửi yêu cầu PUT
-            var response = await _httpClient.PutAsync("ArticleCategory", jsonContent);
+            var response = await _httpClient.PutAsync("ArticleCategories", jsonContent);
 
             if (response.IsSuccessStatusCode)
             {
