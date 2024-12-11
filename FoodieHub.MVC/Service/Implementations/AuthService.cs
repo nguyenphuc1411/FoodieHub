@@ -3,6 +3,7 @@ using FoodieHub.MVC.Models.User;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace FoodieHub.MVC.Service.Implementations
 {
@@ -83,5 +84,12 @@ namespace FoodieHub.MVC.Service.Implementations
                 return await httpResponse.Content.ReadFromJsonAsync<APIResponse>();               
             }
         }
+
+        public async Task<APIResponse> AdminLogin(LoginDTO login)
+        {
+            var httpResponse = await httpClient.PostAsJsonAsync("auth/admin/login", login);
+            var data = await httpResponse.Content.ReadFromJsonAsync<APIResponse>();
+            return data ?? new APIResponse { Success = false, Message = "Server error. Please try again later." };
+        }    
     }
 }

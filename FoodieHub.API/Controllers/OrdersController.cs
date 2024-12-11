@@ -26,7 +26,7 @@ namespace FoodieHub.API.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles ="Admin")]
         [HttpGet]
         public async Task<ActionResult<PaginatedModel<GetOrder>>> Get([FromQuery] QueryOrderModel queryOrder)
         {

@@ -1,7 +1,6 @@
 ﻿using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Models.Article;
 using FoodieHub.MVC.Service.Interfaces;
-using FoodieHub.MVC.Models.Article;
 
 namespace FoodieHub.MVC.Service.Implementations
 {

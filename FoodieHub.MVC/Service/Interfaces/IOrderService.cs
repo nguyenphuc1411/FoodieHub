@@ -13,5 +13,7 @@ namespace FoodieHub.MVC.Service.Interfaces
 
         Task<GetDetailOrder?> GetByID(int id);
         Task<APIResponse?> ChangeStatus(int orderID,string status,string cancellationReason);
+        Task<APIResponse?> ChangeStatusForAdmin(int orderID,string status);
+        Task<PaginatedModel<GetOrder>?> Get(QueryOrderModel queryOrderModel);
     }
 }

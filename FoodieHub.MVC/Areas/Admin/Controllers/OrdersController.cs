@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Configurations;
-using FoodieHub.MVC.Models.Response;
-using FoodieHub.MVC.Models.Order;
+using FoodieHub.MVC.Models.QueryModel;
+using FoodieHub.MVC.Service.Interfaces;
+using FoodieHub.MVC.Helpers;
 
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
@@ -10,90 +10,36 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
     [ValidateTokenForAdmin]
     public class OrdersController : Controller
     {
-        private readonly IConfiguration _config;
-        private readonly IHttpClientFactory _httpClientFactory;
-        public OrdersController(IConfiguration config, IHttpClientFactory httpClientFactory)
-        {
-            _config = config;
-            _httpClientFactory = httpClientFactory;
-        }
+        private readonly IOrderService orderService;
 
+        public OrdersController(IOrderService orderService)
+        {
+            this.orderService = orderService;
+        }
         // GET: Orders
         [HttpGet]
-        public async Task<IActionResult> Index(int? pageSize, int? currentPage, DateOnly? orderDate, string? orderKey, bool? isDesc, string? orderStatus)
+        public async Task<IActionResult> Index(QueryOrderModel query)
         {
-            pageSize ??= 10;
-            currentPage ??= 1;
-
-            var client = _httpClientFactory.CreateClient("MyAPI");
-
-            var url = $"Orders?pageSize={pageSize}&currentPage={currentPage}" +
-                      $"{(orderDate.HasValue ? $"&orderDate={orderDate.Value:yyyy-MM-dd}" : "")}" +
-                      $"{(!string.IsNullOrEmpty(orderKey) ? $"&orderKey={orderKey}" : "")}" +
-                      $"{(isDesc.HasValue ? $"&isDesc={isDesc.Value.ToString().ToLower()}" : "")}" +
-                      $"{(!string.IsNullOrEmpty(orderStatus) ? $"&status={orderStatus}" : "")}";
-
-            var response = await client.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
+            var result = await orderService.Get(query);
+            if(result == null)
             {
-                var content = await response.Content.ReadFromJsonAsync<APIResponse<PaginatedModel<GetOrder>>>();
-                var orderList = content?.Data.Items;
-
-                int totalOrders = content?.Data.TotalItems ?? 0;
-                int totalPages = content?.Data.TotalPages ?? 0;
-
-                ViewData["CurrentPage"] = currentPage;
-                ViewData["TotalPages"] = totalPages;
-                ViewData["PageSize"] = pageSize;
-                ViewData["OrderKey"] = orderKey;
-                ViewData["OrderDate"] = orderDate?.ToString("yyyy-MM-dd");
-                ViewData["SelectedStatus"] = orderStatus;
-
-                ViewData["IsOrderedDateDescending"] = isDesc.HasValue && orderKey == "ORDEREDDATE" && isDesc.Value;
-                ViewData["IsTotalAmountDescending"] = isDesc.HasValue && orderKey == "PRICE" && isDesc.Value;
-
-                if (orderList == null)
-                {
-                    TempData["ErrorMessage"] = "No orders found.";
-                    return View(new List<GetOrder>());
-                }
-
-                return View(orderList);
+                NotificationHelper.SetErrorNotification(this);
+                return RedirectToAction("Index","Home");
             }
-            else
-            {
-                TempData["ErrorMessage"] = "Unable to load order list from API.";
-                return View(new List<GetOrder>());
-            }
+            ViewBag.Query = query;
+            return View(result);
         }
 
 
         public async Task<IActionResult> Details(string id)
         {
-            var client = _httpClientFactory.CreateClient("MyAPI");
-            var response = await client.GetAsync($"Orders/{id}");
-
-            if (response.IsSuccessStatusCode)
+            var result = await orderService.GetByID(int.Parse(id));
+            if (result == null)
             {
-                var content = await response.Content.ReadFromJsonAsync<APIResponse<GetDetailOrder>>();
-                var orderDetails = content?.Data;
-
-                if (orderDetails == null)
-                {
-                    TempData["ErrorMessage"] = content.Message;
-                    return RedirectToAction("Index");
-                }
-
-                // Assign possible statuses
-
-                return View(orderDetails); // Return view with order details
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Unable to load order details from API.";
+                NotificationHelper.SetErrorNotification(this);
                 return RedirectToAction("Index");
             }
+            return View(result);
         }
 
         [HttpPost]
@@ -101,26 +47,20 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         {
             if (string.IsNullOrEmpty(orderId) || string.IsNullOrEmpty(status))
             {
-                TempData["ErrorMessage"] = "Invalid order ID or status.";
+                NotificationHelper.SetErrorNotification(this, "Invalid orderID and status");
                 return RedirectToAction("Details", new { id = orderId });
             }
-
-            var client = _httpClientFactory.CreateClient("MyAPI");
-
             // Send PATCH request with status as a query parameter
-            var response = await client.PatchAsync($"Orders/{orderId}?status={status}", null);
-            var data = await response.Content.ReadFromJsonAsync<APIResponse>();
-            if (data.Success)
+            var result = await orderService.ChangeStatusForAdmin(int.Parse(orderId),status);
+            if (result!=null && result.Success)
             {
-                TempData["SuccessMessage"] = data?.Message ?? "Status updated successfully.";
+                NotificationHelper.SetSuccessNotification(this, result.Message);
                 return RedirectToAction("Index");
             }
             else
             {
-                var errorDetails = await response.Content.ReadAsStringAsync();
-                TempData["ErrorMessage"] = $"Unable to update status. Error details: {errorDetails}";
+                NotificationHelper.SetErrorNotification(this);
             }
-
             return RedirectToAction("Details", new { id = orderId });
         }
     }

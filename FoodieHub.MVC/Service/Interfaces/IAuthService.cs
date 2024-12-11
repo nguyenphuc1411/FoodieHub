@@ -7,6 +7,7 @@ namespace FoodieHub.MVC.Service.Interfaces
     {
         Task<UserDTO?> GetProfile();
         Task<APIResponse> Login(LoginDTO loginVM);  
+        Task<APIResponse> AdminLogin(LoginDTO login);
         Task<APIResponse> Register(RegisterDTO registerVM);
         Task<APIResponse> ForgotPassword(ForgotPasswordDTO forgotPasswordDTO);
         Task<bool> ResetPassword(ResetPasswordDTO resetPasswordDTO);

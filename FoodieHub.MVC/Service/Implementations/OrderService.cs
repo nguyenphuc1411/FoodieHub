@@ -21,6 +21,18 @@ namespace FoodieHub.MVC.Service.Implementations
             var response = await _httpClient.PatchAsync($"Orders/ChangeStatusUser/{orderID}?status={status}&cancellationReason={cancellationReason}", null);
             return await response.Content.ReadFromJsonAsync<APIResponse>();
         }
+        public async Task<APIResponse?> ChangeStatusForAdmin(int orderID,string status)
+        {
+            var response = await _httpClient.PatchAsync($"Orders/{orderID}?status={status}", null);
+            return await response.Content.ReadFromJsonAsync<APIResponse>();
+        }
+
+        public async Task<PaginatedModel<GetOrder>?> Get(QueryOrderModel queryOrderModel)
+        {
+            var queryString = queryOrderModel.ToQueryString();
+            var response = await _httpClient.GetAsync("orders"+queryString);
+            return await response.Content.ReadFromJsonAsync<PaginatedModel<GetOrder>>();
+        }
 
         public async Task<GetDetailOrder?> GetByID(int id)
         {
