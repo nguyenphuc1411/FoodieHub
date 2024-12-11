@@ -1,13 +1,17 @@
 ﻿@model GetArticleDTO
-@using System.Text.Json
 @using FoodieHub.MVC.Models.Article
+@using FoodieHub.MVC.Service.Interfaces
 @inject IConfiguration config
+@inject ICommentService commentService
+@inject IFavoriteService favoriteService;
 
 @{
     ViewData["Title"] = "Detail";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = config["BaseHost"];
-
+    var comments = await commentService.GetCommentRecipe(Model.ArticleID);
+    var listFavorites = await favoriteService.GetFA() ?? new List<GetArticleDTO>();
+    var userID = ViewBag.UserID ?? "";
 }
 
 <div class="container">
@@ -88,42 +92,56 @@
         </form>
 
 
-        <!-- Hiển thị danh sách bình luận -->
-        <div id="commentsList">
-            @if (ViewBag.Comments != null)
-            {
-                @foreach (var comment in ViewBag.Comments)
+        <!-- Reviews Section -->
+        <div id="reviews" class="mt-5">
+            <!-- Create Comment Form -->
+            <form asp-action="CreateComment" method="post" class="mb-4">
+                <div class="d-flex justify-content-between">
+                    <h5>REVIEWS (@comments.Count())</h5>
+                    <button type="submit" class="button button-dark">Submit Review</button>
+                </div>
+                <input type="hidden" name="ArticleID" value="@Model.ArticleID" />
+                <textarea name="CommentContent" required class="form-control me-2" rows="2" placeholder="Enter a Review"></textarea>
+            </form>
+
+            <!-- Comments List -->
+            <div id="commentsList">
+                @foreach (var comment in comments)
                 {
-                    <div class="review d-flex align-items-center">
-                        <img src="@($"{url}/images/{comment.Avatar}")" alt="Avatar" class="img-fluid rounded-circle">
-
-
-                        <div class="col-9">
-
-                            <p><strong>@comment.FullNameComment</strong> - @comment.CommentAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
-                            <p>@comment.CommentContent</p>
+                    <div class="d-flex align-items-center mb-4 bg-light p-3 rounded shadow-sm position-relative">
+                        @if (comment.Avatar != null)
+                        {
+                            <img src="@($"{url}images/{comment.Avatar}")" alt="Avatar" class="rounded-circle me-3" width="50">
+                        }
+                        else
+                        {
+                            <img src="/images/profile.jpg" alt="Avatar" class="rounded-circle me-3" width="50">
+                        }
+                        <div>
+                            <p class="mb-1"><strong>@comment.FullName</strong> - @comment.CommentedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                            <p class="mb-0">@comment.CommentContent</p>
                         </div>
 
-                        <!-- Cột 3: Nút Xóa căn giữa theo chiều dọc -->
-                        @if (comment.UserID == ViewBag.UserID)
+                        @if (comment.UserID == userID)
                         {
-                            <div class="col-2 d-flex justify-content-end">
-                                <form asp-action="DeleteComment" method="post" id="deleteForm_@comment.CommentID">
-                                    <input type="hidden" name="commentID" value="@comment.CommentID" />
-                                    <input type="hidden" name="articleID" value="@ViewBag.ArticleID" />
-                                    <button type="button" class="btn btn-danger d-flex align-items-center" onclick="confirmDelete(@comment.CommentID)">Xóa</button>
-                                </form>
+                            <!-- Dropdown menu for Edit and Delete -->
+                            <div class="dropdown ms-auto position-absolute top-0 end-0 me-3">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i><!-- Bootstrap icon for three dots -->
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <li>
+                                        <button class="dropdown-item" onclick="openEditModal('@comment.CommentID', '@comment.CommentContent',@Model.RecipeID)">Edit</button>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" asp-action="Delete" asp-route-articleID="@Model.ArticleID" asp-route-id="@comment.CommentID">Delete</a>
+                                    </li>
+                                </ul>
                             </div>
                         }
                     </div>
-
-
                 }
-            }
-            else
-            {
-                <p>Chưa có bình luận nào.</p>
-            }
+            </div>
         </div>
     </div>
 </div>
@@ -165,44 +183,3 @@
         modal.hide();
     });
 </script>
-
-<style>
-    .star-rating {
-        color: #f5c518;
-    }
-
-    .ingredient-list, .directions-list {
-        list-style: none;
-        padding: 0;
-    }
-
-    .review {
-        border-top: 1px solid #ddd;
-        padding-top: 10px;
-        margin-top: 10px;
-        display: flex;
-        align-items: center;
-    }
-
-        .review img, .recipe-by img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-    .recipe-by {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .review p {
-        white-space: pre-wrap;
-        word-break: break-word;
-    }
-    .recipe-by-info {
-        display: flex;
-        align-items: center;
-    }
-</style>
