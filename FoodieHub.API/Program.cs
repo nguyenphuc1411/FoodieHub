@@ -63,6 +63,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Khai báo các DI
+builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddTransient<ImageExtentions>();
 builder.Services.AddTransient<IMailService, SendMailService>();
 builder.Services.AddTransient<IImgService, ImgService>();
@@ -76,7 +77,6 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();

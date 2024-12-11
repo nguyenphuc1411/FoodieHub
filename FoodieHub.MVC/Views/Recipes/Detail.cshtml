@@ -2,12 +2,16 @@
 @using FoodieHub.MVC.Service.Interfaces
 @inject IConfiguration config
 @inject ICommentService commentService
+@inject IFavoriteService favoriteService;
 @model DetailRecipeDTO
 @{
     var url = config["BaseHost"];
     ViewData["Title"] = "Detail";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var comments = await commentService.GetCommentRecipe(Model.RecipeID);
+
+    var listFavorites = await favoriteService.GetFR()?? new List<GetRecipeDTO>();
+
     var userID = ViewBag.UserID ?? "";
 }
 
@@ -19,35 +23,52 @@
             <hr class="my-2">
             <h2 class="mb-3">@Model.Title</h2>
             <p><strong>By:</strong> @Model.FullName | <strong>@Model.CreatedAt.ToString("dd MMM yyyy")</strong></p>
-            <div class="star-rating mb-3">
-                <span class="text-muted"> | <a href="#reviews">View comments (@comments.Count())</a></span>
+            <div class="mb-3">
+                <span class="text-muted"> @Model.RatingAverage/5 ★ (@Model.TotalRatings) | <a href="#reviews">View comments (@comments.Count())</a></span>
             </div>
         </div>
 
         <!-- Left Column (Recipe Image and Steps) -->
         <div class="col-lg-6">
             <img src="@(url + "images/" + Model.ImageURL)" alt="Recipe Image" class="img-fluid mb-3 rounded shadow-sm">
-            <h5 class="mb-3">Description:</h5>
-            <p>@Model.Description</p>
-
-            <h5 class="mb-3">Directions</h5>
-            @foreach (var item in Model.Steps)
-            {
-                <h6>Step @item.Step</h6>
-                @if (item.ImageURL != null)
-                {
-                    <img src="@(url + "images/" + item.ImageURL)" class="img-fluid mb-2 rounded shadow-sm" alt="Step Image">
-                }
-                <p>@item.Directions</p>
+            
+            @if(Model.Description!=null){
+                <h5 class="mb-3">Description:</h5>
+                <p>@Model.Description</p>
             }
+            <h4 class="mb-3">Directions</h4>
+            @foreach (var item in Model.Steps.Select((value, index) => new { value, index }))
+            {
+                <h5>Step @(@item.index + 1)</h5> <!-- Thêm chỉ số bước -->
+                <div class="row">
+                    @if (item.value.ImageURL != null)
+                    {
+                        <p class="col-12 col-md-6">@item.value.Directions</p>
+                        <img src="@(url + "images/" + item.value.ImageURL)" class="img-fluid mb-2 rounded shadow-sm col-12 col-md-6" alt="Step Image">
+                    }
+                    else
+                    {
+                        <p>@item.value.Directions</p>
+                    }
+                </div>
+            }
+
         </div>
 
         <!-- Right Column (Save Button and Ingredients) -->
         <div class="col-lg-6">
-            <div class="d-flex justify-content-start mb-3">
-                <a asp-action="Favorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary me-2">Save</a>
-                <a asp-action="UnFavorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary">UnSave</a>
-            </div>
+            @if(userID!=Model.UserID){
+                <div class="d-flex justify-content-start mb-3">
+                    @if (listFavorites.Select(x => x.RecipeID).Contains(Model.RecipeID))
+                    {
+                        <a asp-action="UnFavorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary">UnSave</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Favorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary me-2">Save</a>
+                    }
+                </div>
+            }
             <div class="bg-light p-3 rounded shadow-sm mb-4 text-center">
                 <div class="row">
                     <div class="col-6">
@@ -74,7 +95,12 @@
 
             <!-- Recipe By Section -->
             <div class="d-flex align-items-center bg-light p-3 rounded shadow-sm">
-                <img src="@($"{url}images/{Model.Avatar}")" alt="User Image" class="rounded-circle me-3" width="60">
+                @if(Model.Avatar!=null){
+                    <img src="@($"{url}images/{Model.Avatar}")" alt="User Image" class="rounded-circle me-3" width="60">
+                }
+                else{
+                    <img src="/images/profile.jpg" alt="User Image" class="rounded-circle me-3" width="60">
+                }
                 <div>
                     <p class="mb-0"><strong>Recipe By: </strong> @Model.FullName</p>
                 </div>
@@ -89,40 +115,165 @@
     <hr class="my-5">
 
     <!-- Reviews Section -->
-    <div id="reviews" class="mt-5">
-        <h5>REVIEWS (@comments.Count())</h5>
+    <div id="reviews" class="mt-5 col-12 col-md-6">
+
 
         <!-- Create Comment Form -->
         <form asp-action="CreateComment" method="post" class="mb-4">
-            <input type="hidden" name="RecipeID" value="@Model.RecipeID" />
-            <div class="d-flex mb-3">
-                <textarea name="CommentContent" required class="form-control me-2" rows="3" placeholder="Enter a Review"></textarea>
+            <div class="d-flex justify-content-between">
+                <h5>REVIEWS (@comments.Count())</h5>
                 <button type="submit" class="button button-dark">Submit Review</button>
-            </div>
+            </div>            
+            <input type="hidden" name="RecipeID" value="@Model.RecipeID" />
+            <textarea name="CommentContent" required class="form-control me-2" rows="2" placeholder="Enter a Review"></textarea>              
         </form>
 
         <!-- Comments List -->
         <div id="commentsList">
             @foreach (var comment in comments)
             {
-                <div class="d-flex align-items-center mb-4 bg-light p-3 rounded shadow-sm">
-                    <img src="@($"{url}images/{comment.Avatar}")" alt="Avatar" class="rounded-circle me-3" width="50">
+                <div class="d-flex align-items-center mb-4 bg-light p-3 rounded shadow-sm position-relative">
+                    @if (comment.Avatar!=null){
+                        <img src="@($"{url}images/{comment.Avatar}")" alt="Avatar" class="rounded-circle me-3" width="50">
+                    }
+                    else{
+                        <img src="/images/profile.jpg" alt="Avatar" class="rounded-circle me-3" width="50">
+                    }
                     <div>
                         <p class="mb-1"><strong>@comment.FullName</strong> - @comment.CommentedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
                         <p class="mb-0">@comment.CommentContent</p>
                     </div>
+
                     @if (comment.UserID == userID)
                     {
-                        <a asp-action="DeleteComment" asp-route-recipeID="@Model.RecipeID" asp-route-id="@comment.CommentID" class="btn btn-danger btn-sm ms-auto">Delete</a>
-                    }
+                        <!-- Dropdown menu for Edit and Delete -->
+                        <div class="dropdown ms-auto position-absolute top-0 end-0 me-3">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis-vertical"></i><!-- Bootstrap icon for three dots -->
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li>
+                                    <button class="dropdown-item" onclick="openEditModal('@comment.CommentID', '@comment.CommentContent',@Model.RecipeID)">Edit</button>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" asp-action="DeleteComment" asp-route-recipeID="@Model.RecipeID" asp-route-id="@comment.CommentID">Delete</a>
+                                </li>
+                            </ul>
+                        </div>
+                    }                 
                 </div>
             }
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between">
+            <p class="rating-text" id="ratingText">Hover over the stars to rate</p>
+            <div class="star-rating mb-2">
+                <a href="@Url.Action("Rating", "Recipes", new { recipeID = Model.RecipeID, ratingValue = 1 })" class="star" data-value="1">★</a>
+                <a href="@Url.Action("Rating", "Recipes", new { recipeID = Model.RecipeID, ratingValue = 2 })" class="star" data-value="2">★</a>
+                <a href="@Url.Action("Rating", "Recipes", new { recipeID = Model.RecipeID, ratingValue = 3 })" class="star" data-value="3">★</a>
+                <a href="@Url.Action("Rating", "Recipes", new { recipeID = Model.RecipeID, ratingValue = 4 })" class="star" data-value="4">★</a>
+                <a href="@Url.Action("Rating", "Recipes", new { recipeID = Model.RecipeID, ratingValue = 5 })" class="star" data-value="5">★</a>
+            </div>
+        </div>
+       
+    </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCommentModalLabel">Edit Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" asp-action="EditComment" id="editCommentForm">
+                    <input type="hidden" name="CommentID" id="editCommentID">
+                    <input type="hidden" name="RecipeID" id="recipeID">
+                    <div class="form-group">
+                        <label for="editCommentContent">Comment</label>
+                        <textarea required class="form-control" name="CommentContent" id="editCommentContent" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" form="editCommentForm">Save</button>
+            </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        // Add any necessary JavaScript here
-    </script>
+
+<style>
+    .star {
+        font-size: 30px;
+        color: gray;
+        text-decoration: none;
+    }
+
+    .star.selected {
+        color: gold;
+    }
+
+    .star:hover {
+        color: gold;
+    }
+
 }
+</style>
+<script>
+    function openEditModal(commentID, commentContent,recipeID) {
+        // Set values in the modal
+        document.getElementById('editCommentID').value = commentID;
+        document.getElementById('editCommentContent').value = commentContent;
+        document.getElementById('recipeID').value = recipeID;
+
+        // Show the modal
+        var editModal = new bootstrap.Modal(document.getElementById('editCommentModal'));
+        editModal.show();
+    }
+
+
+
+    const stars = document.querySelectorAll('.star');
+    let selectedRating = 0;  // Lưu giá trị rating khi click
+
+    // Hàm tô sáng các sao dựa trên rating
+    function highlightStars(rating) {
+        stars.forEach(star => {
+            if (parseInt(star.getAttribute('data-value')) <= rating) {
+                star.classList.add('selected'); // Thêm class 'selected' cho các sao nhỏ hơn hoặc bằng rating
+            } else {
+                star.classList.remove('selected'); // Bỏ class 'selected' cho các sao lớn hơn rating
+            }
+        });
+    }
+
+    // Xử lý sự kiện hover trên các sao
+    stars.forEach(star => {
+        star.addEventListener('mouseover', function () {
+            const rating = this.getAttribute('data-value');
+            highlightStars(rating); // Tô sáng các sao khi hover
+            document.getElementById('ratingText').textContent = `Rate ${rating} stars`; // Hiển thị văn bản khi hover
+        });
+
+        // Xử lý khi hover ra ngoài
+        star.addEventListener('mouseout', function () {
+            highlightStars(selectedRating); // Quay lại trạng thái rating đã chọn khi hover ra ngoài
+            if (selectedRating === 0) {
+                document.getElementById('ratingText').textContent = 'Hover over the stars to rate'; // Văn bản mặc định
+            }
+        });
+
+        // Xử lý khi click vào sao
+        star.addEventListener('click', function () {
+            selectedRating = this.getAttribute('data-value');  // Gán rating đã chọn khi click
+            highlightStars(selectedRating);  // Tô sáng các sao dựa trên rating đã chọn
+            document.getElementById('ratingText').textContent = `You rated ${selectedRating} stars`; // Cập nhật văn bản khi click
+        });
+    });
+
+</script>

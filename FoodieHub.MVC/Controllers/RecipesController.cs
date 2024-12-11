@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using FoodieHub.API.Models.DTOs.Favorite;
 using FoodieHub.API.Models.DTOs.Recipe;
 using FoodieHub.MVC.Helpers;
-using Microsoft.AspNetCore.Http;
 using FoodieHub.API.Models.DTOs.Comment;
-using FoodieHub.API.Data.Entities;
 
 
 namespace FoodieHub.MVC.Controllers
@@ -82,7 +80,7 @@ namespace FoodieHub.MVC.Controllers
             }*/
 
         [HttpPost]
-        public async Task<IActionResult> Edit(CreateRecipeDTO edit)
+        public IActionResult Edit(CreateRecipeDTO edit)
         {
             if (ModelState.IsValid)
             {
@@ -124,7 +122,7 @@ namespace FoodieHub.MVC.Controllers
         [ValidateTokenForUser]
         public async Task<IActionResult> Favorite(int id)
         {
-            var newFavorite = new CreateFavoriteDTO { RecipeID = id };
+            var newFavorite = new FavoriteDTO { RecipeID = id };
             bool result = await _favoriteService.Create(newFavorite);
             if (result) NotificationHelper.SetSuccessNotification(this);
             else NotificationHelper.SetErrorNotification(this);
@@ -134,14 +132,16 @@ namespace FoodieHub.MVC.Controllers
         [ValidateTokenForUser]
         public async Task<IActionResult> UnFavorite(int id)
         {
-            bool result = await _favoriteService.Delete(id);
+            bool result = await _favoriteService.Delete(new FavoriteDTO
+            {
+                RecipeID = id
+            });
             if (result)
                 NotificationHelper.SetSuccessNotification(this);
             else
                 NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Detail", new { id });
         } 
-        [HttpPost]
         [ValidateTokenForUser]
         public async Task<IActionResult> Rating(int recipeID, int ratingValue)
         {
@@ -182,6 +182,17 @@ namespace FoodieHub.MVC.Controllers
             if (result) NotificationHelper.SetSuccessNotification(this);
             else NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Detail", new { id = recipeID });
+        }
+
+        public async Task<IActionResult> EditComment(int CommentID,string CommentContent,int RecipeID)
+        {
+            bool result = await _commentService.Edit(CommentID,new CommentDTO
+            {
+                CommentContent = CommentContent
+            });
+            if (result) NotificationHelper.SetSuccessNotification(this);
+            else NotificationHelper.SetErrorNotification(this);
+            return RedirectToAction("Detail", new { id = RecipeID });
         }
     }
 }

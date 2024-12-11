@@ -30,5 +30,11 @@ namespace FoodieHub.MVC.Service.Implementations
             var response = await _httpClient.PostAsJsonAsync("comments", comment);
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> Edit(int id, CommentDTO comment)
+        {
+            var response = await _httpClient.PutAsJsonAsync($"comments/{id}", comment);
+            return response.IsSuccessStatusCode;
+        }
     }
 }

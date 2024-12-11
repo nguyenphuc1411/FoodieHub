@@ -6,8 +6,8 @@ namespace FoodieHub.MVC.Service.Interfaces
 {
     public interface IFavoriteService
     {
-        Task<bool> Create(CreateFavoriteDTO favorite);
-        Task<bool> Delete(int id);
+        Task<bool> Create(FavoriteDTO favorite);
+        Task<bool> Delete(FavoriteDTO favorite);
 
         Task<IEnumerable<GetRecipeDTO>?> GetFR();
         Task<IEnumerable<GetArticleDTO>?> GetFA();

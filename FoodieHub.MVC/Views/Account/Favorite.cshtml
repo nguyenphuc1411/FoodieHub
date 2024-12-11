@@ -64,7 +64,7 @@
                                             <i class="fas fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton@recipe.RecipeID">
-                                            <li><a class="dropdown-item" asp-action="UnFavoriteRecipes" asp-route-id="@recipe.RecipeID">Remove from Favorites</a></li>
+                                            <li><a class="dropdown-item" asp-action="UnFavorite" asp-route-RecipeID="@recipe.RecipeID">Remove from Favorites</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -105,7 +105,7 @@
                                             <i class="fas fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton@article.ArticleID">
-                                            <li><a class="dropdown-item" asp-action="UnFavoriteArticles" asp-route-id="@article.ArticleID">Remove from Favorites</a></li>
+                                            <li><a class="dropdown-item" asp-action="UnFavorite" asp-route-ArticleID="@article.ArticleID">Remove from Favorites</a></li>
                                         </ul>
                                     </div>
                                 </div>

@@ -223,7 +223,7 @@ namespace FoodieHub.MVC.Controllers
         [ValidateTokenForUser]
         public async Task<IActionResult> Favorite(int id)
         {
-            var favorote = new CreateFavoriteDTO { ArticleID = id };
+            var favorote = new FavoriteDTO { ArticleID = id };
 
             bool result = await _favoriteService.Create(favorote);
             if (result)
@@ -238,7 +238,10 @@ namespace FoodieHub.MVC.Controllers
         [ValidateTokenForUser]
         public async Task<IActionResult> UnFavorite(int id)
         {
-            var result = await _favoriteService.Delete(id);
+            var result = await _favoriteService.Delete(new FavoriteDTO
+            {
+                ArticleID = id
+            });
             if (result)
                 NotificationHelper.SetSuccessNotification(this);
             else

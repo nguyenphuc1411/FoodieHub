@@ -1,6 +1,5 @@
 ﻿using FoodieHub.API.Models.DTOs.Article;
 using FoodieHub.API.Models.DTOs.Recipe;
-using FoodieHub.MVC.Models.Article;
 namespace FoodieHub.MVC.Models.Favorite
 {
     public class FavoriteViewModel

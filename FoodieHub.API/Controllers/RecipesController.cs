@@ -45,7 +45,7 @@ namespace FoodieHub.API.Controllers
 
         [Authorize]
         [HttpPost("ratings")]
-        public async Task<IActionResult> Rating(CreateRatingDTO ratingDTO)
+        public async Task<IActionResult> RatingRecipe(CreateRatingDTO ratingDTO)
         {
             var result = await _service.Rating(ratingDTO);
             return result ? Ok() : BadRequest();

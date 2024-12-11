@@ -42,23 +42,10 @@ namespace FoodieHub.API.Repositories.Implementations
         {
             var comment = await _context.Comments.FindAsync(id);
             if (comment == null) return false;
-            _mapper.Map(entity, comment);
+            comment.CommentContent = entity.CommentContent;
+            comment.CommentedAt = DateTime.Now;
             _context.Comments.Update(comment);
             return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<object> Get(int id,string? order)
-        {
-            var comments = await _context.Comments.Where(x => x.RecipeID == id || x.ArticleID==id).Select(x => new
-            {
-                x.CommentID,
-                x.CommentContent,
-                x.CommentedAt,
-                x.UserID,
-                x.User.Avatar,
-                x.User.Fullname,
-            }).ToListAsync();
-            return comments;
         }
 
         public async Task<IEnumerable<GetCommentDTO>> GetByArticle(int id)

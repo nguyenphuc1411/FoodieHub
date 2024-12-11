@@ -1,5 +1,6 @@
 ﻿using FoodieHub.API.Models.DTOs.Article;
 using FoodieHub.API.Models.DTOs.Authentication;
+using FoodieHub.API.Models.DTOs.Favorite;
 using FoodieHub.API.Models.DTOs.Recipe;
 using FoodieHub.API.Models.DTOs.User;
 using FoodieHub.API.Models.QueryModel;
@@ -335,9 +336,9 @@ namespace FoodieHub.MVC.Controllers
             });
         }
         [ValidateTokenForUser]
-        public async Task<IActionResult> UnFavorite(int id)
+        public async Task<IActionResult> UnFavorite(FavoriteDTO favorite)
         {
-            bool result = await favoriteService.Delete(id);
+            bool result = await favoriteService.Delete(favorite);
             if (result) NotificationHelper.SetSuccessNotification(this);
             else NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Favorite");

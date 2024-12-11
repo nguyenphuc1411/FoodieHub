@@ -13,6 +13,6 @@ namespace FoodieHub.API.Data.Entities
 
         [Column(TypeName = "nvarchar(450)")]
         public string UserID { get; set; } = default!;
-        public ApplicationUser User { get; set; } = new();
+        public ApplicationUser User { get; set; } = default!;
     }
 }

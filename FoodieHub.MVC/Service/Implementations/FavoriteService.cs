@@ -14,15 +14,15 @@ namespace FoodieHub.MVC.Service.Implementations
             _httpClient = httpClientFactory.CreateClient("MyAPI");
         }
 
-        public async Task<bool> Create(CreateFavoriteDTO favorite)
+        public async Task<bool> Create(FavoriteDTO favorite)
         {
             var response = await _httpClient.PostAsJsonAsync("favorites", favorite);
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(FavoriteDTO favorite)
         {
-            var response = await _httpClient.DeleteAsync($"favorites/{id}");
+            var response = await _httpClient.DeleteAsync($"favorites?recipeId={favorite.RecipeID}&articleId={favorite.ArticleID}");
             return response.IsSuccessStatusCode;
         }
 

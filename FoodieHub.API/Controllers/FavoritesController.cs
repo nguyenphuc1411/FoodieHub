@@ -19,17 +19,17 @@ namespace FoodieHub.API.Controllers
             _service = service;
         }
         [HttpPost]
-        public async Task<ActionResult<Favorite>> Create([FromBody] CreateFavoriteDTO favorite)
+        public async Task<ActionResult> Create([FromBody] FavoriteDTO favorite)
         {
             var result = await _service.Create(favorite);
             if (result == null) return BadRequest();
             return Ok(result);
         }
         [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete([FromRoute]int id)
+        [HttpDelete]
+        public async Task<ActionResult> Delete([FromQuery] FavoriteDTO favorite)
         {
-            bool result = await _service.Delete(id);
+            bool result = await _service.Delete(favorite);
             return result? NoContent():BadRequest();
         }
         [Authorize]
