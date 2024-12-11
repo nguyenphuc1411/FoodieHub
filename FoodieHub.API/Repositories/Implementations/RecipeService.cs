@@ -113,20 +113,38 @@ namespace FoodieHub.API.Repositories.Implementations
         } 
         public async Task<PaginatedModel<GetRecipeDTO>> Get(QueryRecipeModel query)
         {
-            var listarticles = _context.Recipes.AsQueryable();
+            var listRecipes = _context.Recipes.AsQueryable();
             if (query.CategoryID.HasValue)
             {
-                listarticles = listarticles.Where(x => x.CategoryID == query.CategoryID.Value);
+                listRecipes = listRecipes.Where(x => x.CategoryID == query.CategoryID.Value);
             }
             if (query.IsActive.HasValue)
             {
-                listarticles = listarticles.Where(x => x.IsActive == query.IsActive.Value);
+                listRecipes = listRecipes.Where(x => x.IsActive == query.IsActive.Value);
             }
             if (query.IsAdminUpload.HasValue)
             {
-                listarticles = listarticles.Where(x => x.IsAdminUpload == query.IsAdminUpload.Value);
+                listRecipes = listRecipes.Where(x => x.IsAdminUpload == query.IsAdminUpload.Value);
             }
-            return await listarticles
+            if (query.CookOption.HasValue)
+            {
+                switch (query.CookOption.Value)
+                {
+                    case 1: // Cook time <= 30 minutes
+                        listRecipes = listRecipes.Where(x => x.CookTime <= TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(30)));
+                        break;
+                    case 2: // Cook time between 30 and 60 minutes
+                        listRecipes = listRecipes.Where(x => x.CookTime > TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(30))
+                                                          && x.CookTime <= TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(60)));
+                        break;
+                    case 3: // Cook time > 60 minutes
+                        listRecipes = listRecipes.Where(x => x.CookTime > TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(60)));
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return await listRecipes
             .ProjectTo<GetRecipeDTO>(_mapper.ConfigurationProvider).ApplyQuery(query,x=>x.Title);
         }
         public async Task<bool> Rating(CreateRatingDTO ratingDTO)

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 
 namespace FoodieHub.MVC.Models
 {
@@ -31,9 +30,5 @@ namespace FoodieHub.MVC.Models
         public bool IsActive { get; set; } = true;
 
         public int CategoryID { get; set; }
-
-   
-
-
     }
 }
