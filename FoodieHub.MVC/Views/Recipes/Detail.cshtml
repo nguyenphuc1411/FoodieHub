@@ -1025,26 +1025,9 @@
                 const quantityElement = item.querySelector('.ingredient-quantity');
                 const baseQuantity = parseFloat(quantityElement.getAttribute('data-base-quantity'));
                 const unit = quantityElement.getAttribute('data-unit');
-
                 const newQuantity = (baseQuantity / baseServings) * currentServings;
                 quantityElement.textContent = `${newQuantity.toFixed(2)} ${unit}`;
             });
-        };
-
-        const updateServerData = () => {
-            fetch('/update-servings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ servings: currentServings })
-            })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('Servings updated successfully');
-                    } else {
-                        console.error('Failed to update servings');
-                    }
-                })
-                .catch(error => console.error('Server Error:', error));
         };
 
         decreaseButton.addEventListener('click', () => {
@@ -1052,7 +1035,6 @@
                 currentServings--;
                 servingsValue.textContent = currentServings;
                 updateIngredients();
-                updateServerData();
             }
         });
 
@@ -1060,7 +1042,6 @@
             currentServings++;
             servingsValue.textContent = currentServings;
             updateIngredients();
-            updateServerData();
         });
     });
 
