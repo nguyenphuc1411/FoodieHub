@@ -15,107 +15,340 @@
     var userID = ViewBag.UserID ?? "";
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <!-- Recipe Title and Details -->
-        <div class="col-md-12 text-center">
-            <p class="text-uppercase text-muted">@Model.CategoryName</p>
-            <hr class="my-2">
-            <h2 class="mb-3">@Model.Title</h2>
-            <p><strong>By:</strong> @Model.FullName | <strong>@Model.CreatedAt.ToString("dd MMM yyyy")</strong></p>
-            <div class="mb-3">
-                <span class="text-muted"> @Model.RatingAverage/5 ★ (@Model.TotalRatings) | <a href="#reviews">View comments (@comments.Count())</a></span>
+<div class="container-recipedetail">
+    <img alt="A plate of winter pasta with brown butter, hazelnuts, and kale" class="main-image" src="@(url + "images/" + Model.ImageURL)" width="800" />
+    <div class="main-content">
+        <div class="content col-md-8">
+            <div class="title">
+                @Model.Title
             </div>
-        </div>
+            <p>@Model.CreatedAt.ToString("dd MMM yyyy")</p>
 
-        <!-- Left Column (Recipe Image and Steps) -->
-        <div class="col-lg-6">
-            <img src="@(url + "images/" + Model.ImageURL)" alt="Recipe Image" class="img-fluid mb-3 rounded shadow-sm">
-            
-            @if(Model.Description!=null){
-                <h5 class="mb-3">Description:</h5>
-                <p>@Model.Description</p>
-            }
-            <h4 class="mb-3">Directions</h4>
-            @foreach (var item in Model.Steps.Select((value, index) => new { value, index }))
-            {
-                <h5>Step @(@item.index + 1)</h5> <!-- Thêm chỉ số bước -->
-                <div class="row">
-                    @if (item.value.ImageURL != null)
-                    {
-                        <p class="col-12 col-md-6">@item.value.Directions</p>
-                        <img src="@(url + "images/" + item.value.ImageURL)" class="img-fluid mb-2 rounded shadow-sm col-12 col-md-6" alt="Step Image">
-                    }
-                    else
-                    {
-                        <p>@item.value.Directions</p>
-                    }
-                </div>
+            @{
+                var fullStars = (int)Math.Floor(Model.RatingAverage); // Số sao đầy
+                var hasHalfStar = Model.RatingAverage % 1 >= 0.5;     // Kiểm tra nửa sao
+                var emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Số sao rỗng
             }
 
-        </div>
-
-        <!-- Right Column (Save Button and Ingredients) -->
-        <div class="col-lg-6">
-            @if(userID!=Model.UserID){
-                <div class="d-flex justify-content-start mb-3">
+            <div class="rating">
+                @for (var i = 0; i < fullStars; i++)
+                {
+                    <i class="fas fa-star"></i>
+                }
+                @if (hasHalfStar)
+                {
+                    <i class="fas fa-star-half-alt"></i>
+                }
+                @for (var i = 0; i < emptyStars; i++)
+                {
+                    <i class="far fa-star"></i>
+                }
+                <span>
+                    @Model.TotalRatings ratings
+                </span>
+            </div>
+            <div class="actions">
+                <div>
                     @if (listFavorites.Select(x => x.RecipeID).Contains(Model.RecipeID))
                     {
-                        <a asp-action="UnFavorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary">UnSave</a>
+                        <a asp-action="UnFavorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary">
+                            <i class="fas fa-bookmark"></i> UnSave
+                        </a>
                     }
                     else
                     {
-                        <a asp-action="Favorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary me-2">Save</a>
+                        <a asp-action="Favorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary">
+                            <i class="far fa-bookmark"></i> Save
+                        </a>
                     }
                 </div>
-            }
-            <div class="bg-light p-3 rounded shadow-sm mb-4 text-center">
-                <div class="row">
-                    <div class="col-6">
-                        <strong>Cook Time:</strong>
-                        <p>@Model.CookTime.ToString(@"HH\:mm")</p>
-                    </div>
-                    <div class="col-6">
-                        <strong>Serves:</strong>
-                        <p>@Model.Serves</p>
-                    </div>
-                </div>
             </div>
-
-            <h5>Ingredients</h5>
-            <ul class="list-group list-group-flush mb-4">
-                @foreach (var ingredient in Model.Ingredients)
+            <div class="profile">
+                @if (Model.Avatar != null)
                 {
-                    <li class="list-group-item">@ingredient.Quantity @ingredient.Unit @ingredient.Name</li>
-                }
-            </ul>
-
-            <a href="/recipes/create" class="button button-dark mb-3">CREATE A RECIPE</a>
-            <p class="text-muted">Enter one of our contests, or share that great thing you made for dinner last night.</p>
-
-            <!-- Recipe By Section -->
-            <div class="d-flex align-items-center bg-light p-3 rounded shadow-sm">
-                @if(Model.Avatar!=null){
                     <img src="@($"{url}images/{Model.Avatar}")" alt="User Image" class="rounded-circle me-3" width="60">
                 }
-                else{
+                else
+                {
                     <img src="/images/profile.jpg" alt="User Image" class="rounded-circle me-3" width="60">
                 }
-                <div>
-                    <p class="mb-0"><strong>Recipe By: </strong> @Model.FullName</p>
+                <div class="profile-info">
+                    <h2>
+                        @Model.FullName
+                    </h2>
+                    
                 </div>
                 @if (Model.UserID != userID)
                 {
                     <a href=@("/account/userinfo/"+Model.UserID) class="btn btn-outline-secondary ms-auto">View Profile</a>
                 }
             </div>
+            <div class="description">
+                <p>
+                    @Model.Description    
+                </p>
+                <div class="read-less">
+                    Read less
+                </div>
+                <div class="details">
+                    <div>
+                        <p class="label">
+                            Difficulty
+                        </p>
+                        <p class="value">
+                            Easy
+                            <i class="fas fa-thumbs-up">
+                            </i>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="label">
+                            Preparation
+                        </p>
+                        <p class="value">
+                            @Model.CookTime.ToString(@"HH\:mm")
+                        </p>
+                    </div>
+                    <div>
+                        <p class="label">
+                            Baking
+                        </p>
+                        <p class="value">
+                            0 min
+                        </p>
+                    </div>
+                    <div>
+                        <p class="label">
+                            Resting
+                        </p>
+                        <p class="value">
+                            0 min
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="ingredients-container">
+                <div class="servings">
+                    <button id="decreaseServings" class="btn btn-outline-secondary">-</button>
+                    <span id="servingsValue">@Model.Serves</span>
+                    <button id="increaseServings" class="btn btn-outline-secondary">+</button>
+                    <span class="label">Servings</span>
+                </div>
+
+                <div class="ingredients" id="ingredientsList">
+                    @foreach (var ingredient in Model.Ingredients)
+                    {
+                        <div class="ingredient-item">
+                            <span class="ingredient-quantity" data-base-quantity="@ingredient.Quantity" data-unit="@ingredient.Unit">
+                                @ingredient.Quantity @ingredient.Unit
+                            </span>
+                            <span class="ingredient-name">
+                                @ingredient.Name
+                            </span>
+                        </div>
+                    }
+                </div>
+                <div class="button-container">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-shopping-cart"></i>
+                        Add to the shopping list
+                    </button>
+                </div>
+                <div class="divider"></div>
+            </div>
+
+            <div class="steps-container">
+                @foreach (var item in Model.Steps.Select((value, index) => new { value, index }))
+                {
+                    <div class="step-title">
+                        Step @(@item.index + 1)
+                    </div>
+                    <div class="row">
+                        @if (item.value.ImageURL != null)
+                        {
+                            <div class="image-container">
+                                <img src="@(url + "images/" + item.value.ImageURL)" class="img-fluid mb-2 rounded shadow-sm " alt="Step Image" height="400" width="600">
+                            </div>
+                            <div class="description">
+                                <p>@item.value.Directions</p>
+                            </div>
+                            
+                        }
+                        else
+                        {
+                            <p>@item.value.Directions</p>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="more-delicious col-md-4">
+            <div class="more-delicious-title">
+                More delicious ideas for you
+            </div>
+
+            <!-- Phần more-delicious chia cột -->
+            <div class="more-delicious-items">
+                <div class="more-delicious-item">
+                    <div class="time-label">
+                        <i class="far fa-clock"></i> 45 min
+                    </div>
+                    <img alt="Malfatti with wild garlic and brown butter" src="https://storage.googleapis.com/a1aa/image/YHux08HnDnI5JhenH8YI2dz8bPGb2MWPbQNzzejlHkGVdM5TA.jpg" />
+                    <div class="item-title">Malfatti with wild garlic and brown butter</div>
+                </div>
+
+                <div class="more-delicious-item">
+                    <div class="time-label">
+                        <i class="far fa-clock"></i> 30 min
+                    </div>
+                    <img alt="Malfatti with wild garlic and brown butter" src="https://storage.googleapis.com/a1aa/image/ZP6Y83PF8jIzMdXcWAXhzi8RIwcoMEiPLkRHdR0Ji6rlOTeJA.jpg" />
+                    <div class="item-title">Malfatti with wild garlic and brown butter</div>
+                </div>
+
+                <div class="more-delicious-item">
+                    <div class="time-label">
+                        <i class="far fa-clock"></i> 40 min
+                    </div>
+                    <img alt="Easy colorful carrot tart with ricotta" src="https://storage.googleapis.com/a1aa/image/0bKrLpsf4kWjAKWvO1VAHVAvflq6Vyb7aFpNjwQBWEsZ6M5TA.jpg" />
+                    <div class="item-title">Easy colorful carrot tart with ricotta</div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <h2>
+        More delicious ideas for you
+    </h2>
+    <div class="card-container">
+        <div class="card">
+            <img alt="Malfatti with wild garlic and brown butter" height="150" src="https://storage.googleapis.com/a1aa/image/ZP6Y83PF8jIzMdXcWAXhzi8RIwcoMEiPLkRHdR0Ji6rlOTeJA.jpg" width="250" />
+            <div class="card-content">
+                <div class="badges">
+                    <span class="badge time">
+                        45 min
+                    </span>
+                    <span class="badge vegetarian">
+                        Vegetarian
+                    </span>
+                </div>
+                <h3>
+                    Malfatti with wild garlic and brown butter
+                </h3>
+            </div>
+            <div class="card-footer">
+                <div class="author">
+                    <img alt="Carolin Roitzheim" height="30" src="https://storage.googleapis.com/a1aa/image/sxgEfQvKbvR1AqEfxMKqn2Yhl0EQCa43cI8pmKew1rjq0ZynA.jpg" width="30" />
+                    <span>
+                        Carolin Roitzheim
+                    </span>
+                </div>
+                <div class="likes">
+                    <i class="fas fa-heart">
+                    </i>
+                    <span>
+                        2.7k
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <img alt="Easy colorful carrot tart with ricotta" height="150" src="https://storage.googleapis.com/a1aa/image/0bKrLpsf4kWjAKWvO1VAHVAvflq6Vyb7aFpNjwQBWEsZ6M5TA.jpg" width="250" />
+            <div class="card-content">
+                <div class="badges">
+                    <span class="badge time">
+                        25 min
+                    </span>
+                    <span class="badge vegetarian">
+                        Vegetarian
+                    </span>
+                </div>
+                <h3>
+                    Easy colorful carrot tart with ricotta
+                </h3>
+            </div>
+            <div class="card-footer">
+                <div class="author">
+                    <img alt="Marco Hartz" height="30" src="https://storage.googleapis.com/a1aa/image/lBeEgBeNxzj0eobEeaO3zuelpwm0FidculyFe8tW3gcwlOTeJA.jpg" width="30" />
+                    <span>
+                        Marco Hartz
+                    </span>
+                </div>
+                <div class="likes">
+                    <i class="fas fa-heart">
+                    </i>
+                    <span>
+                        3.2k
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <img alt="Creamy carrot orzo (orzotto)" height="150" src="https://storage.googleapis.com/a1aa/image/9Qw4fg8Lp4R1EqP9fTXwbsf1oqEwCrepFfeonqBs2xfTNdm8JA.jpg" width="250" />
+            <div class="card-content">
+                <div class="badges">
+                    <span class="badge time">
+                        35 min
+                    </span>
+                    <span class="badge vegetarian">
+                        Vegetarian
+                    </span>
+                </div>
+                <h3>
+                    Creamy carrot orzo (orzotto)
+                </h3>
+            </div>
+            <div class="card-footer">
+                <div class="author">
+                    <img alt="Martina Trommer" height="30" src="https://storage.googleapis.com/a1aa/image/dp0y0YflJhW3EqcReooSRfFfUxPeEnB8T4L5DuFyd0fmkOTeJA.jpg" width="30" />
+                    <span>
+                        Martina Trommer
+                    </span>
+                </div>
+                <div class="likes">
+                    <i class="fas fa-heart">
+                    </i>
+                    <span>
+                        4.2k
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <img alt="Vegetarian stuffed peppers with rice and feta" height="150" src="https://storage.googleapis.com/a1aa/image/sSeJb3kfyNlP3koYwDeYWU4PbRIjh76yUHCd58zjQiup0ZynA.jpg" width="250" />
+            <div class="card-content">
+                <div class="badges">
+                    <span class="badge time">
+                        20 min
+                    </span>
+                    <span class="badge vegetarian">
+                        Vegetarian
+                    </span>
+                </div>
+                <h3>
+                    Vegetarian stuffed peppers with rice and feta
+                </h3>
+            </div>
+            <div class="card-footer">
+                <div class="author">
+                    <img alt="Martina Trommer" height="30" src="https://storage.googleapis.com/a1aa/image/dp0y0YflJhW3EqcReooSRfFfUxPeEnB8T4L5DuFyd0fmkOTeJA.jpg" width="30" />
+                    <span>
+                        Martina Trommer
+                    </span>
+                </div>
+                <div class="likes">
+                    <i class="fas fa-heart">
+                    </i>
+                    <span>
+                        12.7k
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
     <hr class="my-5">
 
     <!-- Reviews Section -->
-    <div id="reviews" class="mt-5 col-12 col-md-6">
+    <div id="reviews" class="mt-5">
 
 
         <!-- Create Comment Form -->
@@ -123,9 +356,9 @@
             <div class="d-flex justify-content-between">
                 <h5>REVIEWS (@comments.Count())</h5>
                 <button type="submit" class="button button-dark">Submit Review</button>
-            </div>            
+            </div>
             <input type="hidden" name="RecipeID" value="@Model.RecipeID" />
-            <textarea name="CommentContent" required class="form-control me-2" rows="2" placeholder="Enter a Review"></textarea>              
+            <textarea name="CommentContent" required class="form-control me-2" rows="2" placeholder="Enter a Review"></textarea>
         </form>
 
         <!-- Comments List -->
@@ -133,10 +366,12 @@
             @foreach (var comment in comments)
             {
                 <div class="d-flex align-items-center mb-4 bg-light p-3 rounded shadow-sm position-relative">
-                    @if (comment.Avatar!=null){
+                    @if (comment.Avatar != null)
+                    {
                         <img src="@($"{url}images/{comment.Avatar}")" alt="Avatar" class="rounded-circle me-3" width="50">
                     }
-                    else{
+                    else
+                    {
                         <img src="/images/profile.jpg" alt="Avatar" class="rounded-circle me-3" width="50">
                     }
                     <div>
@@ -160,7 +395,7 @@
                                 </li>
                             </ul>
                         </div>
-                    }                 
+                    }
                 </div>
             }
         </div>
@@ -175,12 +410,12 @@
                 <a href="@Url.Action("Rating", "Recipes", new { recipeID = Model.RecipeID, ratingValue = 5 })" class="star" data-value="5">★</a>
             </div>
         </div>
-       
-    </div>
 
+    </div>
 </div>
 
-<!-- Modal -->
+
+@* <!-- Modal --> *@
 <div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -207,23 +442,520 @@
 </div>
 
 
+
 <style>
+    .container-recipedetail {
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main-image {
+        width: 100%;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .title {
+        font-size: 24px;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .rating {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .rating i {
+            color: #ff6600;
+            margin-right: 5px;
+        }
+
+        .rating span {
+            font-size: 14px;
+            color: #666;
+            margin-left: 10px;
+        }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .actions div {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .actions i {
+            margin-right: 5px;
+        }
+
+    .more-delicious {
+        padding: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .more-delicious-title {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .more-delicious-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+        .more-delicious-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .more-delicious-item .time-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 2px 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            z-index: 1;
+        }
+
+            .more-delicious-item .time-label i {
+                margin-right: 5px;
+            }
+
+        .more-delicious-item div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .more-delicious-item .item-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .more-delicious-item .item-info {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+            .more-delicious-item .item-info span {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.5);
+                color: #fff;
+                padding: 2px 5px;
+                border-radius: 5px;
+            }
+
+            .more-delicious-item .item-info i {
+                margin-right: 5px;
+            }
+
+    .main-content {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .profile {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .profile img {
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+        }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .profile-info h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .profile-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+    .description {
+        font-size: 16px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .read-less {
+        color: #e94e77;
+        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .details {
+        display: flex;
+        justify-content: space-between;
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+        .details div {
+            text-align: center;
+        }
+
+            .details div p {
+                margin: 5px 0;
+            }
+
+            .details div .label {
+                font-size: 14px;
+                color: #666;
+            }
+
+            .details div .value {
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+    .ingredients-container {
+        padding: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+        .ingredients-container .servings {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .ingredients-container .servings button {
+                background-color: #f5f5f5;
+                border: none;
+                padding: 10px;
+                font-size: 18px;
+                cursor: pointer;
+            }
+
+            .ingredients-container .servings span {
+                margin: 0 10px;
+                font-size: 18px;
+            }
+
+            .ingredients-container .servings .label {
+                margin-left: 10px;
+                font-size: 18px;
+            }
+
+        .ingredients-container .ingredients {
+            margin-bottom: 20px;
+        }
+
+            .ingredients-container .ingredients div {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+            }
+
+                .ingredients-container .ingredients div span {
+                    font-size: 16px;
+                }
+
+                    .ingredients-container .ingredients div span:first-child {
+                        flex: 0 0 100px;
+                    }
+
+                    .ingredients-container .ingredients div span:nth-child(2) {
+                        color: red;
+                        flex: 1;
+                    }
+
+        .ingredients-container .button-container {
+            text-align: center;
+        }
+
+            .ingredients-container .button-container button {
+                background-color: #006400;
+                color: #fff;
+                border: none;
+                padding: 15px 30px;
+                font-size: 16px;
+                cursor: pointer;
+                border-radius: 25px;
+            }
+
+                .ingredients-container .button-container button i {
+                    margin-right: 10px;
+                }
+
+        .ingredients-container .divider {
+            border-top: 1px solid #ccc;
+            margin-top: 20px;
+        }
+
+    .steps-container {
+        padding: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+        .steps-container .step-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .steps-container .image-container {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+            .steps-container .image-container img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+
+        .steps-container .ingredients, .steps-container .tools {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+            .steps-container .ingredients i, .steps-container .tools i {
+                margin-right: 5px;
+            }
+
+        .steps-container .description {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+    h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .card-container {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+    }
+
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        width: 250px;
+        flex-shrink: 0;
+    }
+
+        .card img {
+            width: 100%;
+            height: auto;
+        }
+
+    .card-content {
+        padding: 15px;
+    }
+
+        .card-content h3 {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .card-content p {
+            font-size: 14px;
+            color: #555;
+        }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        border-top: 1px solid #ddd;
+    }
+
+        .card-footer .author {
+            display: flex;
+            align-items: center;
+        }
+
+            .card-footer .author img {
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                margin-right: 10px;
+            }
+
+        .card-footer .likes {
+            display: flex;
+            align-items: center;
+        }
+
+            .card-footer .likes i {
+                margin-right: 5px;
+            }
+
+    .badge {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #eee;
+        border-radius: 5px;
+        font-size: 12px;
+        margin-right: 5px;
+    }
+
+        .badge.vegetarian {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .badge.time {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+    .comments-section {
+        margin-top: 40px;
+    }
+
+        .comments-section h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+    .comment {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+        .comment img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+        }
+
+    .comment-content {
+        max-width: 800px;
+    }
+
+        .comment-content h4 {
+            font-size: 16px;
+            margin: 0 0 5px 0;
+        }
+
+        .comment-content p {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .comment-content .comment-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+    .add-comment {
+        display: flex;
+        align-items: flex-start;
+        margin-top: 20px;
+    }
+
+        .add-comment img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+        }
+
+        .add-comment textarea {
+            width: 100%;
+            max-width: 800px;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            resize: none;
+        }
+
+        .add-comment button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            .add-comment button:hover {
+                background-color: #218838;
+            }
+
     .star {
         font-size: 30px;
         color: gray;
         text-decoration: none;
     }
 
-    .star.selected {
-        color: gold;
-    }
+        .star.selected {
+            color: gold;
+        }
 
-    .star:hover {
-        color: gold;
-    }
+        .star:hover {
+            color: gold;
+        }
 
-}
+    }
 </style>
+
 <script>
     function openEditModal(commentID, commentContent,recipeID) {
         // Set values in the modal
@@ -273,6 +1005,43 @@
             selectedRating = this.getAttribute('data-value');  // Gán rating đã chọn khi click
             highlightStars(selectedRating);  // Tô sáng các sao dựa trên rating đã chọn
             document.getElementById('ratingText').textContent = `You rated ${selectedRating} stars`; // Cập nhật văn bản khi click
+        });
+    });
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const decreaseButton = document.getElementById('decreaseServings');
+        const increaseButton = document.getElementById('increaseServings');
+        const servingsValue = document.getElementById('servingsValue');
+        const ingredientsList = document.getElementById('ingredientsList');
+
+        let currentServings = parseInt(servingsValue.textContent);
+        const baseServings = currentServings;
+
+        const updateIngredients = () => {
+            const ingredientItems = ingredientsList.querySelectorAll('.ingredient-item');
+
+            ingredientItems.forEach(item => {
+                const quantityElement = item.querySelector('.ingredient-quantity');
+                const baseQuantity = parseFloat(quantityElement.getAttribute('data-base-quantity'));
+                const unit = quantityElement.getAttribute('data-unit');
+                const newQuantity = (baseQuantity / baseServings) * currentServings;
+                quantityElement.textContent = `${newQuantity.toFixed(2)} ${unit}`;
+            });
+        };
+
+        decreaseButton.addEventListener('click', () => {
+            if (currentServings > 1) {
+                currentServings--;
+                servingsValue.textContent = currentServings;
+                updateIngredients();
+            }
+        });
+
+        increaseButton.addEventListener('click', () => {
+            currentServings++;
+            servingsValue.textContent = currentServings;
+            updateIngredients();
         });
     });
 
