@@ -94,6 +94,7 @@ namespace FoodieHub.MVC.Controllers
         {
             // Lấy danh sách công thức
             var recipes = await _recipeService.GetAll(query);
+            ViewBag.Query = query;
             return View(recipes);
         }
 

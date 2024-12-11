@@ -156,7 +156,7 @@
                                 @{
                                     var listReviewOrther = await _reviewService.GetListReview(item.ProductID);
                                     int averageRatingOther = 0;
-                                    if (listReviewOrther.Data.Any())
+                                    if (listReviewOrther.Data!=null&& listReviewOrther.Data.Any())
                                     {
                                         double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
                                         double avgRate = totalRate / listReviewOrther.Data.Count;  // Trung bình rate
