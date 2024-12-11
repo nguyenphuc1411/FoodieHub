@@ -53,26 +53,26 @@ else
                 <th>Order ID</th>
                 <th>
                     <a asp-action="Index"
-                       asp-route-orderKey="ORDEREDDATE"
-                       asp-route-isDesc="@(ViewData["OrderKey"] as string == "ORDEREDDATE" ? !(ViewData["IsOrderedDateDescending"] as bool? ?? false) : false)"
-                       asp-route-currentPage="@ViewData["CurrentPage"]"
-                       asp-route-pageSize="@ViewData["PageSize"]">
+                       asp-route-SortBy="OrderedAt"
+                       asp-route-Ascending="@(query.Ascending?"false":"true")"
+                       asp-route-Page="@query.Page"
+                       asp-route-PageSize="@query.PageSize">
                         Ordered At
-                        @(ViewData["OrderKey"] as string == "ORDEREDDATE"
-                            ? ((ViewData["IsOrderedDateDescending"] as bool? ?? false) ? " ↓" : " ↑")
+                        @(query.SortBy == "OrderedAt"
+                            ? (query.Ascending ? " ↓" : " ↑")
                             : "")
                     </a>
                 </th>
                 <th>Customer Name</th>
                 <th>
                     <a asp-action="Index"
-                       asp-route-orderKey="PRICE"
-                       asp-route-isDesc="@(ViewData["OrderKey"] as string == "PRICE" ? !(ViewData["IsTotalAmountDescending"] as bool? ?? false) : false)"
-                       asp-route-currentPage="@ViewData["CurrentPage"]"
-                       asp-route-pageSize="@ViewData["PageSize"]">
+                       asp-route-SortBy="TotalAmount"
+                       asp-route-Ascending="@(query.Ascending?"false":"true")"
+                       asp-route-Page="@query.Page"
+                       asp-route-PageSize="@query.PageSize">
                         Total Amount
-                        @(ViewData["OrderKey"] as string == "PRICE"
-                            ? ((ViewData["IsTotalAmountDescending"] as bool? ?? false) ? " ↓" : " ↑")
+                        @(query.SortBy == "TotalAmount"
+                            ? (query.Ascending ? " ↓" : " ↑")
                             : "")
                     </a>
                 </th>
@@ -89,7 +89,7 @@ else
             {
                 <tr>
                     <td>@order.OrderID</td>
-                    <td>@order.OrderedAt.ToString("MM/dd/yyyy")</td>
+                    <td>@order.OrderedAt.ToString("dd/MM/yyyy")</td>
                     <td>@order.Fullname</td>
                     <td>$ @(order.TotalAmount - (order.Discount??0) - (order.DiscountOfCoupon??0))</td>
                     <td>

@@ -64,14 +64,14 @@ namespace FoodieHub.API.Repositories.Implementations
             return await _context.SaveChangesAsync()>0;
         }
 
-        public async Task<PaginatedModel<GetArticleDTO>> Get(QueryModel query,int? categoryID)
+        public async Task<PaginatedModel<GetArticleDTO>> Get(QueryArticleModel query)
         {
             var articles = _context.Articles
                 .ProjectTo<GetArticleDTO>(_mapper.ConfigurationProvider)
                          .AsQueryable();
-            if (categoryID.HasValue)
+            if (query.CategoryID.HasValue)
             {
-                articles = articles.Where(x => x.CategoryID==categoryID.Value);
+                articles = articles.Where(x => x.CategoryID== query.CategoryID.Value);
 
             }
             return await articles.ApplyQuery(query,x=>x.Title);

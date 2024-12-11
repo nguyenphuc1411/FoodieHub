@@ -1,9 +1,15 @@
 ﻿using FoodieHub.MVC.Models.Article;
+using FoodieHub.MVC.Models.QueryModel;
+using FoodieHub.MVC.Models.Response;
 
 namespace FoodieHub.MVC.Service.Interfaces
 {
     public interface IArticleService
     {
-        Task<IEnumerable<GetArticle>> GetAll(string? search, int? pageSize, int? currentPage);
+        Task<PaginatedModel<GetArticleDTO>?> Get(QueryArticleModel query);
+        Task<bool> Create(CreateArticleDTO article);
+        Task<GetArticleDTO?> GetByID(int id);
+        Task<bool> Delete(int id);
+        Task<bool> Update(int id,UpdateArticleDTO article);
     }
 }

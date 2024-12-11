@@ -16,8 +16,6 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         {
             this.orderService = orderService;
         }
-        // GET: Orders
-        [HttpGet]
         public async Task<IActionResult> Index(QueryOrderModel query)
         {
             var result = await orderService.Get(query);

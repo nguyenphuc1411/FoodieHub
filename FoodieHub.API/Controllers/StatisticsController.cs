@@ -1,10 +1,10 @@
 ﻿using FoodieHub.API.Repositories.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodieHub.API.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class StatisticsController : ControllerBase

@@ -2,8 +2,6 @@
 using FoodieHub.API.Models.DTOs.Coupon;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using static Azure.Core.HttpHeader;
 
@@ -21,7 +19,7 @@ namespace FoodieHub.API.Controllers
             _service = service;
         }
 
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Coupon>> Create(CouponDTO coupon)
         {
@@ -29,7 +27,7 @@ namespace FoodieHub.API.Controllers
             if (result == null) return BadRequest();
             return Ok(result);
         }
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{couponID}")]
         public async Task<ActionResult> Update(int couponID,[FromBody]CouponDTO coupon)
         {
@@ -37,14 +35,14 @@ namespace FoodieHub.API.Controllers
             return result ? NoContent() : BadRequest();
         }
 
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{couponID}")]
         public async Task<ActionResult> Delete(int couponID)
         {
             bool result = await _service.Delete(couponID);
             return result ? NoContent() : BadRequest();
         }
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{couponID}")]
         public async Task<ActionResult<GetCoupon>> GetDetail(int couponID)
         {
@@ -52,7 +50,7 @@ namespace FoodieHub.API.Controllers
             if(result == null) return NotFound();
             return Ok(result);
         }
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GetCoupon>>> Get()
         {

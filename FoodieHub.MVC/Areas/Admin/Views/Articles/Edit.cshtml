@@ -1,11 +1,13 @@
 ﻿@using FoodieHub.MVC.Models.Article
-@model EditArticle
+@using FoodieHub.MVC.Service.Interfaces
+@model UpdateArticleDTO
 @inject IConfiguration config;
-
+@inject IArticleCategoryService service
 @{
     var url = config["BaseHost"];
     ViewData["Title"] = "Edit Article";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var categories = await service.GetAll();
 }
 
 <div class="container py-4">
@@ -36,15 +38,21 @@
             <textarea asp-for="Description" class="form-control" placeholder="Enter article description"></textarea>
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
-
+        <div class="mb-3">
+            <label asp-for="IsActive" class="form-label">IsActive</label>
+            <select asp-for="IsActive" class="form-select form-select-sm me-2" style="width: 150px;">
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </select>
+        </div>
         <div class="mb-3">
             <label asp-for="CategoryID" class="form-label me-3">Category</label>
             <span asp-validation-for="CategoryID" class="text-danger"></span>
             <select asp-for="CategoryID" class="form-select form-select-sm me-2" style="width: 150px;">
                 <option selected>All</option>
-                @if (ViewBag.Category != null)
+                @if(categories != null)
                 {
-                    foreach (var item in ViewBag.Category)
+                    foreach (var item in categories)
                     {
                         <option value="@item.CategoryID">@item.CategoryName</option>
                     }

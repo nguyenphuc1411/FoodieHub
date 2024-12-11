@@ -20,9 +20,9 @@ namespace FoodieHub.API.Controllers
             _service = service;
         }
         [HttpGet]
-        public async Task<ActionResult<PaginatedModel<GetArticleDTO>>> Get([FromQuery] QueryModel query, [FromQuery] int? categoryID)
+        public async Task<ActionResult<PaginatedModel<GetArticleDTO>>> Get([FromQuery] QueryArticleModel query)
         {
-            var result = await _service.Get(query,categoryID);
+            var result = await _service.Get(query);
             return Ok(result);
         }
         [HttpGet("users/{userID}")]
@@ -38,14 +38,14 @@ namespace FoodieHub.API.Controllers
             if (result == null) return NotFound();
             return Ok(result);
         }
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles ="Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(CreateArticleDTO articleDTO)
         {
             var result = await _service.Create(articleDTO);
             return result? Ok():BadRequest();
         }
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id,UpdateArticleDTO articleDTO)
         {
@@ -53,7 +53,7 @@ namespace FoodieHub.API.Controllers
             var result = await _service.Update(articleDTO);
             return result ? NoContent() : BadRequest();
         }
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute]int id)
         {

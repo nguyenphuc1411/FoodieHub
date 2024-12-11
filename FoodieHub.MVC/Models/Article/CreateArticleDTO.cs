@@ -15,7 +15,6 @@ namespace FoodieHub.MVC.Models.Article
 
         [Required(ErrorMessage = "Category is required.")]
         public int CategoryID { get; set; }
-
         public bool IsActive { get; set; }
     }
 

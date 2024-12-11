@@ -42,7 +42,7 @@ namespace FoodieHub.API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Policy = "RequireAdmin")]
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{orderID}")]
         public async Task<IActionResult> ChangeStatus(int orderID, [FromBody] string status)
         {

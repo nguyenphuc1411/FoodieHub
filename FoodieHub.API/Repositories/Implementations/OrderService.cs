@@ -231,8 +231,10 @@ namespace FoodieHub.API.Repositories.Implementations
                 .AsQueryable();
             if (queryOrder.OrderDate.HasValue)
             {
-                listOrders = listOrders.Where(x => DateOnly.FromDateTime(x.OrderedAt) == queryOrder.OrderDate.Value);
+                var dateToCompare = queryOrder.OrderDate.Value.ToDateTime(TimeOnly.MinValue);
+                listOrders = listOrders.Where(x => x.OrderedAt.Date == dateToCompare.Date);
             }
+
             if (!string.IsNullOrEmpty(queryOrder.Status))
             {
                 listOrders = listOrders.Where(x => x.Status.ToLower().Contains(queryOrder.Status.ToLower()));

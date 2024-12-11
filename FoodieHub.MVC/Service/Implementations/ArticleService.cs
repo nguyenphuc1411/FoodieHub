@@ -1,6 +1,9 @@
 ﻿using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Models.Article;
 using FoodieHub.MVC.Service.Interfaces;
+using FoodieHub.MVC.Models.QueryModel;
+using FoodieHub.MVC.Helpers;
+using System.Net.Http.Headers;
 
 namespace FoodieHub.MVC.Service.Implementations
 {
@@ -13,53 +16,62 @@ namespace FoodieHub.MVC.Service.Implementations
             _httpClient = httpClientFactory.CreateClient("MyAPI");
         }
 
-        public async Task<IEnumerable<GetArticle>> GetAll(string? search, int? pageSize, int? currentPage)
+        public async Task<bool> Create(CreateArticleDTO article)
         {
-            var response = await _httpClient.GetAsync("Articles");
-
-            if (response.IsSuccessStatusCode)
+            using (var content = new MultipartFormDataContent())
             {
-                // Sử dụng APIResponse<List<GetArticle>> để chuyển đổi phản hồi JSON
-                var content = await response.Content.ReadFromJsonAsync<APIResponse<List<GetArticle>>>();
+                // Thêm các thông tin khác của Article
+                content.Add(new StringContent(article.Title), "Title");
+                content.Add(new StringContent(article.Description), "Description");
+                content.Add(new StringContent(article.CategoryID.ToString()), "CategoryID");
+                content.Add(new StringContent(article.IsActive.ToString()), "IsActive");
 
-                if (content != null && content.Success)
-                {
-                    return content.Data.OrderByDescending(x=>x.CreatedAt).ToList() ?? new List<GetArticle>();
-                }
+                var fileContent = new StreamContent(article.File.OpenReadStream());
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(article.File.ContentType);
+                content.Add(fileContent, "File", article.File.FileName);
+
+                var httpResponse = await _httpClient.PostAsync("articles", content);
+
+                return httpResponse.IsSuccessStatusCode;
             }
-
-            return new List<GetArticle>();
         }
 
-        public async Task<APIResponse<GetArticleDTO>> GetDetail(int id)
+        public async Task<bool> Delete(int id)
         {
-            var response = await _httpClient.GetAsync($"Articles/{id}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Sử dụng APIResponse<GetArticleDetail> cho phản hồi chi tiết bài viết
-                var content = await response.Content.ReadFromJsonAsync<APIResponse<GetArticleDTO>>();
-
-                if (content != null)
-                {
-                    return new APIResponse<GetArticleDTO>
-                    {
-                        Success = content.Success,
-                        Message = content.Message,
-                        Data = content.Data,
-                        StatusCode = (int)response.StatusCode
-                    };
-                }
-            }
-
-            return new APIResponse<GetArticleDTO>
-            {
-                Success = false,
-                Message = "Failed to retrieve article by ID.",
-                Data = null,
-                StatusCode = (int)response.StatusCode
-            };
+            var response = await _httpClient.DeleteAsync("articles/" + id);
+            return response.IsSuccessStatusCode;
         }
 
+        public async Task<PaginatedModel<GetArticleDTO>?> Get(QueryArticleModel query)
+        {
+            var queryString = query.ToQueryString();
+            var response = await _httpClient.GetAsync("Articles"+queryString);
+            return await response.Content.ReadFromJsonAsync<PaginatedModel<GetArticleDTO>>();
+        }
+
+        public async Task<GetArticleDTO?> GetByID(int id)
+        {
+            return await _httpClient.GetFromJsonAsync<GetArticleDTO>("articles/" + id);
+        }
+        public async Task<bool> Update(int id, UpdateArticleDTO article)
+        {
+            using (var content = new MultipartFormDataContent())
+            {
+                // Thêm các thông tin khác của Article
+                content.Add(new StringContent(article.Title), "Title");
+                content.Add(new StringContent(article.Description), "Description");
+                content.Add(new StringContent(article.CategoryID.ToString()), "CategoryID");
+                content.Add(new StringContent(article.IsActive.ToString()), "IsActive");
+                if (article.File != null)
+                {
+                    var fileContent = new StreamContent(article.File.OpenReadStream());
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(article.File.ContentType);
+                    content.Add(fileContent, "File", article.File.FileName);
+                }
+                var httpResponse = await _httpClient.PostAsync("articles", content);
+
+                return httpResponse.IsSuccessStatusCode;
+            }
+        }
     }
 }
