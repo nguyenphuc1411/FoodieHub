@@ -44,8 +44,8 @@
 
     int averageRating = 0;
   
-      if (listReview.Data!=null&& listReview.Data.Any())
-          {
+    if (listReview.Data!=null&& listReview.Data.Any())
+    {
           double totalRate = listReview.Data.Sum(x => x.RatingValue); // Total all rates
           double avgRate = totalRate / listReview.Data.Count;  // Average rate
 

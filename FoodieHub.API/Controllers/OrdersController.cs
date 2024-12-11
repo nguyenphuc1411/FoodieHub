@@ -22,11 +22,6 @@ namespace FoodieHub.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] OrderDTO order)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var result = await _orderService.Create(order);
             return StatusCode(result.StatusCode, result);
         }

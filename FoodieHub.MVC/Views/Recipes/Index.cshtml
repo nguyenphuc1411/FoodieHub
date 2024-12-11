@@ -19,7 +19,7 @@
                 <!-- Search Bar -->
                 <div class="mb-3">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search recipes..." aria-label="Search recipes">
+                        <input name="SearchItem" value=@query.SearchItem type="text" class="form-control" placeholder="Search recipes..." aria-label="Search recipes">
                     </div>
                 </div>
 
@@ -29,29 +29,29 @@
                 </div>
                 <!-- Filter by Time -->
                 <div class="mb-3">
-                    <select class="form-select">
+                    <select name="CookOption" class="form-select">
                         <option value="">Filter by Time</option>
-                        <option value="under30">Under 30 mins</option>
-                        <option value="30to60">30 - 60 mins</option>
-                        <option value="over60">Over 60 mins</option>
+                        <option value="1">Under 30 mins</option>
+                        <option value="2">30 - 60 mins</option>
+                        <option value="3">Over 60 mins</option>
                     </select>
                 </div>
 
                 <!-- Filter by Upload Type -->
                 <div class="mb-3">
-                    <select class="form-select">
+                    <select name="IsAdminUpload" class="form-select">
                         <option value="">Uploaded by</option>
-                        <option value="admin">Admin</option>
-                        <option value="user">User</option>
+                        <option value="TRUE">Admin</option>
+                        <option value="FALSE">User</option>
                     </select>
                 </div>
 
                 <!-- Sort by Dropdown -->
                 <div class="mb-3">
-                    <select class="form-select">
-                        <option value="date">Sort by Date</option>
-                        <option value="likes">Sort by Likes</option>
-                        <option value="rating">Sort by Rating</option>
+                    <select name="SortBy" class="form-select">
+                        <option selected value="CreatedAt">Sort by Date</option>
+                        <option value="TotalFavorites">Sort by Likes</option>
+                        <option value="RatingAverage">Sort by Rating</option>
                     </select>
                 </div>
 

@@ -1,19 +1,18 @@
 ﻿using FoodieHub.MVC.Models.Cart;
-using FoodieHub.MVC.Models.Response;
-using FoodieHub.MVC.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Net.Http;
+using FoodieHub.MVC.Service.Interfaces;
 
 namespace FoodieHub.MVC.Views.Cart
 {
     public class CartViewComponent: ViewComponent
     {
-        private readonly HttpClient _httpClient;
+        private readonly IProductService _service;
 
-        public CartViewComponent(IHttpClientFactory httpClientFactory)
+        public CartViewComponent(IProductService service)
         {
-            _httpClient = httpClientFactory.CreateClient("MyAPI");
+            _service = service;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
@@ -24,23 +23,19 @@ namespace FoodieHub.MVC.Views.Cart
 
             foreach (var item in cartItems)
             {
-                var response = await _httpClient.GetAsync($"Products/getproductbyid/{item.ProductID}");
-                if (response.IsSuccessStatusCode)
+                var response = await _service.GetById(item.ProductID);
+                if (response.Data!=null && response.Success)
                 {
-                    var productResponse = await response.Content.ReadFromJsonAsync<APIResponse<GetProductDTO>>();
-                    if (productResponse != null && productResponse.Success)
+                    var product = response.Data;
+                    getCart.Add(new GetCartDTO
                     {
-                        var product = productResponse.Data;
-                        getCart.Add(new GetCartDTO
-                        {
-                            ProductID = product.ProductID,
-                            ProductName = product.ProductName,
-                            Price = product.Price,
-                            MainImage = product.MainImage,
-                            Quantity = item.Quantity,
-                            Discount = product.Discount
-                        });
-                    }
+                        ProductID = product.ProductID,
+                        ProductName = product.ProductName,
+                        Price = product.Price,
+                        MainImage = product.MainImage,
+                        Quantity = item.Quantity,
+                        Discount = product.Discount
+                    });
                 }
             }
 

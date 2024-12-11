@@ -1,20 +1,22 @@
 ﻿using FoodieHub.MVC.Models.Order;
 using FoodieHub.MVC.Configurations;
-using FoodieHub.MVC.Models;
 using FoodieHub.MVC.Models.Cart;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using FoodieHub.MVC.Helpers;
 namespace FoodieHub.MVC.Controllers
 {
     public class CartController : Controller
     {
-        private readonly HttpClient _httpClient;
+        private readonly IProductService _productService;
         private readonly IVnPayService _vnPayService;
-        public CartController(IHttpClientFactory httpClientFactory, IVnPayService vnPayService)
+        private readonly HttpClient _httpClient;
+        public CartController(IVnPayService vnPayService, IProductService productService, IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient("MyAPI");
             _vnPayService = vnPayService;
+            _productService = productService;
+            _httpClient = httpClientFactory.CreateClient("MyAPI");
         }
         [ValidateTokenForUser]
         public async Task<IActionResult> Checkout()
@@ -29,25 +31,20 @@ namespace FoodieHub.MVC.Controllers
             foreach (var item in cartItems)
             {
                 // Gọi API để lấy thông tin sản phẩm
-                var response = await _httpClient.GetAsync($"Products/getproductbyid/{item.ProductID}");
-                if (response.IsSuccessStatusCode)
+                var response = await _productService.GetById(item.ProductID);
+                if (response.Data!=null && response.Success)
                 {
-                    var productResponse = await response.Content.ReadFromJsonAsync<APIResponse<GetProductDTO>>();
-                    if (productResponse != null && productResponse.Success)
+                    var product = response.Data;
+                    // Thêm thông tin sản phẩm vào danh sách cartDetails
+                    getCart.Add(new GetCartDTO
                     {
-                        var product = productResponse.Data;
-
-                        // Thêm thông tin sản phẩm vào danh sách cartDetails
-                        getCart.Add(new GetCartDTO
-                        {
-                            ProductID = product.ProductID,
-                            ProductName = product.ProductName,
-                            Price = product.Price,
-                            Discount = product.Discount,
-                            MainImage = product.MainImage,
-                            Quantity = item.Quantity // Lưu số lượng từ giỏ hàng
-                        });
-                    }
+                        ProductID = product.ProductID,
+                        ProductName = product.ProductName,
+                        Price = product.Price,
+                        Discount = product.Discount,
+                        MainImage = product.MainImage,
+                        Quantity = item.Quantity // Lưu số lượng từ giỏ hàng
+                    });
                 }
             }
 
@@ -73,21 +70,12 @@ namespace FoodieHub.MVC.Controllers
             orderDto.ShippingAddress = $"{address}, {ward}, {district}, {province}";
 
             foreach (var item in cartItems)
-            {
-                // Get product details from API
-                var response = await _httpClient.GetAsync($"Products/getproductbyid/{item.ProductID}");
-                if (response.IsSuccessStatusCode)
+            {            
+                orderDto.OrderDetails.Add(new OrderDetailDtO
                 {
-                    var productResponse = await response.Content.ReadFromJsonAsync<APIResponse<GetProductDTO>>();
-                    if (productResponse != null && productResponse.Success)
-                    {
-                        orderDto.OrderDetails.Add(new OrderDetailDtO
-                        {
-                            ProductID = productResponse.Data.ProductID,
-                            Quantity = item.Quantity// Ensure to retrieve the price of the product
-                        });
-                    }
-                }
+                    ProductID = item.ProductID,
+                    Quantity = item.Quantity
+                });
             }
                       
 			var orderResponse = await _httpClient.PostAsJsonAsync("Orders", orderDto);
@@ -97,7 +85,7 @@ namespace FoodieHub.MVC.Controllers
 				var orderID = data.Data.OrderID;
 
 				// Clear the cart cookie
-				Response.Cookies.Delete("cart");
+				Response.DeleteCookie("cart");
 				TempData["SuccessMessage"] = data.Message;
 
                 if (orderDto.PaymentMethod) // thanh toán thẻ
@@ -131,7 +119,7 @@ namespace FoodieHub.MVC.Controllers
                 Quantity = quantity
             };
 
-            var cartItemsJson = Request.Cookies["cart"] ?? "[]";
+            var cartItemsJson = Request.GetCookie("cart") ?? "[]";
             var cartItems = System.Text.Json.JsonSerializer.Deserialize<List<CartItem>>(cartItemsJson) ?? new List<CartItem>();
 
             var existingItem = cartItems.Find(item => item.ProductID == productId);
@@ -145,17 +133,8 @@ namespace FoodieHub.MVC.Controllers
             }
 
             var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                Expires = DateTime.UtcNow.AddDays(30)
-            };
-
-            Response.Cookies.Append("cart", newCartItemsJson, cookieOptions);
-
-            TempData["SuccessMessage"] = "The product has been added to the cart successfully!";
-
+            Response.SetCookie("cart", newCartItemsJson);
+            NotificationHelper.SetSuccessNotification(this, "The product has been added to the cart successfully!");
             var refererUrl = Request.Headers["Referer"].ToString();
             return Redirect(refererUrl ?? Url.Action("Index","Products"));
         }
@@ -223,14 +202,7 @@ namespace FoodieHub.MVC.Controllers
 
             // Save updated cart to cookie
             var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true, // Adjust based on your environment
-                Expires = DateTime.UtcNow.AddDays(30)
-            };
-
-            Response.Cookies.Append("cart", newCartItemsJson, cookieOptions);
+            Response.SetCookie("cart", newCartItemsJson);
 
             return RedirectToAction("Checkout");
         }
@@ -252,14 +224,8 @@ namespace FoodieHub.MVC.Controllers
 
             // Save updated cart to cookie
             var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true, // Adjust based on your environment
-                Expires = DateTime.UtcNow.AddDays(30)
-            };
 
-            Response.Cookies.Append("cart", newCartItemsJson, cookieOptions);
+            Response.SetCookie("cart", newCartItemsJson);
 
             // Redirect back to the referring page
             var refererUrl = Request.Headers["Referer"].ToString();
@@ -269,7 +235,7 @@ namespace FoodieHub.MVC.Controllers
         public IActionResult RemoveFromCart(int id)
         {
             // Lấy danh sách giỏ hàng hiện tại từ cookie
-            var cartItemsJson = Request.Cookies["cart"] ?? "[]";
+            var cartItemsJson = Request.GetCookie("cart") ?? "[]";
             var cartItems = System.Text.Json.JsonSerializer.Deserialize<List<CartItem>>(cartItemsJson) ?? new List<CartItem>();
 
             // Tìm sản phẩm trong giỏ hàng
@@ -282,14 +248,8 @@ namespace FoodieHub.MVC.Controllers
 
             // Lưu giỏ hàng đã cập nhật vào cookie
             var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true, // Điều chỉnh tùy thuộc vào môi trường của bạn
-                Expires = DateTime.UtcNow.AddDays(30) // hoặc không set Expires để là session cookie
-            };
 
-            Response.Cookies.Append("cart", newCartItemsJson, cookieOptions);
+            Response.SetCookie("cart", newCartItemsJson);
 
             TempData["SuccessMessage"] = "The product has been removed from the cart successfully!";
 
@@ -312,14 +272,8 @@ namespace FoodieHub.MVC.Controllers
 
             // Lưu giỏ hàng đã cập nhật vào cookie
             var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true, // Điều chỉnh tùy thuộc vào môi trường của bạn
-                Expires = DateTime.UtcNow.AddDays(30) // hoặc không set Expires để là session cookie
-            };
 
-            Response.Cookies.Append("cart", newCartItemsJson, cookieOptions);
+            Response.SetCookie("cart", newCartItemsJson);
 
             TempData["SuccessMessage"] = "The product has been removed from the cart successfully!";
 
