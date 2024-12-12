@@ -116,7 +116,7 @@ namespace FoodieHub.MVC.Controllers
         }
 
         [ValidateTokenForUser]
-        public async Task<IActionResult> DeleteComment(int commentID,int articleID ,string order = "desc")
+        public async Task<IActionResult> Delete(int commentID,int articleID ,string order = "desc")
         {
             bool result = await _commentService.Delete(commentID);
             if (result)
