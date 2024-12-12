@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FoodieHub.API.Models.DTOs.Coupon
 {
     public class CouponDTO
     {
+        public int? CouponID { get; set; }
         [StringLength(20)]
         public string CouponCode { get; set; }
         [StringLength(10)]

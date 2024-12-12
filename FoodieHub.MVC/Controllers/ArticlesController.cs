@@ -27,55 +27,27 @@ namespace FoodieHub.MVC.Controllers
             _favoriteService = favoriteService;
         }
 
-        public async Task<IActionResult> Index(string? search, int? pageSize, int? currentPage)
+        public async Task<IActionResult> Index()
         {
-            // Gọi API thông qua service
-            var articlesFromService = await _articleService.Get(search, pageSize, currentPage);
-
-            // Kiểm tra dữ liệu trả về
-            if (articlesFromService == null || !articlesFromService.Any())
+            var queryFavorite = new QueryArticleModel
             {
-                return View(new ArticleViewModel());
-            }
+                SortBy = "TotalFavorites"
+            };
+            var topArticles = await _articleService.Get(queryFavorite);
 
-            // Feature Article
-            var featureArticle = articlesFromService
-                .OrderByDescending(a => a.TotalFavorites)
-                .ThenBy(a => a.CreatedAt)
-                .FirstOrDefault();
+            var queryLasted = new QueryArticleModel
+            {
+                SortBy = "CreatedAt"
+            };
+            var lastedArticle = await _articleService.Get(queryLasted);
 
-            // Top Articles: chỉ chọn bài viết có lượt thích > 0
-            var topArticles = articlesFromService
-                .Where(a => a.TotalFavorites > 0) // Lọc bài viết có lượt thích
-                .OrderByDescending(a => a.TotalFavorites)
-                .ThenBy(a => a.CreatedAt)
-                .Take(10)
-                .ToList();
-
-            // Latest Article
-            var latestArticle = articlesFromService
-                .OrderByDescending(a => a.CreatedAt)
-                .FirstOrDefault();
-
-            // Latest Articles List
-            var latestArticlesList = articlesFromService
-                .OrderByDescending(a => a.CreatedAt)
-                .Skip(1) // Bỏ qua bài viết đã chọn là Latest Article
-                .Take(4)
-                .ToList();
-
-            // Tạo ViewModel
             var viewModel = new ArticleViewModel
             {
-                FeatureArticle = featureArticle,
-                TopArticlesByFavourite = topArticles,
-                LatestArticle = latestArticle,
-                LatestArticlesList = latestArticlesList
+                TopArticles = topArticles.Items,
+                LatestArticlesList = lastedArticle.Items,
             };
-
             return View(viewModel);
         }
-
 
 
         public async Task<IActionResult> ViewAll(QueryArticleModel queryArticle)
@@ -113,6 +85,17 @@ namespace FoodieHub.MVC.Controllers
                     NotificationHelper.SetErrorNotification(this);
             }
             return RedirectToAction("Detail", new { id = comment.ArticleID, order });
+        }
+        [HttpPost]
+        public async Task<IActionResult> EditComment(int CommentID, string CommentContent, int articleID)
+        {
+            bool result = await _commentService.Edit(CommentID, new CommentDTO
+            {
+                CommentContent = CommentContent
+            });
+            if (result) NotificationHelper.SetSuccessNotification(this);
+            else NotificationHelper.SetErrorNotification(this);
+            return RedirectToAction("Detail", new { id = articleID });
         }
 
         [ValidateTokenForUser]
@@ -153,6 +136,14 @@ namespace FoodieHub.MVC.Controllers
             else
                 NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Detail", new { id });
+        }
+
+        public async Task<IActionResult> DeleteComment(int id, int articleID)
+        {
+            bool result = await _commentService.Delete(id);
+            if (result) NotificationHelper.SetSuccessNotification(this);
+            else NotificationHelper.SetErrorNotification(this);
+            return RedirectToAction("Detail", new { id = articleID });
         }
     }
 }

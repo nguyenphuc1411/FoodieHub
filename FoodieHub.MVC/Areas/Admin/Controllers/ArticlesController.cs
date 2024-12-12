@@ -4,7 +4,6 @@ using FoodieHub.MVC.Models.Article;
 using FoodieHub.MVC.Models.QueryModel;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
@@ -27,6 +26,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 NotificationHelper.SetErrorNotification(this);
                 return RedirectToAction("Index","Home");
             }
+            ViewBag.Query = query;
             return View(result);
         }
     
@@ -74,6 +74,8 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 CategoryID = result.CategoryID,
                 IsActive = result.IsActive
             };
+            Response.SetCookie("ImageCurrent",result.MainImage);
+            ViewBag.CurrentImage=result.MainImage;
             return View(article);         
         }
 
@@ -89,7 +91,8 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                     return RedirectToAction("Index");
                 }
                 else NotificationHelper.SetErrorNotification(this);
-            }       
+            }
+            ViewBag.CurrentImage= Request.GetCookie("ImageCurrent");
             return View(update);
         }
           

@@ -2,12 +2,10 @@
 using FoodieHub.API.Models.QueryModel;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodieHub.API.Controllers
 {
-    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -17,18 +15,22 @@ namespace FoodieHub.API.Controllers
         {
             _service = service;
         }
+        [Authorize(Roles = "Admin")]
+
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] QueryUserModel query)
         {
             var result = await _service.Get(query);
             return Ok(result);
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> Create([FromForm] CreateUserDTO createUser)
         {
             var result = await _service.Create(createUser);
             return StatusCode(result.StatusCode, result);
         }
+        [Authorize(Roles = "Admin")]
         [HttpPatch("disable/{id}")]
         public async Task<IActionResult> Disble([FromRoute] string id)
         {
@@ -36,6 +38,7 @@ namespace FoodieHub.API.Controllers
 
             return result ? Ok() : BadRequest();
         }
+        [Authorize(Roles = "Admin")]
         [HttpPatch("restore/{id}")]
         public async Task<IActionResult> Restore([FromRoute] string id)
         {

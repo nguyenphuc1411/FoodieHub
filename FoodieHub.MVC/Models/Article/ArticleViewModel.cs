@@ -2,9 +2,7 @@
 {
     public class ArticleViewModel
     {
-        public GetArticle? FeatureArticle { get; set; }
-        public List<GetArticle> TopArticlesByFavourite { get; set; } = new();
-        public GetArticle? LatestArticle { get; set; }
-        public List<GetArticle> LatestArticlesList { get; set; } = new();
+        public IEnumerable<GetArticleDTO> TopArticles { get; set; } = new List<GetArticleDTO>();
+        public IEnumerable<GetArticleDTO> LatestArticlesList { get; set; }= new List<GetArticleDTO>();
     }
 }

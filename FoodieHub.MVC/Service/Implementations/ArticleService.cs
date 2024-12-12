@@ -42,11 +42,11 @@ namespace FoodieHub.MVC.Service.Implementations
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<PaginatedModel<GetArticleDTO>?> Get(QueryArticleModel query)
+        public async Task<PaginatedModel<GetArticleDTO>> Get(QueryArticleModel query)
         {
             var queryString = query.ToQueryString();
             var response = await _httpClient.GetAsync("Articles"+queryString);
-            return await response.Content.ReadFromJsonAsync<PaginatedModel<GetArticleDTO>>();
+            return await response.Content.ReadFromJsonAsync<PaginatedModel<GetArticleDTO>>() ?? new PaginatedModel<GetArticleDTO>();
         }
 
         public async Task<GetArticleDTO?> GetByID(int id)
@@ -58,6 +58,7 @@ namespace FoodieHub.MVC.Service.Implementations
             using (var content = new MultipartFormDataContent())
             {
                 // Thêm các thông tin khác của Article
+                content.Add(new StringContent(article.ArticleID.ToString()), "ArticleID");
                 content.Add(new StringContent(article.Title), "Title");
                 content.Add(new StringContent(article.Description), "Description");
                 content.Add(new StringContent(article.CategoryID.ToString()), "CategoryID");
@@ -68,7 +69,7 @@ namespace FoodieHub.MVC.Service.Implementations
                     fileContent.Headers.ContentType = new MediaTypeHeaderValue(article.File.ContentType);
                     content.Add(fileContent, "File", article.File.FileName);
                 }
-                var httpResponse = await _httpClient.PostAsync("articles", content);
+                var httpResponse = await _httpClient.PutAsync($"articles/{id}", content);
 
                 return httpResponse.IsSuccessStatusCode;
             }

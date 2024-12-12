@@ -44,14 +44,14 @@ namespace FoodieHub.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{orderID}")]
-        public async Task<IActionResult> ChangeStatus(int orderID, [FromBody] string status)
+        public async Task<IActionResult> ChangeStatus(int orderID, [FromQuery] string status)
         {
             var result = await _orderService.ChangeStatus(orderID, status);
             return StatusCode(result.StatusCode, result);
         }
         [Authorize]
         [HttpPatch("ChangeStatusUser/{orderID}")]
-        public async Task<IActionResult> ChangeStatusUser(int orderID, [FromBody] string status, [FromQuery] string? cancellationReason = null)
+        public async Task<IActionResult> ChangeStatusUser(int orderID, [FromQuery] string status, [FromQuery] string? cancellationReason)
         {
             var result = await _orderService.ChangeStatusUser(orderID, status, cancellationReason);
             return StatusCode(result.StatusCode, result);

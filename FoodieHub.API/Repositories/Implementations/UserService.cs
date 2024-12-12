@@ -143,7 +143,7 @@ namespace FoodieHub.API.Repositories.Implementations
 
             if (!string.IsNullOrEmpty(query.Email))
             {
-                users = users.Where(x => x.Email.ToLowerInvariant().Contains(query.Email.ToLowerInvariant()));
+                users = users.Where(x => x.Email.ToLower().Contains(query.Email.ToLower()));
             }
             var userList = await users.ToListAsync();
             var result = new List<UserDTO>();
@@ -167,9 +167,8 @@ namespace FoodieHub.API.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(query.Role))
             {
-                result = result.Where(x => x.Role.Equals(query.Role, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                result = result.Where(x => x.Role==query.Role).ToList();
             }
-
             return result.Paginate(query.PageSize,query.Page);
         }
 

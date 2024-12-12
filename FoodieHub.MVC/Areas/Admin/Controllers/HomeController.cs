@@ -5,6 +5,8 @@ using FoodieHub.MVC.Models.Contact;
 using FoodieHub.MVC.Models.Order;
 using FoodieHub.MVC.Models.Response;
 using Microsoft.AspNetCore.Mvc;
+using FoodieHub.MVC.Service.Interfaces;
+using FoodieHub.MVC.Helpers;
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
@@ -12,10 +14,11 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
     public class HomeController : Controller
     {
         private readonly HttpClient _httpClient;
-
-        public HomeController(IHttpClientFactory httpClientFactory)
+        private readonly IAuthService authService;
+        public HomeController(IHttpClientFactory httpClientFactory, IAuthService authService)
         {
             _httpClient = httpClientFactory.CreateClient("MyAPI");
+            this.authService = authService;
         }
 
         public async Task<IActionResult> Index(
@@ -162,6 +165,9 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
 
             await GetContactInfo();
 
+            var profile = await authService.GetProfile();
+            Response.SetCookie("FullNameAdmin", profile?.Fullname ??"");
+            Response.SetCookie("AvatarAdmin",profile?.Avatar ??"");
             return View();
         }
 

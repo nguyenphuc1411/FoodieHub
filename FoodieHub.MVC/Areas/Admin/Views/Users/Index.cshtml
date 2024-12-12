@@ -1,10 +1,12 @@
-﻿@using FoodieHub.MVC.Models.User
+﻿@using FoodieHub.MVC.Models.QueryModel
+@using FoodieHub.MVC.Models.User
 @using FoodieHub.MVC.Models.Response
 @inject IConfiguration config
 @{
     ViewData["Title"] = "Users";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var url = config["BaseHost"];
+    var query = ViewBag.Query as QueryUserModel ?? new QueryUserModel();
 }
 @model PaginatedModel<UserDTO>
 <div class="container py-4">
@@ -18,7 +20,7 @@
             <label for="Role" class="me-2">Role</label>
             <select name="Role" class="form-select form-select-sm me-2" style="width: 150px;">
                 <option value="">All</option>
-                @if (ViewBag.Role == "Admin" && ViewBag.Role!=null)
+                @if (query.Role == "Admin")
                 {
                     <option value="Admin" selected>Admin</option>
                 }
@@ -26,7 +28,7 @@
                 {
                     <option value="Admin">Admin</option>
                 }
-                @if (ViewBag.Role == "User" && ViewBag.Role != null)
+                @if (query.Role == "User")
                 {
                     <option value="User" selected>User</option>
                 }
@@ -40,8 +42,8 @@
                 <!-- Add more roles as needed -->
             </select>
 
-            <label for="email" class="me-2">Email</label>
-            <input name="email" value="@ViewBag.Email" class="form-control form-control-sm me-2" placeholder="Search by email.." style="width: 250px;" />
+            <label for="Email" class="me-2">Email</label>
+            <input name="Email" value=@query.Email class="form-control form-control-sm me-2" placeholder="Search by email.." style="width: 250px;" />
 
             <button type="submit" class="btn btn-secondary">Filter</button>
         </form>
@@ -66,11 +68,10 @@
                 {
                     foreach (var item in Model.Items)
                     {
-                        var imgurl = !string.IsNullOrEmpty(item.Avatar.ToString()) ? $"{url + "images/" +item.Avatar}" : "/images/profile.jpg";
                         <tr>
                             <td>@item.Fullname</td>
                             <td>
-                                <img src=@(imgurl) alt="Avatar Image" class="img-thumbnail" style="width:50px;height:50px" />
+                                <img src=@(item.Avatar!=null?"imgaes/"+item.Avatar:"/images/profile.jpg") alt="Avatar Image" class="img-thumbnail" style="width:50px;height:50px" />
                             </td>
                             <td>@item.Email</td>
                             <td>@item.JoinedAt</td>

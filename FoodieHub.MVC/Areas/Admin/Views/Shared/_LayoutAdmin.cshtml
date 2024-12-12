@@ -126,7 +126,8 @@
                 <div class="dropdown ">
                     <button id="fullnameAdmin" type="button" class="btn btn-primary dropdown-toggle button-menu-user"
                             data-bs-toggle="dropdown">
-
+                    <span id="FullNameAdmin"></span>
+                    <span id="AvatarAdmin"></span>
                     </button>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/admin/account/updateprofile"><i class="fa-solid fa-user me-2"></i>Profile</a></li>
@@ -200,6 +201,31 @@
             plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
             toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
         });
+
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) {
+                return decodeURIComponent(parts.pop().split(';').shift());
+            }
+            return null;
+        }
+
+        // Lấy giá trị cookie "Name" và hiển thị
+        const fullName = getCookie("FullNameAdmin");
+            if (fullName) {
+                    document.getElementById("FullNameAdmin").innerText = fullName;
+        }
+
+        const avatar = getCookie("AvatarAdmin");
+        if (avatar) {
+            const url = "@Url.Content(url + "/images/")";
+            document.getElementById("AvatarAdmin").innerHTML =
+                `<img src="${url}${avatar}" class="img-fluid rounded-circle" style="width:25px;height:25px" />`;
+        } else {
+            document.getElementById("AvatarAdmin").innerHTML = `<i class="fa-solid fa-user"></i>`;
+        }
     </script>
 </body>
 
