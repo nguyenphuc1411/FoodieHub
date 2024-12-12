@@ -56,8 +56,7 @@ namespace FoodieHub.MVC.Service.Implementations
         public async Task<PaginatedModel<UserDTO>?> Get(QueryUserModel query)
         {
             var queryString = query.ToQueryString();
-            var httpResponse = await _httpClient.GetAsync($"users{queryString}");
-            return await httpResponse.Content.ReadFromJsonAsync<PaginatedModel<UserDTO>>();
+            return await _httpClient.GetFromJsonAsync<PaginatedModel<UserDTO>>("users"+queryString);
         }
 
         public async Task<UserDTO?> GetByID(string id)

@@ -6,7 +6,7 @@ namespace FoodieHub.MVC.Service.Interfaces
 {
     public interface IArticleService
     {
-        Task<PaginatedModel<GetArticleDTO>?> Get(QueryArticleModel query);
+        Task<PaginatedModel<GetArticleDTO>> Get(QueryArticleModel query);
         Task<bool> Create(CreateArticleDTO article);
         Task<GetArticleDTO?> GetByID(int id);
         Task<bool> Delete(int id);

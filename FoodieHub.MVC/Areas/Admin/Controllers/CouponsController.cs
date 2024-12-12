@@ -87,7 +87,12 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             }
             var result = await couponService.Update(id, coupon);
 
-            if (result) NotificationHelper.SetSuccessNotification(this);
+            if (result)
+            {
+                NotificationHelper.SetSuccessNotification(this);
+                return RedirectToAction("Index");
+            }
+
             else NotificationHelper.SetErrorNotification(this);
             return View(coupon);
         }

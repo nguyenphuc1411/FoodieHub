@@ -1,6 +1,5 @@
-﻿@model FoodieHub.MVC.Models.Article.ArticleViewModel
-
-@using FoodieHub.MVC.Models.Response
+﻿@using FoodieHub.MVC.Models.Article
+@model ArticleViewModel
 @inject IConfiguration config
 @{
     ViewData["Title"] = "Articles";
@@ -14,14 +13,14 @@
 
         <!-- Feature Article Section -->
         <div class="col-md-5">
-            @if (Model.FeatureArticle != null)
+            @if (Model.TopArticles.Count() >0)
             {
-                <img src="@($"{url}/images/{Model.FeatureArticle.MainImage}")"
+                <img src="@($"{url}/images/{Model.TopArticles.First().MainImage}")"
                      alt="Feature Article Image"
                      class="recipe-image" />
                 <p class="my-3" style="color: #A18F7A;">FAVORITE ARTICLE</p>
                 <h2 class="my-3">
-                    <a asp-action="Detail" asp-route-id="@Model.FeatureArticle.ArticleID">@Model.FeatureArticle.Title</a>
+                    <a asp-action="Detail" asp-route-id="@Model.TopArticles.First().ArticleID">@Model.TopArticles.First().Title</a>
                 </h2>
             }
             else
@@ -35,10 +34,10 @@
         <!-- Top Articles Section -->
         <div class="col-md-6 bg-light p-4">
             <h2 class="my-4 text-center">Top Articles</h2>
-            @if (Model.TopArticlesByFavourite != null && Model.TopArticlesByFavourite.Any())
+            @if (Model.TopArticles != null && Model.TopArticles.Any())
             {
                 <ul class="ChuLi">
-                    @foreach (var article in Model.TopArticlesByFavourite.Select((value, index) => new { value, index }))
+                    @foreach (var article in Model.TopArticles.Select((value, index) => new { value, index }))
                     {
                         <li>
                             <span>@(article.index + 1).</span>
@@ -63,14 +62,14 @@
 
         <!-- Latest Article -->
         <div class="col-md-5 my-3">
-            @if (Model.LatestArticle != null)
+            @if (Model.LatestArticlesList != null)
             {
-                <img src="@($"{url}/images/{Model.LatestArticle.MainImage}")"
+                <img src="@($"{url}/images/{Model.LatestArticlesList.First().MainImage}")"
                      alt="Article News Image"
                      class="recipe-image" />
-                <p class="my-2" style="color: #A18F7A;">@Model.LatestArticle.UpdatedAt.ToString("dd/MM/yyyy/hh:mm:ss")</p>
+                <p class="my-2" style="color: #A18F7A;">@Model.LatestArticlesList.First().CreatedAt.ToString("dd/MM/yyyy/hh:mm:ss")</p>
                 <h2 class="my-3">
-                    <a asp-action="Detail" asp-route-id="@Model.LatestArticle.ArticleID">@Model.LatestArticle.Title</a>
+                    <a asp-action="Detail" asp-route-id="@Model.LatestArticlesList.First().ArticleID">@Model.LatestArticlesList.First().Title</a>
                 </h2>
             }
             else
@@ -94,7 +93,7 @@
                 {
                     <div class="latest-recipe d-flex align-items-center mb-4">
                         <div class="col-8">
-                            <p class="my-2" style="color: #A18F7A;">@article.UpdatedAt.ToString("dd/MM/yyyy/hh:mm:ss")</p>
+                            <p class="my-2" style="color: #A18F7A;">@article.CreatedAt.ToString("dd/MM/yyyy/hh:mm:ss")</p>
                             <h4>
                                 <a asp-action="Detail" asp-route-id="@article.ArticleID">@article.Title</a>
                             </h4>
@@ -165,6 +164,7 @@
         background-size: cover;
         background-position: center;
         height: 300px;
+        width:100%;
     }
 
     .latest-recipe {

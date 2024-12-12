@@ -195,9 +195,6 @@ namespace FoodieHub.MVC.Controllers
                 NotificationHelper.SetErrorNotification(this);
                 return RedirectToAction("Dashboard");
             }
-            ViewData["CurrentPage"] = queryOrder.Page;
-            ViewData["TotalPages"] = result.TotalPages;
-            ViewData["PageSize"] = queryOrder.PageSize;
             return View(result);
         }
         [ValidateTokenForUser]

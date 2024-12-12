@@ -44,8 +44,8 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         [ValidateTokenForAdmin]
         public IActionResult Logout()
         {
+            Response.DeleteCookie("FullNameAdmin");
             Response.DeleteCookie("AvatarAdmin");
-            Response.DeleteCookie("NameAdmin");
             Response.DeleteCookie("TokenAdmin");
             return RedirectToAction("Login");
         }

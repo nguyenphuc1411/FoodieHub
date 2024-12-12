@@ -117,9 +117,15 @@ namespace FoodieHub.API.Repositories.Implementations
         {
             var existCoupon = await _context.Coupons.FindAsync(couponID);
             if (existCoupon == null) return false;
-            _mapper.Map(coupon, existCoupon);
+            existCoupon.DiscountValue= coupon.DiscountValue;
+            existCoupon.DiscountType= coupon.DiscountType;
+            existCoupon.StartDate=coupon.StartDate;
+            existCoupon.EndDate=coupon.EndDate;
+            existCoupon.MinimumOrderAmount=coupon.MinimumOrderAmount;
+            coupon.IsActive =coupon.IsActive;
+            coupon.Note = coupon.Note;
+            coupon.CouponCode = coupon.CouponCode;
             _context.Coupons.Update(existCoupon);
-            var result = await _context.SaveChangesAsync();
             return await _context.SaveChangesAsync() > 0;
         }
     }

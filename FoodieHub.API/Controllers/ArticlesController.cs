@@ -1,10 +1,8 @@
-﻿using FoodieHub.API.Data.Entities;
-using FoodieHub.API.Models.DTOs.Article;
+﻿using FoodieHub.API.Models.DTOs.Article;
 using FoodieHub.API.Models.QueryModel;
 using FoodieHub.API.Models.Response;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodieHub.API.Controllers

@@ -9,7 +9,7 @@
     ViewData["Title"] = "Detail";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = config["BaseHost"];
-    var comments = await commentService.GetCommentRecipe(Model.ArticleID);
+    var comments = await commentService.GetCommentArticle(Model.ArticleID);
     var listFavorites = await favoriteService.GetFA() ?? new List<GetArticleDTO>();
     var userID = ViewBag.UserID ?? "";
 }
@@ -17,10 +17,10 @@
 <div class="container">
     <div class="row">
         <p class="mt-3">Article / @Model.CategoryName</p>
-        <div class="col-md-12 text-center mt-1">
+        <div class="col-md-12 text-center my-2">
             <h2 class="mb-3">@Model.Title</h2>
             <p><strong>By:</strong> @Model.FullName | <strong>@Model.CreatedAt</strong></p>
-            <a href="#reviews">View TotalComment comments</a>
+            <a href="#reviews">View @Model.TotalComments comments</a>
         </div>
 
         <div class="col-md-6">
@@ -31,20 +31,34 @@
 
         <div class="col-md-6">
             <div class="col-12 d-flex align-items-center mb-1">
-                <form asp-action="Favorite" asp-route-id="@Model.ArticleID" method="post">
-                    <button type="submit" class="btn btn-outline-secondary me-2">Save</button>
-                </form>
-                <form asp-action="UnFavorite" asp-route-id="@Model.ArticleID" method="post">
-                    <button type="submit" class="btn btn-outline-secondary me-2">UnSave</button>
-                </form>
-                <button class="btn btn-outline-secondary me-2">Review</button>
+                @if (listFavorites.Select(x => x.ArticleID).Contains(Model.ArticleID))
+                {
+                    <a asp-action="UnFavorite" asp-route-id="@Model.ArticleID" class="btn btn-outline-secondary">
+                        <i class="fas fa-bookmark"></i> UnSave
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Favorite" asp-route-id="@Model.ArticleID" class="btn btn-outline-secondary">
+                        <i class="far fa-bookmark"></i> Save
+                    </a>
+                }
+                <span class="ms-2"> @Model.TotalFavorites Favorites</span>
             </div>
             <hr>
             <div class="recipe-by">
                 <div class="recipe-by-info">
-                    <img src="@($"{url}/images/{Model.Avatar}")" alt="User Image" >
-
-                    <p class="mb-0"><strong>Recipe By: <br></strong> @Model.FullName</p>
+                    <p class="mb-0"><strong>Recipe By: <br></strong>
+                        @if (Model.Avatar != null)
+                        {
+                            <img src="@($"{url}images/{Model.Avatar}")" alt="User Image" class="rounded-circle me-3" width="60">
+                        }
+                        else
+                        {
+                            <img src="/images/profile.jpg" alt="User Image" class="rounded-circle me-3" width="60">
+                        }
+                        @Model.FullName
+                        </p>
                 </div>
                 <a href=@("/account/userinfo/"+Model.UserID) class="btn btn-outline-secondary">View Profile</a>
             </div>
@@ -53,133 +67,97 @@
     <hr>
 
     <!-- Reviews Section -->
-    <div class="mt-4" id="reviews">
-        <h5>REVIEWS(@ViewBag.TotalComment)</h5>
-        
-        <!-- Thông báo lỗi nếu có -->
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-        }
-
-        <!-- Form tạo bình luận mới -->
-        <form asp-action="CreateComment" method="post">
-            <input type="hidden" name="articleID" value="@Model.ArticleID" />
-            <input type="hidden" name="order" value="@ViewBag.Order" />
-
-            <div class="col-6 d-flex align-items-center mb-3">
-                <!-- Avatar của người dùng hiện tại -->
-                <img src="@($"{url}/images/{ViewBag.CurrentUserAvatar}")" alt="Avatar" class="rounded-circle me-2" style="width: 40px; height: 40px;border-radius: 50%; margin-right: 10px;">
-
-                <!-- Hiển thị tên người dùng hiện tại -->
-                <p class="mb-0"><strong>@ViewBag.CurrentUserFullName</strong></p>
+    <div id="reviews" class="mt-5 col-12 col-md-6">
+        <!-- Create Comment Form -->
+        <form asp-action="CreateComment" method="post" class="mb-4">
+            <div class="d-flex justify-content-between">
+                <h5>REVIEWS (@comments.Count())</h5>
+                <button type="submit" class="button button-dark">Submit Review</button>
             </div>
-
-            <!-- Nút submit và ô nhập nội dung bình luận -->
-            <div class="col-6 d-flex">
-                <textarea name="commentContent" class="form-control mb-3" rows="3" placeholder="Enter a Review"></textarea>
-                <button type="submit" class="btn btn-dark ms-2" style="height:75px">Submit Review</button>
-            </div>
-
-            <!-- Dropdown chọn thứ tự sắp xếp -->
-            <div class="d-flex align-items-center mb-3">
-                <label for="order-by" class="me-2"><strong>Order By:</strong></label>
-                <select id="order-by" class="form-select" style="width: auto;" onchange="location.href='?order=' + this.value">
-                    <option value="desc" selected="@(ViewBag.Order == "desc")">Newest</option>
-                    <option value="asc" selected="@(ViewBag.Order == "asc")">Oldest</option>
-                </select>
-            </div>
+            <input type="hidden" name="ArticleID" value="@Model.ArticleID" />
+            <textarea name="CommentContent" required class="form-control me-2" rows="2" placeholder="Enter a Review"></textarea>
         </form>
 
-
-        <!-- Reviews Section -->
-        <div id="reviews" class="mt-5">
-            <!-- Create Comment Form -->
-            <form asp-action="CreateComment" method="post" class="mb-4">
-                <div class="d-flex justify-content-between">
-                    <h5>REVIEWS (@comments.Count())</h5>
-                    <button type="submit" class="button button-dark">Submit Review</button>
-                </div>
-                <input type="hidden" name="ArticleID" value="@Model.ArticleID" />
-                <textarea name="CommentContent" required class="form-control me-2" rows="2" placeholder="Enter a Review"></textarea>
-            </form>
-
-            <!-- Comments List -->
-            <div id="commentsList">
-                @foreach (var comment in comments)
-                {
-                    <div class="d-flex align-items-center mb-4 bg-light p-3 rounded shadow-sm position-relative">
-                        @if (comment.Avatar != null)
-                        {
-                            <img src="@($"{url}images/{comment.Avatar}")" alt="Avatar" class="rounded-circle me-3" width="50">
-                        }
-                        else
-                        {
-                            <img src="/images/profile.jpg" alt="Avatar" class="rounded-circle me-3" width="50">
-                        }
-                        <div>
-                            <p class="mb-1"><strong>@comment.FullName</strong> - @comment.CommentedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
-                            <p class="mb-0">@comment.CommentContent</p>
-                        </div>
-
-                        @if (comment.UserID == userID)
-                        {
-                            <!-- Dropdown menu for Edit and Delete -->
-                            <div class="dropdown ms-auto position-absolute top-0 end-0 me-3">
-                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-solid fa-ellipsis-vertical"></i><!-- Bootstrap icon for three dots -->
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <li>
-                                        <button class="dropdown-item" onclick="openEditModal('@comment.CommentID', '@comment.CommentContent',@Model.RecipeID)">Edit</button>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item text-danger" asp-action="Delete" asp-route-articleID="@Model.ArticleID" asp-route-id="@comment.CommentID">Delete</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        }
+        <!-- Comments List -->
+        <div id="commentsList">
+            @foreach (var comment in comments)
+            {
+                <div class="d-flex align-items-center mb-4 bg-light p-3 rounded shadow-sm position-relative">
+                    @if (comment.Avatar != null)
+                    {
+                        <img src="@($"{url}images/{comment.Avatar}")" alt="Avatar" class="rounded-circle me-3" width="50">
+                    }
+                    else
+                    {
+                        <img src="/images/profile.jpg" alt="Avatar" class="rounded-circle me-3" width="50">
+                    }
+                    <div>
+                        <p class="mb-1"><strong>@comment.FullName</strong> - @comment.CommentedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                        <p class="mb-0">@comment.CommentContent</p>
                     </div>
-                }
-            </div>
+
+                    @if (comment.UserID == userID)
+                    {
+                        <!-- Dropdown menu for Edit and Delete -->
+                        <div class="dropdown ms-auto position-absolute top-0 end-0 me-3">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis-vertical"></i><!-- Bootstrap icon for three dots -->
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li>
+                                    <button class="dropdown-item" onclick="openEditModal('@comment.CommentID', '@comment.CommentContent',@Model.ArticleID)">Edit</button>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" asp-action="DeleteComment" asp-route-articleID="@Model.ArticleID" asp-route-id="@comment.CommentID">Delete</a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </div>
 </div>
-<!-- Modal xác nhận xóa -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+
+@* <!-- Modal --> *@
+<div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Xác nhận xóa bình luận</h5>
+                <h5 class="modal-title" id="editCommentModalLabel">Edit Comment</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Bạn có chắc chắn muốn xóa bình luận này không?
+                <form method="post" asp-action="EditComment" id="editCommentForm">
+                    <input type="hidden" name="CommentID" id="editCommentID">
+                    <input type="hidden" name="ArticleID" id="articleID">
+                    <div class="form-group">
+                        <label for="editCommentContent">Comment</label>
+                        <textarea required class="form-control" name="CommentContent" id="editCommentContent" rows="3"></textarea>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Có</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" form="editCommentForm">Save</button>
             </div>
         </div>
     </div>
 </div>
-<script>
-    function confirmDelete(commentID) {
-        // Lưu ID của bình luận vào biến toàn cục
-        window.commentIDToDelete = commentID;
 
-        // Hiển thị modal xác nhận
-        var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-        modal.show();
+
+
+<script>
+     function openEditModal(commentID, commentContent,articleID) {
+        // Set values in the modal
+        document.getElementById('editCommentID').value = commentID;
+        document.getElementById('editCommentContent').value = commentContent;
+        document.getElementById('articleID').value = articleID;
+
+        // Show the modal
+        var editModal = new bootstrap.Modal(document.getElementById('editCommentModal'));
+        editModal.show();
     }
 
-    // Xử lý khi người dùng nhấn "Có" để xóa bình luận
-    document.getElementById('confirmDeleteButton').addEventListener('click', function () {
-        // Submit form xóa bình luận
-        document.getElementById("deleteForm_" + window.commentIDToDelete).submit();
 
-        // Đóng modal sau khi đã xóa
-        var modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
-        modal.hide();
-    });
 </script>

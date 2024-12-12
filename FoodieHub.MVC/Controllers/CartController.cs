@@ -142,8 +142,7 @@ namespace FoodieHub.MVC.Controllers
         public async Task<IActionResult> AddOrderItemsToCart(string id)
         {
             var response = await _httpClient.GetAsync($"Orders/{id}");
-            var content = await response.Content.ReadFromJsonAsync<APIResponse<GetDetailOrder>>();
-            var orderDetails = content?.Data;
+            var orderDetails = await response.Content.ReadFromJsonAsync<GetDetailOrder>();
 
             // Lấy giỏ hàng hiện tại từ cookie
             var cartItemsJson = Request.Cookies["cart"] ?? "[]";
@@ -179,8 +178,7 @@ namespace FoodieHub.MVC.Controllers
             };
 
             Response.Cookies.Append("cart", newCartItemsJson, cookieOptions);
-
-            TempData["SuccessMessage"] = "All products from the order have been added to the cart successfully!";
+            NotificationHelper.SetSuccessNotification(this, "All products from the order have been added to the cart successfully!");
 
             return RedirectToAction("Checkout");
         }
@@ -250,9 +248,7 @@ namespace FoodieHub.MVC.Controllers
             var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
 
             Response.SetCookie("cart", newCartItemsJson);
-
-            TempData["SuccessMessage"] = "The product has been removed from the cart successfully!";
-
+            NotificationHelper.SetSuccessNotification(this, "The product has been removed from the cart successfully!");
             return RedirectToAction("Checkout"); // Hoặc chuyển hướng đến trang giỏ hàng
         }
         [ValidateTokenForUser]
@@ -274,9 +270,7 @@ namespace FoodieHub.MVC.Controllers
             var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
 
             Response.SetCookie("cart", newCartItemsJson);
-
-            TempData["SuccessMessage"] = "The product has been removed from the cart successfully!";
-
+            NotificationHelper.SetSuccessNotification(this, "The product has been removed from the cart successfully!");
             var refererUrl = Request.Headers["Referer"].ToString();
             return Redirect(refererUrl ?? Url.Action("Index"));
         }

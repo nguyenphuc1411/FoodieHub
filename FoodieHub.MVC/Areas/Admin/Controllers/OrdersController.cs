@@ -48,7 +48,6 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 NotificationHelper.SetErrorNotification(this, "Invalid orderID and status");
                 return RedirectToAction("Details", new { id = orderId });
             }
-            // Send PATCH request with status as a query parameter
             var result = await orderService.ChangeStatusForAdmin(int.Parse(orderId),status);
             if (result!=null && result.Success)
             {

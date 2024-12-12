@@ -19,12 +19,11 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             _userService = userService;
         }
 
-        public async Task<IActionResult> Index([FromQuery] QueryUserModel query)
+        public async Task<IActionResult> Index(QueryUserModel query)
         {
             var result = await _userService.Get(query);
             if(result == null) return RedirectToAction("Index", "Home");
-            ViewBag.Email = query.Email;
-            ViewBag.Role = query.Role;
+            ViewBag.Query = query;
             return View(result);
         }
         public IActionResult Create()

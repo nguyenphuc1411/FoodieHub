@@ -31,9 +31,33 @@
                 <div class="mb-3">
                     <select name="CookOption" class="form-select">
                         <option value="">Filter by Time</option>
-                        <option value="1">Under 30 mins</option>
-                        <option value="2">30 - 60 mins</option>
-                        <option value="3">Over 60 mins</option>
+
+                        @if (query.CookOption == 1)
+                        {
+                            <option value="1" selected>Under 30 mins</option>
+                        }
+                        else
+                        {
+                            <option value="1">Under 30 mins</option>
+                        }
+
+                        @if (query.CookOption == 2)
+                        {
+                            <option value="2" selected>30 - 60 mins</option>
+                        }
+                        else
+                        {
+                            <option value="2">30 - 60 mins</option>
+                        }
+
+                        @if (query.CookOption == 3)
+                        {
+                            <option value="3" selected>Over 60 mins</option>
+                        }
+                        else
+                        {
+                            <option value="3">Over 60 mins</option>
+                        }
                     </select>
                 </div>
 
@@ -41,18 +65,59 @@
                 <div class="mb-3">
                     <select name="IsAdminUpload" class="form-select">
                         <option value="">Uploaded by</option>
-                        <option value="TRUE">Admin</option>
-                        <option value="FALSE">User</option>
+
+                        @if (query.IsAdminUpload == true)
+                        {
+                            <option value="TRUE" selected>Admin</option>
+                        }
+                        else
+                        {
+                            <option value="TRUE">Admin</option>
+                        }
+
+                        @if (query.IsAdminUpload == false)
+                        {
+                            <option value="FALSE" selected>User</option>
+                        }
+                        else
+                        {
+                            <option value="FALSE">User</option>
+                        }
                     </select>
+
                 </div>
 
                 <!-- Sort by Dropdown -->
                 <div class="mb-3">
                     <select name="SortBy" class="form-select">
-                        <option selected value="CreatedAt">Sort by Date</option>
-                        <option value="TotalFavorites">Sort by Likes</option>
-                        <option value="RatingAverage">Sort by Rating</option>
+                        @if (query.SortBy == "CreatedAt")
+                        {
+                            <option value="CreatedAt" selected>Sort by Date</option>
+                        }
+                        else
+                        {
+                            <option value="CreatedAt">Sort by Date</option>
+                        }
+
+                        @if (query.SortBy == "TotalFavorites")
+                        {
+                            <option value="TotalFavorites" selected>Sort by Likes</option>
+                        }
+                        else
+                        {
+                            <option value="TotalFavorites">Sort by Likes</option>
+                        }
+
+                        @if (query.SortBy == "RatingAverage")
+                        {
+                            <option value="RatingAverage" selected>Sort by Rating</option>
+                        }
+                        else
+                        {
+                            <option value="RatingAverage">Sort by Rating</option>
+                        }
                     </select>
+
                 </div>
 
                 <!-- Apply Filters Button -->
@@ -62,7 +127,7 @@
 
                 <!-- Clear Filters Button -->
                 <div class="d-grid gap-2 mt-2">
-                    <a href="recipes" class="button button-light">Clear Filters</a>
+                    <a href="/recipes" class="button button-light">Clear Filters</a>
                 </div>
             </form>
         </div>
