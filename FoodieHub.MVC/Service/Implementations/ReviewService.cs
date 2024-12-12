@@ -15,7 +15,7 @@ namespace FoodieHub.MVC.Service.Implementations
         }
         public async Task<APIResponse<List<GetOrderDetailsByProductIdDTO>>> GetListReview(int id)
         {
-            var response = await _httpClient.GetAsync($"Review/getallreview/{id}");
+            var response = await _httpClient.GetAsync($"Review/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -40,7 +40,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<APIResponse> AddNewReview(ReviewDTO review)
         {
-            var httpResponse = await _httpClient.PostAsJsonAsync("Review/addnewreview", review);
+            var httpResponse = await _httpClient.PostAsJsonAsync("Review", review);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -60,7 +60,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<APIResponse> DeleteNewReview(int id)
         {
-            var httpResponse = await _httpClient.DeleteAsync($"Review/deletereview/{id}");
+            var httpResponse = await _httpClient.DeleteAsync($"Review/{id}");
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -82,7 +82,7 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<APIResponse> UpdateNewReview(UpdateReviewDTO review)
         {
-            var httpResponse = await _httpClient.PutAsJsonAsync("Review/updatereview", review);
+            var httpResponse = await _httpClient.PutAsJsonAsync("Review/", review);
 
             if (httpResponse.IsSuccessStatusCode)
             {
