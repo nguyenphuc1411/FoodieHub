@@ -2,10 +2,12 @@
 @using FoodieHub.MVC.Models.Categories
 @using FoodieHub.MVC.Service.Interfaces
 @inject IRecipeCategoryService categoryService
+@inject IProductService productService
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var categories = await categoryService.GetAll() ?? new List<GetRecipeCategoryDTO>();
+    var products = await productService.GetAll() ?? new List<GetProductDTO>();
 }
 @model CreateRecipeDTO
 
@@ -51,7 +53,7 @@
                     <div class="mb-3">
                         <label asp-for="Ingredients" class="form-label">Ingredient *</label>
                         <div id="ingredients-section">
-                            <!-- Ingredients will be added here -->
+                            <!-- Ingredients will be added here -->                     
                         </div>
                         <span asp-validation-for="Ingredients" class="text-danger"></span>
                         <button type="button" id="add-ingredient" class="btn btn-secondary">Add Ingredient</button>
@@ -90,18 +92,17 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex justify-content-end">
-                        <button type="submit" class="button button-dark me-2" name="IsActive" value="true">PUBLISH</button>
-                        <button type="submit" class="button button-light me-2" name="IsActive" value="false">SAVE AS DRAFT</button>
-                        <a href="/account/recipes" class="btn btn-secondary">CANCEL</a>
+                        <button type="submit" class="btn btn-primary me-2" name="IsActive" value="true">PUBLISH</button>
+                        <button type="submit" class="btn btn-light me-2" name="IsActive" value="false">SAVE AS DRAFT</button>
+                        <a href="/admin/recipes" class="btn btn-secondary">CANCEL</a>
                     </div>
-                </form>
-
-
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                </form>            
             </div>
         </div>
     </div>
 </div>
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+
 
 @section Scripts {
     <script>
@@ -172,8 +173,14 @@
             stepsSection.appendChild(stepDiv);
         });
 
+        const products = [
+        @foreach (var item in products)
+        {
+            @: { id: '@item.ProductID', name: '@item.ProductName' },
+        }
+        ];
 
-                // Fetch available units for the dropdown
+        // Fetch available units for the dropdown
         const availableUnits = ["cái", "kg", "g", "thìa", "ml", "lít", "tấn", "mét", "chén", "muỗng", "hũ"];
 
         document.getElementById("add-ingredient").addEventListener("click", function () {
@@ -218,6 +225,26 @@
                 unitSelect.appendChild(option);
             });
 
+            // Ingredient Product Select
+            const productSelect = document.createElement("select");
+            productSelect.name = `Ingredients[${ingredientIndex}].ProductID`;
+            productSelect.className = "form-select-sm mb-2";
+            productSelect.required = true;
+
+            // Add default option
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.text = "Select Product";
+            productSelect.appendChild(defaultOption);
+
+            // Add product options to the dropdown
+            products.forEach(product => {
+                const option = document.createElement("option");
+                option.value = product.id;
+                option.text = product.name;
+                productSelect.appendChild(option);
+            });
+
             // Delete Button for Ingredient
             const deleteButton = document.createElement("button");
             deleteButton.type = "button";
@@ -233,6 +260,7 @@
             ingredientDiv.appendChild(nameInput);
             ingredientDiv.appendChild(quantityInput);
             ingredientDiv.appendChild(unitSelect);
+            ingredientDiv.appendChild(productSelect);
             ingredientDiv.appendChild(deleteButton);
 
             // Append ingredient container to ingredients section

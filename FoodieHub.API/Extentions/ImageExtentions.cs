@@ -110,9 +110,11 @@ namespace FoodieHub.API.Extentions
         public void DeleteImage(string filePath)
         {
             var fullPath = Path.Combine(_environment.WebRootPath, "Images", filePath);
-            if (Directory.Exists(fullPath))
+
+            // Kiểm tra xem tệp có tồn tại không
+            if (File.Exists(fullPath))
             {
-                File.Delete(fullPath);
+                File.Delete(fullPath);  // Xóa tệp nếu tồn tại
             }
         }
 

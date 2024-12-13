@@ -229,6 +229,7 @@ namespace FoodieHub.API.Repositories.Implementations
                 var ingredients = await _context.Ingredients.Where(x => x.RecipeID == id).ToListAsync();
                 var recipeProducts = await _context.RecipeProducts.Where(x=>x.RecipeID==id).ToListAsync();
                 var imgPath = recipe.ImageURL;
+                var listImagePath = new List<string>(); 
                 foreach (var comment in listComments)
                 {
                     _context.Comments.Remove(comment);
@@ -245,6 +246,7 @@ namespace FoodieHub.API.Repositories.Implementations
                 foreach (var step in listSteps)
                 {
                     _context.RecipeSteps.Remove(step);
+                    if(step.ImageURL != null) listImagePath.Add(step.ImageURL);
                 }
                 foreach (var ingredient in ingredients)
                 {
@@ -260,6 +262,12 @@ namespace FoodieHub.API.Repositories.Implementations
                     + ingredients.Count()+recipeProducts.Count();
                 if (result >entityCount)
                 {
+                    _imageServices.DeleteImage(imgPath);
+                    foreach (var item in listImagePath)
+                    {
+                        _imageServices.DeleteImage(item);
+                    }
+
                     await transaction.CommitAsync();
                     return true;
                 }
