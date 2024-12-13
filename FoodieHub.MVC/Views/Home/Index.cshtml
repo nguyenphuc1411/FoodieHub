@@ -70,7 +70,7 @@
                 var listReviewOrther = await _reviewService.GetListReview(topSellingProduct.ProductID);
 
                 int averageRatingOther = 0;
-                if (listReviewOrther.Data.Any())
+                if (  listReviewOrther != null && listReviewOrther.Data != null && listReviewOrther.Data.Any())
                 {
                     double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue);
                     double avgRate = totalRate / listReviewOrther.Data.Count;

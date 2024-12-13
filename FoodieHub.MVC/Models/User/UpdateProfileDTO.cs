@@ -8,7 +8,7 @@ namespace FoodieHub.MVC.Models.User
         [MinLength(4, ErrorMessage = "Fullname must be at least 4 characters long")]
         public string Fullname { get; set; } = default!;
         public string Email { get; set; } = default!;
-        public string Avatar { get; set; } = default!;
+        public string? Avatar { get; set; }
 
         [MaxLength(255, ErrorMessage = "Bio must not exceed 255 characters")]
         public string? Bio { get; set; }

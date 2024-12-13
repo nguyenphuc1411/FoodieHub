@@ -62,7 +62,7 @@
 
         <!-- Latest Article -->
         <div class="col-md-5 my-3">
-            @if (Model.LatestArticlesList != null)
+            @if (Model.LatestArticlesList != null && Model.LatestArticlesList.Count()>0)
             {
                 <img src="@($"{url}/images/{Model.LatestArticlesList.First().MainImage}")"
                      alt="Article News Image"

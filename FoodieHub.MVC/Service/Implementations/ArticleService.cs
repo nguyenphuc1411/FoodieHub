@@ -53,6 +53,13 @@ namespace FoodieHub.MVC.Service.Implementations
         {
             return await _httpClient.GetFromJsonAsync<GetArticleDTO>("articles/" + id);
         }
+
+        public async Task<IEnumerable<GetArticleDTO>> GetOfUser(string userID)
+        {
+            var response = await _httpClient.GetAsync("articles/users/"+userID);
+            return await response.Content.ReadFromJsonAsync<IEnumerable<GetArticleDTO>>() ?? new List<GetArticleDTO>();
+        }
+
         public async Task<bool> Update(int id, UpdateArticleDTO article)
         {
             using (var content = new MultipartFormDataContent())

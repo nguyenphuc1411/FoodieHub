@@ -72,6 +72,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 if (result!=null&& result.Success)
                 {
                     NotificationHelper.SetSuccessNotification(this,result.Message);
+                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {

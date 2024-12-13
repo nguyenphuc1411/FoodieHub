@@ -74,13 +74,12 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await service.GetByID(id);
-            if (result == null)
-            {
-                NotificationHelper.SetErrorNotification(this);
-                return RedirectToAction("Index");
-            }
-            return View(result);
+            var result = await service.Delete(id);
+            if (result)
+                NotificationHelper.SetSuccessNotification(this);
+            else NotificationHelper.SetErrorNotification(this);
+
+            return RedirectToAction("Index");
         }
         public async Task<IActionResult> ConfirmDelete(int id)
         {

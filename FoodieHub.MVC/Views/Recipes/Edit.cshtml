@@ -4,123 +4,173 @@
 @inject IConfiguration config
 @inject IRecipeCategoryService categoryService
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Recipe";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = config["BaseHost"];
     var categories = await categoryService.GetAll() ?? new List<GetRecipeCategoryDTO>();
 }
 
-@model CreateRecipeDTO
+@model UpdateRecipeDTO
+<div class="container-sm col-12 col-md-8 my-3">
+    <h2 class="mb-4">Edit Recipe</h2>
 
-@* <!-- Place the first <script> tag in your HTML's <head> -->
-<script src="https://cdn.tiny.cloud/1/duegha34dr7j1t0qyhfswxzknx2j50fyq02kkj4d1ylv0stm/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    <form asp-action="UpdateRecipe" enctype="multipart/form-data" method="post">
+        <input type="hidden" asp-for="RecipeID" />
 
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            <div class="card shadow">
-                <form asp-controller="Recipes" asp-action="Edit" method="post" enctype="multipart/form-data" class="card-body">
-                    <h2 class="card-title text-center mb-4">Update Recipe</h2>
-                    <div class="py-1 text-center">
-                        <img src="/images/horizontal-line1 1.png" alt="horizontal line">
-                    </div>
-                    <input type="hidden" asp-for="RecipeID" />
-                    <!-- Recipe Title -->
-                    <div class="mb-3">
-                        <label asp-for="Title" class="form-label">Recipe Title *</label>
-                        <input asp-for="Title" class="form-control" placeholder="This is title">
-                        <span asp-validation-for="Title" class="text-danger"></span>
-                    </div>
+        <!-- Recipe Information -->
+        <div class="form-group">
+            <label asp-for="Title" class="font-weight-bold">Recipe Title</label>
+            <input asp-for="Title" class="form-control" placeholder="Enter the recipe title" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
 
-                    <!-- Time Fields -->
-                    <div class="row">
-                        <!-- Prep Time -->
-                        <div class="col-md-6 mb-3">
-                            <label for="prep-time" class="form-label">Prep Time *</label>
-                            <div class="d-flex">
-                                <input asp-for="PrepHours" class="form-control me-2" placeholder="Hours">
-                                <input asp-for="PrepMinutes" class="form-control" placeholder="Minutes">
-                            </div>
-                            <span asp-validation-for="PrepHours" class="text-danger"></span>
-                            <span asp-validation-for="PrepMinutes" class="text-danger"></span>
-                        </div>
+        <div class="form-group">
+            <label asp-for="Description" class="font-weight-bold">Description</label>
+            <textarea asp-for="Description" class="form-control" placeholder="Enter the recipe description"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <div class="row">
+            <div class="form-group col-12 col-md-4">
+                <label asp-for="CookTime" class="font-weight-bold">Cook Time</label>
+                <input asp-for="CookTime" type="time" class="form-control" placeholder="Enter cook time" />
+                <span asp-validation-for="CookTime" class="text-danger"></span>
+            </div>
 
-                        <!-- Cook Time -->
-                        <div class="col-md-6 mb-3">
-                            <label for="cook-time" class="form-label">Cook Time *</label>
-                            <div class="d-flex">
-                                <input asp-for="CookHours" class="form-control me-2" placeholder="Hours">
-                                <input asp-for="CookMinutes" class="form-control" placeholder="Minutes">
-                            </div>
-                            <span asp-validation-for="CookHours" class="text-danger"></span>
-                            <span asp-validation-for="CookMinutes" class="text-danger"></span>
-                        </div>
-                    </div>
+            <div class="form-group col-12 col-md-4">
+                <label asp-for="Serves" class="font-weight-bold">Serves</label>
+                <input asp-for="Serves" class="form-control" placeholder="Enter number of servings" />
+                <span asp-validation-for="Serves" class="text-danger"></span>
+            </div>
 
-                    <!-- Recipe Servings -->
-                    <div class="mb-3">
-                        <label asp-for="Serves" class="form-label">This Recipe Serves *</label>
-                        <input asp-for="Serves" class="form-control" placeholder="4">
-                        <span asp-validation-for="Serves" class="text-danger"></span>
-                    </div>
-
-                    <!-- Ingredients -->
-                    <div class="mb-3">
-                        <label asp-for="Ingredients" class="form-label me-3">Ingredients *</label>
-                        <span asp-validation-for="Ingredients" class="text-danger"></span>
-                        <textarea asp-for="Ingredients" class="form-control" rows="4"></textarea>
-                    </div>
-
-                    <!-- Directions -->
-                    <div class="mb-3">
-                        <label asp-for="Directions" class="form-label me-3">Directions *</label>
-                        <span asp-validation-for="Directions" class="text-danger"></span>
-                        <textarea asp-for="Directions" class="form-control rows="4"></textarea>
-                    </div>
-
-                    <!-- Upload Image -->
-                    <div class="mb-3 row">
-                        <div class="col-6">
-                            <label asp-for="File" class="form-label">Upload Image *</label>
-                            <input asp-for="File" type="file" class="form-control" accept="image/*">
-                            <span asp-validation-for="File" class="text-danger"></span>
-                        </div>
-                        <div class="col-6">
-                            <p>Current Image</p>
-                            <img src="@(url + "images/" + Model.ImageURL)" style="width:100px;height:100px" alt="Current Image" />
-                            <span class="text-info">Leave blank to keep the current image.</span>
-                        </div>
-
-                    </div>
-                    <label asp-for="CategoryID" class="form-label me-3">Category</label>
-                    <span asp-validation-for="CategoryID" class="text-danger"></span>
-                    <select asp-for="CategoryID" class="form-select form-select-sm me-2" style="width: 150px;">
-                        <option selected>All</option>
-                        @if (ViewBag.Category != null)
-                        {
-                            foreach (var item in ViewBag.Category)
-                            {
-                                <option value="@item.CategoryID">@item.CategoryName</option>
-                            }
-                        }
-                    </select>
-                    <!-- Action Buttons -->
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="button button-dark me-2">PUBLISH</button>
-                        <a href="/recipes" class="button button-light">CANCEL</a>
-                    </div>
-                </form>
+            <div class="form-group col-12 col-md-4">
+                <label asp-for="CategoryID" class="font-weight-bold">Category</label>
+                <select asp-for="CategoryID" asp-items="@(new SelectList(categories, "CategoryID", "CategoryName"))" class="form-control">
+                    <option value="">Select Category</option>
+                </select>
             </div>
         </div>
-    </div>
+       
+        <div class="row my-3">
+            <div class="form-group col-12 col-md-6">
+                <label asp-for="ImageURL" class="font-weight-bold">Current Image</label>
+                <img src=@(url+"images/"+@Model.ImageURL) alt="Recipe Image" class="img-fluid" style="max-width: 100px;" />
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <label asp-for="File" class="font-weight-bold">Upload New Image</label>
+                <input asp-for="File" type="file" class="form-control" accept="images/*" />
+            </div>
+        </div>
+      
+
+       
+
+        <hr />
+
+        <!-- Recipe Steps -->
+        <h4 class="mb-3">Recipe Steps</h4>
+        <table class="table" id="stepsTable">
+            <thead>
+                <tr>
+                    <th style="width: 10%;" class="text-center">Step Number</th>
+                    <th style="width: 60%;" class="text-center">Directions</th>
+                    <th style="width: 20%;" class="text-center">Step Image</th>
+                    <th style="width: 10%;" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.RecipeSteps.Count; i++)
+                {
+                    <tr>
+                        <td style="width: 10%;"><input asp-for="RecipeSteps[@i].Step" class="form-control" /></td>
+                        <td style="width: 60%;"><textarea asp-for="RecipeSteps[@i].Directions" class="form-control"></textarea></td>
+                        <td style="width: 20%;">
+                            @if (!string.IsNullOrEmpty(Model.RecipeSteps[i].ImageURL))
+                            {
+                                <img src="@Model.RecipeSteps[i].ImageURL" alt="Step Image" class="img-fluid" style="max-width: 100px;" />
+                            }
+                            <input asp-for="RecipeSteps[@i].FileStep" type="file" class="form-control" />
+                        </td>
+                        <td style="width: 10%;">
+                            <button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" onclick="addStep()">Add Step</button>
+
+        <hr />
+
+        <!-- Ingredients -->
+        <h4 class="mb-3">Ingredients</h4>
+        <table class="table" id="ingredientsTable">
+            <thead>
+                <tr>
+                    <th style="width: 50%;" class="text-center">Ingredient</th>
+                    <th style="width: 20%;" class="text-center">Quantity</th>
+                    <th style="width: 20%;" class="text-center">Unit</th>
+                    <th style="width: 10%;" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Ingredients.Count; i++)
+                {
+                    <tr>
+                        <td style="width: 50%;"><input asp-for="Ingredients[@i].Name" class="form-control" placeholder="Ingredient name" /></td>
+                        <td style="width: 20%;"><input asp-for="Ingredients[@i].Quantity" class="form-control" placeholder="Quantity" /></td>
+                        <td style="width: 20%;"><input asp-for="Ingredients[@i].Unit" class="form-control" placeholder="Unit" /></td>
+                        <td style="width: 10%;">
+                            <button type="button" class="btn btn-danger" onclick="removeIngredient(this)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" onclick="addIngredient()">Add Ingredient</button>
+
+        <hr />
+
+        <div class="form-group text-center">
+            <button type="submit" class="button button-dark">Update</button>
+        </div>
+    </form>
 </div>
 
-<script>
-    tinymce.init({
-        selector: 'textarea',
-        plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-    });
-</script>
 
- *@
+@section Scripts {
+    <script>
+        function addStep() {
+            var table = document.getElementById('stepsTable').getElementsByTagName('tbody')[0];
+            var rowCount = table.rows.length;
+            var row = table.insertRow(rowCount);
+
+            row.innerHTML = `
+                <td><input name="RecipeSteps[${rowCount}].Step" class="form-control" /></td>
+                <td><textarea name="RecipeSteps[${rowCount}].Directions" class="form-control"></textarea></td>
+                <td><input name="RecipeSteps[${rowCount}].FileStep" type="file" class="form-control" /></td>
+                <td><button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button></td>`;
+        }
+
+        function removeStep(button) {
+            var row = button.closest('tr');
+            row.parentNode.removeChild(row);
+        }
+
+        function addIngredient() {
+            var table = document.getElementById('ingredientsTable').getElementsByTagName('tbody')[0];
+            var rowCount = table.rows.length;
+            var row = table.insertRow(rowCount);
+
+            row.innerHTML = `
+                <td><input name="Ingredients[${rowCount}].Name" class="form-control" /></td>
+                <td><input name="Ingredients[${rowCount}].Quantity" class="form-control" /></td>
+                <td><input name="Ingredients[${rowCount}].Unit" class="form-control" /></td>
+                <td><button type="button" class="btn btn-danger" onclick="removeIngredient(this)">Delete</button></td>`;
+        }
+
+        function removeIngredient(button) {
+            var row = button.closest('tr');
+            row.parentNode.removeChild(row);
+        }
+    </script>
+}

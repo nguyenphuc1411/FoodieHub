@@ -30,6 +30,11 @@ namespace FoodieHub.MVC.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (!recipe.Ingredients.Any() || !recipe.RecipeSteps.Any())
+                {
+                    NotificationHelper.SetErrorNotification(this,"List ingredient and step is required");
+                    return View();
+                }
                 bool result = await _recipeService.Create(recipe);
                 if (result)
                 {
@@ -44,55 +49,45 @@ namespace FoodieHub.MVC.Controllers
 
 
 
-        /*    public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id)
+        {
+            var response = await _recipeService.GetByID(id);
+            if(response != null)
             {
-                var responseCategory = await _httpClient.GetFromJsonAsync<List<CategoryDTO>>("RecipeCategory/getallrecipecategory");
-                if (responseCategory != null)
+                var edit = new UpdateRecipeDTO
                 {
-                    ViewBag.Category = responseCategory.ToList();
-                }
-
-
-                var response = await _httpClient.GetAsync("recipes/edit/" + id);
-                if (response.IsSuccessStatusCode)
-                {
-                    var data = await response.Content.ReadFromJsonAsync<JsonElement>();
-                    var preptime = TimeOnly.Parse(data.GetProperty("prepTime").GetString());
-                    var cooktime = TimeOnly.Parse(data.GetProperty("cookTime").GetString());
-                    var recipe = new EditRecipe
-                    {
-                        RecipeID = data.GetProperty("recipeID").GetInt32(),
-                        Title = data.GetProperty("title").GetString(),
-                        PrepHours = preptime.Hour,
-                        PrepMinutes = preptime.Minute,
-                        CookHours = cooktime.Hour,
-                        CookMinutes = cooktime.Minute,
-                        ImageURL = data.GetProperty("imageURL").ToString(),
-                        Serves = data.GetProperty("serves").GetInt32(),
-                        Ingredients = data.GetProperty("ingredients").ToString(),
-                        Directions = data.GetProperty("directions").ToString(),
-                        CategoryID = data.GetProperty("categoryID").GetInt32()
-                    };
-                    return View(recipe);
-                }
-
-                return RedirectToAction("RecipesAndFollows", "Account");
-            }*/
+                    RecipeID = id,
+                    Title = response.Title,
+                    CookTime = response.CookTime,
+                    Serves = response.Serves,
+                    Description = response.Description,
+                    IsActive = response.IsActive,
+                    ImageURL = response.ImageURL,
+                    CategoryID= response.CategoryID,
+                    RecipeSteps = response.Steps,
+                    Ingredients = response.Ingredients,
+                };
+                return View(edit);
+            }
+            NotificationHelper.SetErrorNotification(this);
+            return RedirectToAction("Recipes", "Account");
+        }
 
         [HttpPost]
-        public IActionResult Edit(CreateRecipeDTO edit)
+        public IActionResult Edit(UpdateRecipeDTO update)
         {
             if (ModelState.IsValid)
             {
                
             }
-            return View(edit);
+            return View(update);
         }
 
 
         public async Task<IActionResult> Index(QueryRecipeModel query)
         {
             // Lấy danh sách công thức
+            query.IsActive = true;
             var recipes = await _recipeService.GetAll(query);
             ViewBag.Query = query;
             return View(recipes);
@@ -104,9 +99,10 @@ namespace FoodieHub.MVC.Controllers
         public async Task<IActionResult> Detail(int id)
         {
             var data = await _recipeService.GetByID(id);
-            if (data == null)
+            if (data == null || !data.IsActive)
             {
                 NotificationHelper.SetErrorNotification(this,"Not found this recipe");
+                return RedirectToAction("Index");
             }
             ViewBag.UserID = Request.GetCookie("UserID");
             return View(data);

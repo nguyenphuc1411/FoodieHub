@@ -2,11 +2,9 @@
 using FoodieHub.API.Models.DTOs.User;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 
 namespace FoodieHub.API.Controllers
 {
@@ -72,13 +70,13 @@ namespace FoodieHub.API.Controllers
         }
         [Authorize]
         [HttpPut]
-        public async Task<IActionResult> Update(UpdateProfileDTO user)
+        public async Task<IActionResult> Update([FromForm]UpdateProfileDTO user)
         {
             var result = await _service.UpdateUser(user);
             return StatusCode(result.StatusCode, result);
         }
         [HttpGet("change-password")]
-        public async Task<IActionResult> ChangePassword(ChangePassword changePassword)
+        public async Task<IActionResult> ChangePassword([FromBody]ChangePassword changePassword)
         {          
             var result = await _service.ChangePassword(changePassword);
             return StatusCode(result.StatusCode, result);        
