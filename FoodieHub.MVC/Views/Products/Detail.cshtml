@@ -26,7 +26,6 @@
 
     var productID = Model.Data.ProductID;
 
-    bool hasOrder = false;
     var currentUserId = _authService.GetProfile();
 
     var listProduct = await _productService.GetAll();
@@ -43,14 +42,19 @@
     // Lọc danh sách đánh giá theo ProductID của sản phẩm hiện tại
 
     int averageRating = 0;
-  
-    if (listReview.Data!=null&& listReview.Data.Any())
-    {
-          double totalRate = listReview.Data.Sum(x => x.RatingValue); // Total all rates
-          double avgRate = totalRate / listReview.Data.Count;  // Average rate
 
-          // Round: if avgRate >= 3.5, round up, if < 3.5, round down
-          averageRating = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
+    if (listReview != null && listReview.Data != null && listReview.Data.Any())
+    {
+        double totalRate = listReview.Data.Sum(x => x.RatingValue); // Total all rates
+        double avgRate = totalRate / listReview.Data.Count;  // Average rate
+
+        // Round: if avgRate >= 3.5, round up, if < 3.5, round down
+        averageRating = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
+    }
+    else
+    {
+        // Trường hợp listReview hoặc Data bị null hoặc rỗng
+        averageRating = 0; // Hoặc giá trị mặc định khác nếu cần
     }
    
 }
@@ -125,27 +129,33 @@
             <div class="ratings mb-3">
                
                 <span class="ms-2">
-                    @for (int i = 1; i <= 5; i++)
+                    @if (listReview != null && listReview.Data != null && listReview.Data.Any())
                     {
-                        if(averageRating == 0)
+                        @for (int i = 1; i <= 5; i++)
                         {
-                            <i class="fa-solid fa-star text-mute "></i>
-                        }
+                            if (averageRating == 0)
+                            {
+                                <i class="fa-solid fa-star text-mute "></i>
+                            }
 
-                        else if (i <= averageRating)
-                        {
-                            <!-- Sao đầy -->
-                            <i class="fa-solid fa-star text-mute text-warning"></i>
-                        }
-                        else
-                        {
-                            <!-- Sao rỗng -->
-                            <i class="fa-solid fa-star text-muted "></i>
+                            else if (i <= averageRating)
+                            {
+                                <!-- Sao đầy -->
+                                <i class="fa-solid fa-star text-mute text-warning"></i>
+                            }
+                            else
+                            {
+                                <!-- Sao rỗng -->
+                                <i class="fa-solid fa-star text-muted "></i>
 
+                            }
                         }
                     }
+
                 </span>
-                <a class="ms-2 text-decoration-none" href="#tolistreview">View @listReview.Data.Count() reviews</a>
+                <a class="ms-2 text-decoration-none" href="#tolistreview">
+                    View @(listReview?.Data?.Count() ?? 0) reviews
+                </a>
             </div>
 
             <div class="mb-2">
@@ -266,7 +276,7 @@
 
 
                             int averageRatingOther = 0;
-                            if (listReviewOrther.Data.Any())
+                            if (listReviewOrther != null && listReviewOrther.Data != null && listReviewOrther.Data.Any())
                             {
                                 double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
                                 double avgRate = totalRate / listReviewOrther.Data.Count;  // Trung bình rate
@@ -334,40 +344,35 @@
         <p class="text-muted mt-2">Filter Reviews</p>
 
         @{
-            bool showButtonFeedBack = false; // Biến để kiểm soát hiển thị nút review
-            bool hasReviewed = false; // Biến để kiểm tra xem đã review chưa
+            bool showButtonFeedBack = false; // Kiểm soát hiển thị nút review
 
             if (listOrder?.Data != null && listOrderDetails?.Data != null)
             {
-                foreach (var order in listOrder.Data)
+                foreach (var order in listOrder.Data.Where(o => o.Status == "COMPLETED" && o.UserID == currentUserId.Result.Id))
                 {
-                    if (order.Status == "COMPLETED" && order.UserID == currentUserId.Result.Id)
+                    // Kiểm tra nếu đơn hàng có sản phẩm và trong thời hạn review
+                    if ((DateTime.Now - order.OrderedAt).TotalDays <= 30)
                     {
-                        // Kiểm tra thời gian còn lại để review
-                        if ((DateTime.Now - order.OrderedAt).TotalDays <= 30)
-                        {
-                            foreach (var orderDt in listOrderDetails.Data.Where(od => od.OrderID == order.OrderID))
-                            {
-                                if (orderDt.ProductID == productID)
-                                {
-                                    // Kiểm tra xem đã review sản phẩm này trong vòng 30 ngày chưa
-                                    hasReviewed = listReview?.Data.Any(r =>
-                                    r.ProductID == productID &&
-                                    r.Id == currentUserId.Result.Id &&
-                                    r.ReviewedAt >= order.OrderedAt &&  // Đảm bảo review thuộc về lần mua này
-                                    r.ReviewedAt <= order.OrderedAt.AddDays(r.ShelfLife) // Nằm trong khoảng thời gian 30 ngày
-                                    ) ?? false;
+                        var orderDetails = listOrderDetails.Data.Where(od => od.OrderID == order.OrderID && od.ProductID == productID);
 
-                                    if (!hasReviewed)
-                                    {
-                                        showButtonFeedBack = true; // Chỉ hiển thị nút nếu chưa review
-                                        break;
-                                    }
-                                }
+                        foreach (var orderDt in orderDetails)
+                        {
+                            // Kiểm tra xem đã review cho lần mua này chưa
+                            bool hasReviewed = listReview?.Data.Any(r =>
+                            r.ProductID == productID &&
+                            r.Id == currentUserId.Result.Id &&
+                            r.ReviewedAt >= order.OrderedAt && // Review sau khi đặt hàng
+                            r.ReviewedAt <= order.OrderedAt.AddDays(30) // Review trong vòng 30 ngày
+                            ) ?? false;
+
+                            if (!hasReviewed)
+                            {
+                                showButtonFeedBack = true; // Chỉ hiển thị nút nếu chưa review
+                                break;
                             }
                         }
 
-                        if (showButtonFeedBack) break;
+                        if (showButtonFeedBack) break; // Dừng ngay khi tìm thấy nút cần hiển thị
                     }
                 }
             }
@@ -383,6 +388,8 @@
                 We need your feedback. Let's do it!
             </a>
         }
+
+
     </div>
 
     
@@ -414,51 +421,56 @@
 
         <div class="tab-pane container active" id="allstar">
             <div id="review-list-all" class="collapse">
-                @foreach (var item in listReview.Data)
+                @if (listReview?.Data != null && listReview.Data.Any())
                 {
-                    var ratingValue = item.RatingValue;
-                    var reviewDate = item.ReviewedAt;
-                    var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
+                    @foreach (var item in listReview.Data)
+                    {
+                        var ratingValue = item?.RatingValue ?? 0; // Giá trị mặc định là 0 nếu null
+                        var reviewDate = item?.ReviewedAt ?? DateTime.MinValue; // Giá trị mặc định là ngày tối thiểu
+                        var timeAgo = reviewDate != DateTime.MinValue ? TimeHelper.GetTimeAgo(reviewDate) : "N/A";
 
-                    <div class="review-card">
-                        <div class="row">
-                            <div class="col-6 review-rating">
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    if (i <= ratingValue)
+                        <div class="review-card">
+                            <div class="row">
+                                <div class="col-6 review-rating">
+                                    @for (int i = 1; i <= 5; i++)
                                     {
-                                        <i class="fa-solid fa-star text-warning"></i>
+                                        if (i <= ratingValue)
+                                        {
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fa-solid fa-star text-muted"></i>
+                                        }
                                     }
-                                    else
+                                </div>
+                                <div class="col-6 text-end text-muted">@timeAgo</div>
+                            </div>
+
+                            <div class="review-author">
+                                <img src="@($"{apiUrl}Images/{item?.Avatar ?? "default-avatar.png"}")" alt="Reviewer Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
+                                <span>@(item?.UserName ?? "Anonymous")</span>
+                            </div>
+
+                            <div class="review-body">@item.ReviewContent </div>
+
+                            @if (item?.Id == currentUserId?.Result?.Id)
+                            {
+                                <div class="text-end mt-2">
+                                    @if ((DateTime.Now - reviewDate).TotalDays <= 30)
                                     {
-                                        <i class="fa-solid fa-star text-muted"></i>
+                                        <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item?.ReviewID)">Edit</a>
                                     }
-                                }
-                            </div>
-                            <div class="col-6 text-end text-muted">@timeAgo</div>
+                                </div>
+                            }
                         </div>
-
-
-                        <div class="review-author">
-                            <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
-                            <span>@item.UserName</span>
-                        </div>
-
-
-                        <div class="review-body">@item.ReviewContent</div>
-
-  
-                        @if (item.Id == currentUserId.Result.Id) 
-                        {
-                            <div class="text-end mt-2">
-                                @if ((DateTime.Now - reviewDate).TotalDays <= 30) 
-                                {
-                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
-                                }
-                            </div>
-                        }
-                    </div>
+                    }
                 }
+                else
+                {
+                    <p>No reviews available.</p>
+                }
+
 
             </div>
             <div class="text-center">
@@ -470,38 +482,51 @@
 
         <div class="tab-pane container fade" id="fivestars">
             <div id="review-list-five" class="collapse">
-                @foreach (var item in listReview.Data)
+                @if (listReview?.Data != null && listReview.Data.Any())
                 {
-                    @if (item.RatingValue == 5)
+                    @foreach (var item in listReview.Data)
                     {
-                        var ratingValue = item.RatingValue;
-                        var reviewDate = item.ReviewedAt;
-                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
-                        <div class="review-card">
-                            <div class="row">
-                                <div class="col-6 review-rating">
-                                    @for (int i = 1; i <= ratingValue; i++)
-                                    {
-                                        <i class="fa-solid fa-star text-warning"></i>
-                                    }
-                                </div>
-                                <div class="col-6 text-end text-muted">@timeAgo</div>
-                            </div>
-                            <div class="review-author">
-                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar">
-                                @item.UserName
-                            </div>
-                            <div class="review-body">@item.ReviewContent</div>
+                        if (item?.RatingValue == 5) // Kiểm tra nếu điểm đánh giá là 5
+                        {
+                            var ratingValue = item.RatingValue;
+                            var reviewDate = item?.ReviewedAt ?? DateTime.MinValue; // Giá trị mặc định là ngày tối thiểu
+                            var timeAgo = reviewDate != DateTime.MinValue ? TimeHelper.GetTimeAgo(reviewDate) : "N/A";
 
-                            @if (item.Id == currentUserId.Result.Id)
-                            {
-                                <div class="text-end mt-2">
-                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                            <div class="review-card">
+                                <div class="row">
+                                    <div class="col-6 review-rating">
+                                        @for (int i = 1; i <= ratingValue; i++)
+                                        {
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                        }
+                                    </div>
+                                    <div class="col-6 text-end text-muted">@timeAgo</div>
                                 </div>
-                            }
-                        </div>
+
+                                <div class="review-author">
+                                    <img src="@($"{apiUrl}Images/{item.Avatar ?? "default-avatar.png"}")" alt="Reviewer Avatar" style="width: 50px; height: 50px;" class="rounded-circle">
+                                    <span>@(item.UserName ?? "Anonymous")</span>
+                                </div>
+
+                                <div class="review-body">
+                                    @item.ReviewContent
+                                </div>
+
+                                @if (item.Id == currentUserId?.Result?.Id)
+                                {
+                                    <div class="text-end mt-2">
+                                        <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                    </div>
+                                }
+                            </div>
+                        }
                     }
                 }
+                else
+                {
+                    <p>No reviews available.</p>
+                }
+
             </div>
             <div class="text-center">
                 <button class="btn btn-dark mt-2" data-bs-toggle="collapse" data-bs-target="#review-list-five" aria-expanded="false" aria-controls="review-list-five">
@@ -512,43 +537,49 @@
 
         <div class="tab-pane container fade" id="fourstars">
             <div id="review-list-four" class="collapse">
-                @foreach (var item in listReview.Data)
+                @if (listReview?.Data != null && listReview.Data.Any())
                 {
-                    @if (item.RatingValue == 4)
+                    @foreach (var item in listReview.Data)
                     {
-                        var ratingValue = item.RatingValue;
-                        var reviewDate = item.ReviewedAt;
-                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
-                        <div class="review-card">
-                            <!-- Star Rating and Timestamp Row -->
-                            <div class="row">
-                                <div class="col-6 review-rating">
-                                    @for (int i = 1; i <= ratingValue; i++)
-                                    {
-                                        <i class="fa-solid fa-star text-warning"></i>
-                                    }
+                        if (item?.RatingValue == 4) // Kiểm tra nếu điểm đánh giá là 5
+                        {
+                            var ratingValue = item.RatingValue;
+                            var reviewDate = item?.ReviewedAt ?? DateTime.MinValue; // Giá trị mặc định là ngày tối thiểu
+                            var timeAgo = reviewDate != DateTime.MinValue ? TimeHelper.GetTimeAgo(reviewDate) : "N/A";
+
+                            <div class="review-card">
+                                <div class="row">
+                                    <div class="col-6 review-rating">
+                                        @for (int i = 1; i <= ratingValue; i++)
+                                        {
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                        }
+                                    </div>
+                                    <div class="col-6 text-end text-muted">@timeAgo</div>
                                 </div>
-                                <div class="col-6 text-end text-muted">@timeAgo</div>
-                            </div>
 
-                            <!-- Avatar and Reviewer Name Row -->
-                            <div class="review-author">
-                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar">
-                                @item.UserName
-                            </div>
-
-                            <!-- Review Content -->
-                            <div class="review-body">@item.ReviewContent</div>
-
-
-                            @if (item.Id == currentUserId.Result.Id)
-                            {
-                                <div class="text-end mt-2">
-                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                <div class="review-author">
+                                    <img src="@($"{apiUrl}Images/{item.Avatar ?? "default-avatar.png"}")" alt="Reviewer Avatar" style="width: 50px; height: 50px;" class="rounded-circle">
+                                    <span>@(item.UserName ?? "Anonymous")</span>
                                 </div>
-                            }
-                        </div>
+
+                                <div class="review-body">
+                                    @item.ReviewContent
+                                </div>
+
+                                @if (item.Id == currentUserId?.Result?.Id)
+                                {
+                                    <div class="text-end mt-2">
+                                        <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                    </div>
+                                }
+                            </div>
+                        }
                     }
+                }
+                else
+                {
+                    <p>No reviews available.</p>
                 }
             </div>
             <div class="text-center">
@@ -561,37 +592,49 @@
 
         <div class="tab-pane container fade" id="threestars">
             <div id="review-list-three" class="collapse">
-                @foreach (var item in listReview.Data)
+                @if (listReview?.Data != null && listReview.Data.Any())
                 {
-                    @if (item.RatingValue == 3)
+                    @foreach (var item in listReview.Data)
                     {
-                        var ratingValue = item.RatingValue;
-                        var reviewDate = item.ReviewedAt;
-                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
-                        <div class="review-card">
-                            <div class="row">
-                                <div class="col-6 review-rating">
-                                    @for (int i = 1; i <= ratingValue; i++)
-                                    {
-                                        <i class="fa-solid fa-star text-warning"></i>
-                                    }
-                                </div>
-                                <div class="col-6 text-end text-muted">@timeAgo</div>
-                            </div>
-                            <div class="review-author">
-                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
-                                <span>@item.UserName</span>
-                            </div>
-                            <div class="review-body">@item.ReviewContent</div>
+                        if (item?.RatingValue == 3) // Kiểm tra nếu điểm đánh giá là 5
+                        {
+                            var ratingValue = item.RatingValue;
+                            var reviewDate = item?.ReviewedAt ?? DateTime.MinValue; // Giá trị mặc định là ngày tối thiểu
+                            var timeAgo = reviewDate != DateTime.MinValue ? TimeHelper.GetTimeAgo(reviewDate) : "N/A";
 
-                            @if (item.Id == currentUserId.Result.Id)
-                            {
-                                <div class="text-end mt-2">
-                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                            <div class="review-card">
+                                <div class="row">
+                                    <div class="col-6 review-rating">
+                                        @for (int i = 1; i <= ratingValue; i++)
+                                        {
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                        }
+                                    </div>
+                                    <div class="col-6 text-end text-muted">@timeAgo</div>
                                 </div>
-                            }
-                        </div>
+
+                                <div class="review-author">
+                                    <img src="@($"{apiUrl}Images/{item.Avatar ?? "default-avatar.png"}")" alt="Reviewer Avatar" style="width: 50px; height: 50px;" class="rounded-circle">
+                                    <span>@(item.UserName ?? "Anonymous")</span>
+                                </div>
+
+                                <div class="review-body">
+                                    @item.ReviewContent
+                                </div>
+
+                                @if (item.Id == currentUserId?.Result?.Id)
+                                {
+                                    <div class="text-end mt-2">
+                                        <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                    </div>
+                                }
+                            </div>
+                        }
                     }
+                }
+                else
+                {
+                    <p>No reviews available.</p>
                 }
             </div>
             <div class="text-center">
@@ -603,37 +646,49 @@
 
         <div class="tab-pane container fade" id="twostars">
             <div id="review-list-two" class="collapse">
-                @foreach (var item in listReview.Data)
+                @if (listReview?.Data != null && listReview.Data.Any())
                 {
-                    @if (item.RatingValue == 2)
+                    @foreach (var item in listReview.Data)
                     {
-                        var ratingValue = item.RatingValue;
-                        var reviewDate = item.ReviewedAt;
-                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
-                        <div class="review-card">
-                            <div class="row">
-                                <div class="col-6 review-rating">
-                                    @for (int i = 1; i <= ratingValue; i++)
-                                    {
-                                        <i class="fa-solid fa-star text-warning"></i>
-                                    }
-                                </div>
-                                <div class="col-6 text-end text-muted">@timeAgo</div>
-                            </div>
-                            <div class="review-author">
-                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
-                                <span>@item.UserName</span>
-                            </div>
-                            <div class="review-body">@item.ReviewContent</div>
+                        if (item?.RatingValue == 2) // Kiểm tra nếu điểm đánh giá là 5
+                        {
+                            var ratingValue = item.RatingValue;
+                            var reviewDate = item?.ReviewedAt ?? DateTime.MinValue; // Giá trị mặc định là ngày tối thiểu
+                            var timeAgo = reviewDate != DateTime.MinValue ? TimeHelper.GetTimeAgo(reviewDate) : "N/A";
 
-                            @if (item.Id == currentUserId.Result.Id)
-                            {
-                                <div class="text-end mt-2">
-                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                            <div class="review-card">
+                                <div class="row">
+                                    <div class="col-6 review-rating">
+                                        @for (int i = 1; i <= ratingValue; i++)
+                                        {
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                        }
+                                    </div>
+                                    <div class="col-6 text-end text-muted">@timeAgo</div>
                                 </div>
-                            }
-                        </div>
+
+                                <div class="review-author">
+                                    <img src="@($"{apiUrl}Images/{item.Avatar ?? "default-avatar.png"}")" alt="Reviewer Avatar" style="width: 50px; height: 50px;" class="rounded-circle">
+                                    <span>@(item.UserName ?? "Anonymous")</span>
+                                </div>
+
+                                <div class="review-body">
+                                    @item.ReviewContent
+                                </div>
+
+                                @if (item.Id == currentUserId?.Result?.Id)
+                                {
+                                    <div class="text-end mt-2">
+                                        <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                    </div>
+                                }
+                            </div>
+                        }
                     }
+                }
+                else
+                {
+                    <p>No reviews available.</p>
                 }
             </div>
             <div class="text-center">
@@ -645,37 +700,49 @@
 
         <div class="tab-pane container fade" id="onestar">
             <div id="review-list-one" class="collapse">
-                @foreach (var item in listReview.Data)
+                @if (listReview?.Data != null && listReview.Data.Any())
                 {
-                    @if (item.RatingValue == 1)
+                    @foreach (var item in listReview.Data)
                     {
-                        var ratingValue = item.RatingValue;
-                        var reviewDate = item.ReviewedAt;
-                        var timeAgo = TimeHelper.GetTimeAgo(reviewDate);
-                        <div class="review-card">
-                            <div class="row">
-                                <div class="col-6 review-rating">
-                                    @for (int i = 1; i <= ratingValue; i++)
-                                    {
-                                        <i class="fa-solid fa-star text-warning"></i>
-                                    }
-                                </div>
-                                <div class="col-6 text-end text-muted">@timeAgo</div>
-                            </div>
-                            <div class="review-author">
-                                <img src="@($"{apiUrl}Images/{item.Avatar}")" alt="Reviewer Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
-                                <span>@item.UserName</span>
-                            </div>
-                            <div class="review-body">@item.ReviewContent</div>
+                        if (item?.RatingValue == 1) // Kiểm tra nếu điểm đánh giá là 5
+                        {
+                            var ratingValue = item.RatingValue;
+                            var reviewDate = item?.ReviewedAt ?? DateTime.MinValue; // Giá trị mặc định là ngày tối thiểu
+                            var timeAgo = reviewDate != DateTime.MinValue ? TimeHelper.GetTimeAgo(reviewDate) : "N/A";
 
-                            @if (item.Id == currentUserId.Result.Id)
-                            {
-                                <div class="text-end mt-2">
-                                    <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                            <div class="review-card">
+                                <div class="row">
+                                    <div class="col-6 review-rating">
+                                        @for (int i = 1; i <= ratingValue; i++)
+                                        {
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                        }
+                                    </div>
+                                    <div class="col-6 text-end text-muted">@timeAgo</div>
                                 </div>
-                            }
-                        </div>
+
+                                <div class="review-author">
+                                    <img src="@($"{apiUrl}Images/{item.Avatar ?? "default-avatar.png"}")" alt="Reviewer Avatar" style="width: 50px; height: 50px;" class="rounded-circle">
+                                    <span>@(item.UserName ?? "Anonymous")</span>
+                                </div>
+
+                                <div class="review-body">
+                                    @item.ReviewContent 
+                                </div>
+
+                                @if (item.Id == currentUserId?.Result?.Id)
+                                {
+                                    <div class="text-end mt-2">
+                                        <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateReviewModal(@item.ReviewID)">Edit</a>
+                                    </div>
+                                }
+                            </div>
+                        }
                     }
+                }
+                else
+                {
+                    <p>No reviews available.</p>
                 }
             </div>
             <div class="text-center">
@@ -689,7 +756,9 @@
 
 
     </div>
-    
+
+
+
 
 
 
@@ -743,51 +812,57 @@
     </div>
 
     <!-- Update Review Modal -->
-    @foreach (var item in listReview.Data)
+    @if (listReview?.Data != null && listReview.Data.Any())
     {
-
-        <div class="modal fade" id="updateReviewModal(@item.ReviewID)" tabindex="-1" aria-labelledby="updateReviewModalLabel(@item.ReviewID)" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="updateReviewModalLabel-@item.ReviewID">Update review</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="post" asp-action="UpdateReview" asp-controller="Review">
-                            <!-- Input ẩn chứa ReviewID -->
-                            <input type="hidden" name="ReviewID" value="@item.ReviewID">
-                            <input type="hidden" name="ProductID" value="@item.ProductID">
-                            <!-- Trường Rating -->
-                            <div class="mb-3">
-                                <label for="ratingValue-@item.ReviewID" class="form-label">
-                                    Rating: <i class="fa-solid fa-star text-warning"></i>
-                                </label>
-                                <select class="form-select" id="ratingValue-@item.ReviewID" name="RatingValue" required>
-                                    @for (int i = 1; i <= 5; i++)
-                                    {
-                                        <option value="@i">@i  </option>
-                                    }
-                                </select>
+        @foreach (var item in listReview.Data)
+        {
+            if (item != null)
+            {
+                <div class="modal fade" id="updateReviewModal(@item.ReviewID)" tabindex="-1" aria-labelledby="updateReviewModalLabel(@item.ReviewID)" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="updateReviewModalLabel-@item.ReviewID">Update review</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
+                            <div class="modal-body">
+                                <form method="post" asp-action="UpdateReview" asp-controller="Review">
+                                    <!-- Input ẩn chứa ReviewID -->
+                                    <input type="hidden" name="ReviewID" value="@item.ReviewID">
+                                    <input type="hidden" name="ProductID" value="@item.ProductID">
 
-                            <!-- Input cho nội dung review -->
-                            <div class="mb-3">
-                                <label for="reviewContent-@item.ReviewID" class="form-label">Review Content</label>
-                                <textarea class="form-control" id="reviewContent-@item.ReviewID" name="ReviewContent" rows="3" required>@item.ReviewContent</textarea>
+                                    <!-- Trường Rating -->
+                                    <div class="mb-3">
+                                        <label for="ratingValue-@item.ReviewID" class="form-label">
+                                            Rating: <i class="fa-solid fa-star text-warning"></i>
+                                        </label>
+                                        <select class="form-select" id="ratingValue-@item.ReviewID" name="RatingValue" required>
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <option value="@i">@i  </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Input cho nội dung review -->
+                                    <div class="mb-3">
+                                        <label for="reviewContent-@item.ReviewID" class="form-label">Review Content</label>
+                                        <textarea class="form-control" id="reviewContent-@item.ReviewID" name="ReviewContent" rows="3" required>
+                                            @(item.ReviewContent ?? "")
+                                                </textarea>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
                             </div>
-
-                          
-
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            }
+        }
     }
 
 
