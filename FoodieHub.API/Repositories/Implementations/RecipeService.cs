@@ -215,8 +215,9 @@ namespace FoodieHub.API.Repositories.Implementations
             var recipe = await _context.Recipes.FindAsync(id);
             if (recipe == null) return false;
             if(userId != recipe.UserID)
-            {             
-                if (!recipe.IsAdminUpload) return false;
+            {
+                bool isAdmin = await _authService.IsAdmin(userId);
+                if (!isAdmin) return false;
             }
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -228,7 +229,6 @@ namespace FoodieHub.API.Repositories.Implementations
                 var ingredients = await _context.Ingredients.Where(x => x.RecipeID == id).ToListAsync();
                 var recipeProducts = await _context.RecipeProducts.Where(x=>x.RecipeID==id).ToListAsync();
                 var imgPath = recipe.ImageURL;
-                _context.Recipes.Remove(recipe);
                 foreach (var comment in listComments)
                 {
                     _context.Comments.Remove(comment);
@@ -254,6 +254,7 @@ namespace FoodieHub.API.Repositories.Implementations
                 {
                     _context.RecipeProducts.Remove(product);
                 }
+                _context.Recipes.Remove(recipe);
                 var result = await _context.SaveChangesAsync();
                 int entityCount = listComments.Count() + listFavorites.Count() + listRatings.Count() + listSteps.Count()
                     + ingredients.Count()+recipeProducts.Count();
