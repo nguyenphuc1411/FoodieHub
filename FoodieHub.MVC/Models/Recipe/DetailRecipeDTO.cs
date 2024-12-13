@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace FoodieHub.MVC.Models.Recipe
 {
     public class DetailRecipeDTO
@@ -24,26 +26,44 @@ namespace FoodieHub.MVC.Models.Recipe
         public int TotalFavorites { get; set; } = 0;
         public int TotalComments { get; set; } = 0;
 
-        public IEnumerable<GetIngredient> Ingredients { get; set; }= new List<GetIngredient>();
-        public IEnumerable<GetRecipeStep> Steps { get; set; }= new List<GetRecipeStep>();
+        public List<IngredientVM> Ingredients { get; set; }= new List<IngredientVM>();
+        public List<RecipeStepVM> Steps { get; set; }= new List<RecipeStepVM>();
         public List<int> RelativeProducts { get; set; } = new List<int>();
     }
 
 
-    public class GetIngredient
+    public class IngredientVM
     {
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Ingredient name is required.")]
+        [StringLength(100, ErrorMessage = "Ingredient name cannot be longer than 100 characters.")]
         public string Name { get; set; } = default!;
+
+        [Range(0.1, float.MaxValue, ErrorMessage = "Quantity must be greater than 0.")]
         public float Quantity { get; set; }
+
+        [Required(ErrorMessage = "Unit is required.")]
+        [StringLength(50, ErrorMessage = "Unit cannot be longer than 50 characters.")]
         public string Unit { get; set; } = default!;
+
         public int? ProductID { get; set; }
     }
-    public class GetRecipeStep
+    public class RecipeStepVM
     {
         public int Id { get; set; }
-        public int Step { get; set; }
-        public string? ImageURL { get; set; }
-        public string Directions { get; set; } = default!;
 
+        [Required(ErrorMessage = "Step number is required.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Step number must be greater than 0.")]
+        public int Step { get; set; }
+
+        public string? ImageURL { get; set; }
+
+        [DataType(DataType.Upload, ErrorMessage = "Please select a valid image file.")]
+        public IFormFile? FileStep { get; set; }
+
+        [Required(ErrorMessage = "Directions are required.")]
+        [StringLength(1000, ErrorMessage = "Directions cannot be longer than 1000 characters.")]
+        public string Directions { get; set; } = default!;
     }
 }

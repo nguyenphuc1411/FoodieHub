@@ -94,8 +94,8 @@ namespace FoodieHub.API.Configurations.Mappings
 
 
             // Detail
-            CreateMap<Ingredient, GetIngredient>();
-            CreateMap<RecipeStep, GetRecipeStep>();
+            CreateMap<Ingredient, IngredientVM>();
+            CreateMap<RecipeStep, RecipeStepVM>();
             CreateMap<Recipe, DetailRecipeDTO>()
                            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.Fullname))
                            .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.User.Avatar))

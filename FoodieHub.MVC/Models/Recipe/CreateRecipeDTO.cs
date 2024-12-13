@@ -41,7 +41,7 @@ namespace FoodieHub.MVC.Models.Recipe
         public string Name { get; set; } = default!;
 
         [Required(ErrorMessage = "Quantity is required.")]
-        [Range(0, float.MaxValue, ErrorMessage = "Quantity must be a positive number.")]
+        [Range(0.1, float.MaxValue, ErrorMessage = "Quantity must be a positive number.")]
         public float Quantity { get; set; }
 
         [Required(ErrorMessage = "Unit is required.")]

@@ -284,9 +284,114 @@ namespace FoodieHub.API.Repositories.Implementations
             }
         }
     
-        public Task<bool> Update(UpdateRecipeDTO recipeDTO)
+        public async Task<bool> Update(UpdateRecipeDTO recipeDTO)
         {
-            throw new NotImplementedException();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var entityToUpdate = await _context.Recipes.FindAsync(recipeDTO.RecipeID);
+                if (entityToUpdate == null) return false;
+
+                _mapper.Map(recipeDTO, entityToUpdate);
+                if (recipeDTO.File != null)
+                {
+                    var uploadResult = await _imageServices.UploadImage(recipeDTO.File, "Recipes");
+                    if (uploadResult.Success)
+                    {
+                        _imageServices.DeleteImage(entityToUpdate.ImageURL);
+                        entityToUpdate.ImageURL = uploadResult.FilePath.ToString() ?? "";
+                    }
+                }
+                _context.Recipes.Update(entityToUpdate);
+
+                // STEP
+                foreach (var item in recipeDTO.RecipeSteps)
+                {
+                    var step = await _context.RecipeSteps.FindAsync(item.Id);
+                    if(step != null)
+                    {
+                        // cap nhat
+                        step.Step = item.Step;
+                        step.Directions = item.Directions;
+                        if(item.FileStep != null)
+                        {
+                            var uploadStep = await _imageServices.UploadImage(item.FileStep, "RecipeSteps");
+                            if (uploadStep.Success)
+                            {
+                                if(item.ImageURL != null) _imageServices.DeleteImage(item.ImageURL);
+                                step.ImageURL =uploadStep.FilePath.ToString()??"";
+                            }
+                        } 
+                        _context.RecipeSteps.Update(step);
+                    }
+                    else
+                    {
+                        var path = "";
+                        if (item.FileStep != null)
+                        {
+                            var uploadImage = await _imageServices.UploadImage(item.FileStep, "RecipeSteps");
+                            if (uploadImage.Success)
+                            {
+                                path = uploadImage.FilePath.ToString() ?? "";
+                            }
+                        }
+                        // them moi
+                        var newStep = new RecipeStep
+                        {
+                            RecipeID = recipeDTO.RecipeID,
+                            Step = item.Step,
+                            Directions = item.Directions,
+                            ImageURL = path
+                        };
+
+                        await _context.RecipeSteps.AddAsync(newStep);
+                    }
+                }
+
+                // INGREDIENT
+                foreach (var item in recipeDTO.Ingredients)
+                {
+                    var ingredient = await _context.Ingredients.FindAsync(item.Id);
+                    if (ingredient != null)
+                    {
+                        // cap nhat
+                        ingredient.Name = item.Name;
+                        ingredient.Quantity = item.Quantity;
+                        ingredient.Unit = item.Unit; 
+                        ingredient.ProductID=item.ProductID;
+                        _context.Ingredients.Update(ingredient);
+                    }
+                    else
+                    {                        
+                        // them moi
+                        var newIngredient = new Ingredient
+                        {
+                            RecipeID = recipeDTO.RecipeID,
+                            Name = item.Name,
+                            Quantity = item.Quantity,
+                            Unit = item.Unit,
+                            ProductID = item.ProductID,
+                        };
+
+                        await _context.Ingredients.AddAsync(newIngredient);
+                    }
+                }
+
+                var result = await _context.SaveChangesAsync();
+                int entityChangeCount = recipeDTO.Ingredients.Count() + recipeDTO.RecipeSteps.Count();
+                if(result > entityChangeCount)
+                {
+                    await transaction.CommitAsync();
+                    return true;
+                }
+                await transaction.RollbackAsync();
+                return false;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return false;
+            }
         }
 
         public async Task<DetailRecipeDTO?> GetByID(int id)
