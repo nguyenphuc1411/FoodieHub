@@ -24,9 +24,9 @@ namespace FoodieHub.API.Controllers
             return Ok(result);
         }
         [HttpGet("users/{userID}")]
-        public async Task<ActionResult<PaginatedModel<GetArticleDTO>>> GetOfUser([FromRoute]string userID, [FromQuery] QueryModel query)
+        public async Task<ActionResult<IEnumerable<GetArticleDTO>>> GetOfUser([FromRoute]string userID)
         {
-            var result = await _service.GetOfUser(query,userID);
+            var result = await _service.GetOfUser(userID);
             return Ok(result);
         }
         [HttpGet("{id}")]

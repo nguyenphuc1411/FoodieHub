@@ -1,12 +1,15 @@
 ﻿@using FoodieHub.MVC.Models.QueryModel
 @using FoodieHub.MVC.Models.Recipe
 @using FoodieHub.MVC.Models.Response
+@using FoodieHub.MVC.Service.Interfaces
+@inject IRecipeCategoryService categoryService
 @inject IConfiguration config
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = config["BaseHost"];
-    var query = ViewBag.Query as QueryRecipeModel ?? new QueryRecipeModel(); 
+    var query = ViewBag.Query as QueryRecipeModel ?? new QueryRecipeModel();
+    var categories = await categoryService.GetAll();
 }
 @model PaginatedModel<GetRecipeDTO>
 <div class="container py-5">
@@ -58,6 +61,22 @@
                         {
                             <option value="3">Over 60 mins</option>
                         }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <select name="CategoryID" class="form-select">
+                        <option value="">Filter by Category</option>
+                        @foreach (var item in categories)
+                        {
+                            if(query.CategoryID==item.CategoryID){
+                                <option selected value="@item.CategoryID">@item.CategoryName</option>
+                            }
+                            else{
+                                <option value="@item.CategoryID">@item.CategoryName</option>
+                            }
+                        }
+                        
                     </select>
                 </div>
 

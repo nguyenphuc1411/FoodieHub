@@ -34,18 +34,7 @@ namespace FoodieHub.MVC.Service.Implementations
         public async Task<IEnumerable<ArticleCategoryDTO>> GetAll()
         {
             var response = await _httpClient.GetAsync($"ArticleCategories");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                var categories = JsonSerializer.Deserialize<IEnumerable<ArticleCategoryDTO>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                return categories;
-            }
-            else
-            {
-                throw new Exception("Failed to retrieve categories from API");
-            }
+            return await response.Content.ReadFromJsonAsync<IEnumerable<ArticleCategoryDTO>>() ?? new List<ArticleCategoryDTO>();
         }
 
         public async Task<APIResponse> GetById(int id)

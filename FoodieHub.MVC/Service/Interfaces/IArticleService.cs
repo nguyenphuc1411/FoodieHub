@@ -11,5 +11,6 @@ namespace FoodieHub.MVC.Service.Interfaces
         Task<GetArticleDTO?> GetByID(int id);
         Task<bool> Delete(int id);
         Task<bool> Update(int id,UpdateArticleDTO article);
+        Task<IEnumerable<GetArticleDTO>> GetOfUser(string userID);
     }
 }

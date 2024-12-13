@@ -126,12 +126,12 @@ namespace FoodieHub.API.Repositories.Implementations
            
         }
 
-        public async Task<PaginatedModel<GetArticleDTO>> GetOfUser(QueryModel query,string userID)
+        public async Task<IEnumerable<GetArticleDTO>> GetOfUser(string userID)
         {
             return await _context.Articles
-                .Where(x=>x.UserID==userID)
+                .Where(x => x.UserID == userID)
                 .ProjectTo<GetArticleDTO>(_mapper.ConfigurationProvider)
-                .ApplyQuery(query, x => x.Title);
+                .ToListAsync();
         }
     }
 }

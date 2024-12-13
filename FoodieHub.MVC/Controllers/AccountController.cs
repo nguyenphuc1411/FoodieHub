@@ -23,11 +23,14 @@ namespace FoodieHub.MVC.Controllers
         private readonly IOrderService orderService;
         private readonly IRecipeService recipeService;
         private readonly IUserService userService;
+        private readonly IArticleService articleService;
         public AccountController(IConfiguration config,
             IFavoriteService favoriteService,
             IAuthService authService,
             IOrderService orderService,
-            IRecipeService recipeService, IUserService userService)
+            IRecipeService recipeService, 
+            IUserService userService,
+            IArticleService articleService)
         {
             _config = config;
             this.favoriteService = favoriteService;
@@ -35,6 +38,7 @@ namespace FoodieHub.MVC.Controllers
             this.orderService = orderService;
             this.recipeService = recipeService;
             this.userService = userService;
+            this.articleService = articleService;
         }
 
         public IActionResult Login()
@@ -259,7 +263,15 @@ namespace FoodieHub.MVC.Controllers
         {
             var userData = await userService.GetByID(id);
             var recipeData = await recipeService.GetByUser(id);
-            ViewBag.RecipeData = recipeData;
+            if (recipeData != null)
+            {
+                ViewBag.RecipeData = recipeData.Where(x=>x.IsActive);
+            }
+            var articleData = await articleService.GetOfUser(id);
+            if (articleData != null)
+            {
+                ViewBag.ArticleData = articleData.Where(x => x.IsActive);
+            }
             return View(userData);
         }
 

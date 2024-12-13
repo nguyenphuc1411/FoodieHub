@@ -15,23 +15,25 @@ namespace FoodieHub.MVC.Controllers
         private readonly IArticleService _articleService;
         private readonly ICommentService _commentService;
         private readonly IFavoriteService _favoriteService;
-
+        private readonly IArticleCategoryService categoryService;
         public ArticlesController(
             IArticleService articleService,
             ICommentService commentService,
             IHttpClientFactory httpClientFactory,
-            IFavoriteService favoriteService)
+            IFavoriteService favoriteService,
+            IArticleCategoryService categoryService)
         {
             _articleService = articleService;
             _commentService = commentService;
             _favoriteService = favoriteService;
+            this.categoryService = categoryService;
         }
 
         public async Task<IActionResult> Index()
         {
             var queryFavorite = new QueryArticleModel
             {
-                SortBy = "TotalFavorites"
+                SortBy = "TotalFavorites",
             };
             var topArticles = await _articleService.Get(queryFavorite);
 
@@ -58,6 +60,9 @@ namespace FoodieHub.MVC.Controllers
                 NotificationHelper.SetErrorNotification(this);
                 return RedirectToAction("Index");
             }
+            var categories = await categoryService.GetAll();
+            ViewBag.Categories = categories;
+            ViewBag.Query = queryArticle;
            return View(result);
         }
 
