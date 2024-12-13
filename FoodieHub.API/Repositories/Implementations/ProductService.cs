@@ -85,6 +85,19 @@ namespace FoodieHub.API.Repositories.Implementations
         {
             var obj = _mapper.Map<Product>(product);
 
+            var existName = _appDbContext.Products.Any(x => x.ProductName == product.ProductName);
+
+            if (existName) {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.ProductID,
+                    StatusCode = 201
+                };
+            }
+         
+
 
             var uploadResult = await _uploadImageHelper.UploadImage(product.MainImage, "Products");
 

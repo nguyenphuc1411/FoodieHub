@@ -1,4 +1,5 @@
 ﻿using FoodieHub.MVC.Configurations;
+using FoodieHub.MVC.Helpers;
 using FoodieHub.MVC.Models;
 using FoodieHub.MVC.Models.Product;
 using FoodieHub.MVC.Models.Response;
@@ -83,6 +84,12 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         public async Task<IActionResult> CreateNewProduct(ProductDTO productDTO)
         {
             var response = await _productService.AddProduct(productDTO);
+
+            if (!response.Success)
+            {
+                NotificationHelper.SetErrorNotification(this,response.Message);
+                return RedirectToAction("Index");
+            }
 
             if (response.Success)
             {
