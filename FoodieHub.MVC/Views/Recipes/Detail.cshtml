@@ -138,21 +138,22 @@
                 <div class="ingredients" id="ingredientsList">
                     @foreach (var ingredient in Model.Ingredients)
                     {
+                        var hasProductID = ingredient.ProductID.HasValue;
                         <div class="ingredient-item">
                             <span class="ingredient-quantity" data-base-quantity="@ingredient.Quantity" data-unit="@ingredient.Unit">
                                 @ingredient.Quantity @ingredient.Unit
                             </span>
-                            <span class="ingredient-name">
+                            <span class="ingredient-name @(hasProductID ? "" : "text-black")" onclick="searchProduct('@ingredient.Name')" style="cursor: pointer;">
                                 @ingredient.Name
                             </span>
                         </div>
                     }
                 </div>
                 <div class="button-container">
-                    <button class="btn btn-primary">
+                    <a class="button button-dark" asp-controller="Cart" asp-action="AddRecipeItemsToCart" asp-route-id="@Model.RecipeID">
                         <i class="fas fa-shopping-cart"></i>
                         Add to the shopping list
-                    </button>
+                    </a>
                 </div>
                 <div class="divider"></div>
             </div>
@@ -1044,5 +1045,13 @@
             updateIngredients();
         });
     });
+    function searchProduct(name) {
+        if (!name) {
+            alert('Ingredient name not found.');
+            return;
+        }
 
+        // Chuyển hướng đến controller
+        window.location.href = `/Products?searchName=${encodeURIComponent(name)}`;
+    }
 </script>
