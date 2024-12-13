@@ -31,7 +31,7 @@ namespace FoodieHub.MVC.Controllers
         {
             var queryFavorite = new QueryArticleModel
             {
-                SortBy = "TotalFavorites"
+                SortBy = "TotalFavorites",
             };
             var topArticles = await _articleService.Get(queryFavorite);
 

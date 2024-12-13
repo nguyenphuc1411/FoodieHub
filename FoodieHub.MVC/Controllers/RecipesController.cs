@@ -93,6 +93,7 @@ namespace FoodieHub.MVC.Controllers
         public async Task<IActionResult> Index(QueryRecipeModel query)
         {
             // Lấy danh sách công thức
+            query.IsActive = true;
             var recipes = await _recipeService.GetAll(query);
             ViewBag.Query = query;
             return View(recipes);
@@ -104,9 +105,10 @@ namespace FoodieHub.MVC.Controllers
         public async Task<IActionResult> Detail(int id)
         {
             var data = await _recipeService.GetByID(id);
-            if (data == null)
+            if (data == null || !data.IsActive)
             {
                 NotificationHelper.SetErrorNotification(this,"Not found this recipe");
+                return RedirectToAction("Index");
             }
             ViewBag.UserID = Request.GetCookie("UserID");
             return View(data);

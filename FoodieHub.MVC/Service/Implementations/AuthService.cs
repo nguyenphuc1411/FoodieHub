@@ -63,7 +63,8 @@ namespace FoodieHub.MVC.Service.Implementations
         {
             using (var content = new MultipartFormDataContent())
             {
-                content.Add(new StringContent(user.Fullname), "Fullname");
+                content.Add(new StringContent(user.Fullname), "Fullname"); 
+                content.Add(new StringContent(user.Email), "Email");
 
                 if (!string.IsNullOrEmpty(user.Bio))
                 {

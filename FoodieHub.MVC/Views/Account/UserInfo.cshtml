@@ -1,4 +1,5 @@
-﻿@using FoodieHub.MVC.Models.Recipe
+﻿@using FoodieHub.MVC.Models.Article
+@using FoodieHub.MVC.Models.Recipe
 @using FoodieHub.MVC.Models.User
 @using System.Text.Json
 @model UserDTO
@@ -9,13 +10,19 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = config["BaseHost"];
     var recipes = ViewBag.RecipeData as IEnumerable<GetRecipeDTO> ?? new List<GetRecipeDTO>();
+    var articles = ViewBag.ArticleData as IEnumerable<GetArticleDTO> ?? new List<GetArticleDTO>();
 }
 
 
 <div class="container my-5">
     <!-- Profile Section -->
     <div class="profile-header text-center mb-5">
-        <img src="@(string.IsNullOrEmpty(Model.Avatar) ? "/images/profile.jpg" : url + "/images/" + Model.Avatar))" class="rounded-circle mb-3" alt="Profile Picture">
+        @if(Model.Avatar!=null){
+            <img src=@(url + "images/" + Model.Avatar) class="rounded-circle mb-3" alt="Profile Picture">
+        }
+        else {
+            <img src="~/images/profile.jpg" class="rounded-circle mb-3" alt="Profile Picture">
+        }
         <h2>@Model.Fullname</h2>
         <p class="text-muted">Member since @Model.JoinedAt</p>
         <p class="text-muted">Bio: @Model.Bio</p>
@@ -31,20 +38,21 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="following-tab" data-bs-toggle="tab" data-bs-target="#articles" type="button" role="tab" aria-controls="following" aria-selected="false">
-                <strong>@recipes.Count()</strong> Article
+                <strong>@articles.Count()</strong> Article
             </button>
         </li>
     </ul>
 
     <!-- Tab Content -->
     <div class="tab-content" id="profileTabsContent">
+
         <!-- Recipes Tab -->
         <div class="tab-pane fade show active" id="recipes" role="tabpanel" aria-labelledby="recipes-tab">
             <div class="row">
                 @if (recipes.Count() > 0)
                 {
                     foreach (var item in recipes)
-                    {         
+                    {      
                         <div class="col-lg-3 col-md-4 col-6 mb-4">
                             <a href="/recipes/detail/@item.RecipeID">
                                 <div class="card h-100">
@@ -55,8 +63,7 @@
                                     </div>
                                 </div>
                             </a>                          
-                        </div>
-                       
+                        </div>                     
                     }
                 }
                 else
@@ -66,7 +73,36 @@
             </div>
         </div>
 
-    
+
+        <!-- Articles Tab -->
+        <div class="tab-pane fade show" id="articles" role="tabpanel" aria-labelledby="recipes-tab">
+            <div class="row">
+                @if (articles.Count() > 0)
+                {
+                    foreach (var item in articles)
+                    {
+                        <div class="col-lg-3 col-md-4 col-6 mb-4">
+                            <a href="/recipes/detail/@item.ArticleID">
+                                <div class="card h-100">
+                                    <img src="@(url + "images/" + item.MainImage)" class="card-img-top" alt="Article Image">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">@item.Title</h5>
+                                        <p>@item.CreatedAt</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>No article found.</p>
+                }
+            </div>
+        </div>
+        
+
+
     </div>
 </div>
 
