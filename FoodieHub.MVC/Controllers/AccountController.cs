@@ -145,7 +145,7 @@ namespace FoodieHub.MVC.Controllers
         }
         public IActionResult LoginGoogle()
         {
-            var url = _config["BaseURL"] + "auth/login-google";
+            var url = _config["BaseHost"]+"api/" + "auth/login-google";
             return Redirect(url);
         }
         public IActionResult GoogleCallBack(string data)
