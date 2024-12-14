@@ -190,29 +190,23 @@
 
             <!-- Phần more-delicious chia cột -->
             <div class="more-delicious-items">
-                <div class="more-delicious-item">
-                    <div class="time-label">
-                        <i class="far fa-clock"></i> 45 min
-                    </div>
-                    <img alt="Malfatti with wild garlic and brown butter" src="https://storage.googleapis.com/a1aa/image/YHux08HnDnI5JhenH8YI2dz8bPGb2MWPbQNzzejlHkGVdM5TA.jpg" />
-                    <div class="item-title">Malfatti with wild garlic and brown butter</div>
-                </div>
-
-                <div class="more-delicious-item">
-                    <div class="time-label">
-                        <i class="far fa-clock"></i> 30 min
-                    </div>
-                    <img alt="Malfatti with wild garlic and brown butter" src="https://storage.googleapis.com/a1aa/image/ZP6Y83PF8jIzMdXcWAXhzi8RIwcoMEiPLkRHdR0Ji6rlOTeJA.jpg" />
-                    <div class="item-title">Malfatti with wild garlic and brown butter</div>
-                </div>
-
-                <div class="more-delicious-item">
-                    <div class="time-label">
-                        <i class="far fa-clock"></i> 40 min
-                    </div>
-                    <img alt="Easy colorful carrot tart with ricotta" src="https://storage.googleapis.com/a1aa/image/0bKrLpsf4kWjAKWvO1VAHVAvflq6Vyb7aFpNjwQBWEsZ6M5TA.jpg" />
-                    <div class="item-title">Easy colorful carrot tart with ricotta</div>
-                </div>
+                @if (ViewBag.RelatedRecipes != null && ViewBag.RelatedRecipes.Count > 0)
+                {
+                    foreach (var recipe in ViewBag.RelatedRecipes)
+                    {
+                        <a class="more-delicious-item" href="@Url.Action("Detail", "Recipes", new { id = recipe.RecipeID })">
+                            <div class="time-label">
+                                <i class="far fa-clock"></i> @recipe.CookTime min
+                            </div>
+                            <img alt="@recipe.Title" src="@recipe.ImageURL" />
+                            <div class="item-title">@recipe.Title</div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <p>No related recipes found.</p>
+                }
             </div>
         </div>
     </div>

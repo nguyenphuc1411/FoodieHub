@@ -113,6 +113,26 @@ namespace FoodieHub.MVC.Controllers
                 NotificationHelper.SetErrorNotification(this,"Not found this recipe");
                 return RedirectToAction("Index");
             }
+            var relatedRecipesResult = await _recipeService.GetAll(new QueryRecipeModel
+            {
+                CategoryID = data.CategoryID,
+                IsActive = true,
+            });
+
+            // Lọc các bài viết liên quan, loại trừ bài viết hiện tại
+            var relatedRecipes = relatedRecipesResult.Items
+                .Where(r => r.RecipeID != id)
+                .Select(r => new
+                {
+                    r.RecipeID,
+                    r.Title,
+                    r.ImageURL,
+                    r.CookTime,
+                    r.CategoryName
+                })
+                .ToList();
+
+            ViewBag.RelatedRecipes = relatedRecipes;
             ViewBag.UserID = Request.GetCookie("UserID");
             return View(data);
         }
