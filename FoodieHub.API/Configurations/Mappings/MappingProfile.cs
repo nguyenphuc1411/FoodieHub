@@ -82,7 +82,7 @@ namespace FoodieHub.API.Configurations.Mappings
        
             // Recipes
             CreateMap<CreateRecipeDTO, Recipe>();
-            CreateMap<UpdateRecipeDTO, Recipe>();
+
             CreateMap<Recipe, GetRecipeDTO>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.Fullname))
                 .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.User.Avatar))

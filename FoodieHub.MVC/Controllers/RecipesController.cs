@@ -47,8 +47,6 @@ namespace FoodieHub.MVC.Controllers
         }
 
 
-
-
         public async Task<IActionResult> Edit(int id)
         {
             var response = await _recipeService.GetByID(id);
@@ -74,11 +72,22 @@ namespace FoodieHub.MVC.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(UpdateRecipeDTO update)
+        public async Task<IActionResult> Edit(UpdateRecipeDTO update)
         {
+            if (update.Ingredients.Count() == 0 || update.RecipeSteps.Count() == 0)
+            {
+                NotificationHelper.SetErrorNotification(this,"List step and ingredient is required");
+                return View(update);
+            }
             if (ModelState.IsValid)
             {
-               
+                var result = await _recipeService.Update(update);
+                if (result)
+                {
+                    NotificationHelper.SetSuccessNotification(this);
+                    return RedirectToAction("Recipes","Account");
+                }
+                NotificationHelper.SetErrorNotification(this);
             }
             return View(update);
         }
