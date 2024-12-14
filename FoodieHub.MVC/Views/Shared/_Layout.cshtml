@@ -1,4 +1,5 @@
-﻿@inject IConfiguration config
+﻿@using FoodieHub.MVC.Controllers
+@inject IConfiguration config
 @{
     var url = config["BaseHost"];
 }
@@ -148,6 +149,7 @@
             <li><a class="nav__link" href="">Article</a></li>
         </ul>
     </div>
+
 
     <!-- Bootstrap Link JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

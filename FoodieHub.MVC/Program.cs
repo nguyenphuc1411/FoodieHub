@@ -1,5 +1,4 @@
-
-using FoodieHub.MVC.Configurations;
+﻿using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Libraries;
 using FoodieHub.MVC.Service.Implementations;
 using FoodieHub.MVC.Service.Interfaces;
@@ -49,8 +48,8 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddTransient<CustomHttpClientHandler>();
 
-var app = builder.Build();
 
+var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
@@ -65,7 +64,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
-// Khai b�o Route cho Admin
+// Khai báo Route cho Admin
 app.MapControllerRoute(
     name: "areas",
       pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");

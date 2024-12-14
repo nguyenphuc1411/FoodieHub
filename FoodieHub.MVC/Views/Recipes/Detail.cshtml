@@ -165,7 +165,7 @@
                         Step @(@item.index + 1)
                     </div>
                     <div class="row">
-                        @if (item.value.ImageURL != null)
+                        @if (!string.IsNullOrEmpty(item.value.ImageURL))
                         {
                             <div class="image-container">
                                 <img src="@(url + "images/" + item.value.ImageURL)" class="img-fluid mb-2 rounded shadow-sm " alt="Step Image" height="400" width="600">
