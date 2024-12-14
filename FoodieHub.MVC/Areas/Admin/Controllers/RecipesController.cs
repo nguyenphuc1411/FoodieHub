@@ -49,17 +49,46 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Edit(int id)
         {
-           
+            var response = await service.GetByID(id);
+            if (response != null)
+            {
+                var edit = new UpdateRecipeDTO
+                {
+                    RecipeID = id,
+                    Title = response.Title,
+                    CookTime = response.CookTime,
+                    Serves = response.Serves,
+                    Description = response.Description,
+                    IsActive = response.IsActive,
+                    ImageURL = response.ImageURL,
+                    CategoryID = response.CategoryID,
+                    RecipeSteps = response.Steps,
+                    Ingredients = response.Ingredients,
+                };
+                return View(edit);
+            }
+            NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Index");
         }
         [HttpPost]
-        public async Task<IActionResult> Edit(CreateRecipeDTO edit)
+        public async Task<IActionResult> Edit(UpdateRecipeDTO update)
         {
+            if (update.Ingredients.Count() == 0 || update.RecipeSteps.Count() == 0)
+            {
+                NotificationHelper.SetErrorNotification(this, "List step and ingredient is required");
+                return View(update);
+            }
             if (ModelState.IsValid)
             {
-                
-            }  
-            return View(edit);
+                var result = await service.Update(update);
+                if (result)
+                {
+                    NotificationHelper.SetSuccessNotification(this);
+                    return RedirectToAction("Index");
+                }
+                NotificationHelper.SetErrorNotification(this);
+            }
+            return View(update);
         }
         public async Task<IActionResult> Detail(int id)
         {

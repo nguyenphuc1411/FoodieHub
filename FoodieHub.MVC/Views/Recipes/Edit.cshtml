@@ -98,56 +98,6 @@
                 <input asp-for="File" type="file" class="form-control" accept="images/*" />
             </div>
         </div>
-      
-
-       
-
-        <hr />
-
-        <!-- Recipe Steps -->
-        <h4 class="mb-3">Recipe Steps</h4>
-        <table class="table" id="stepsTable">
-            <thead>
-                <tr>
-                    <th style="width: 10%;" class="text-center">Step Number</th>
-                    <th style="width: 60%;" class="text-center">Directions</th>
-                    <th style="width: 20%;" class="text-center">Step Image</th>
-                    <th style="width: 10%;" class="text-center">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (var i = 0; i < Model.RecipeSteps.Count; i++)
-                {
-                    <tr>
-                        <td style="width: 10%;">
-                            <input type="hidden" asp-for="RecipeSteps[@i].Id" />
-                            <input asp-for="RecipeSteps[@i].Step" class="form-control" />
-                            <span asp-validation-for="RecipeSteps[@i].Step" class="text-danger"></span>
-                        </td>
-                        <td style="width: 60%;">
-                            <textarea asp-for="RecipeSteps[@i].Directions" class="form-control"></textarea>
-                            <span asp-validation-for="RecipeSteps[@i].Directions" class="text-danger"></span>
-                        </td>
-                        <td style="width: 20%;">
-                            <div class="d-flex">
-                                @if (!string.IsNullOrEmpty(Model.RecipeSteps[i].ImageURL))
-                                {
-                                    <img src=@(url+"images/"+@Model.RecipeSteps[i].ImageURL) alt="Step Image" class="img-fluid" style="max-width: 100px;" />
-                                }
-                                <input type="hidden" asp-for="RecipeSteps[i].ImageURL" />
-                                <input asp-for="RecipeSteps[@i].FileStep" type="file" class="form-control" />
-                            </div>   
-                        </td>
-                        <td style="width: 10%;">
-                            <button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <button type="button" class="btn btn-primary" onclick="addStep()">Add Step</button>
-
-        <hr />
 
         <!-- Ingredients -->
         <h4 class="mb-3">Ingredients</h4>
@@ -186,6 +136,51 @@
             </tbody>
         </table>
         <button type="button" class="btn btn-primary" onclick="addIngredient()">Add Ingredient</button>
+
+        <!-- Recipe Steps -->
+        <h4 class="mb-3">Recipe Steps</h4>
+        <table class="table" id="stepsTable">
+            <thead>
+                <tr>
+                    <th style="width: 10%;" class="text-center">Step Number</th>
+                    <th style="width: 60%;" class="text-center">Directions</th>
+                    <th style="width: 20%;" class="text-center">Step Image</th>
+                    <th style="width: 10%;" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.RecipeSteps.Count; i++)
+                {
+                    <tr>
+                        <td style="width: 10%;">
+                            <input type="hidden" asp-for="RecipeSteps[@i].Id" />
+                            <input asp-for="RecipeSteps[@i].Step" class="form-control" />
+                            <span asp-validation-for="RecipeSteps[@i].Step" class="text-danger"></span>
+                        </td>
+                        <td style="width: 60%;">
+                            <textarea asp-for="RecipeSteps[@i].Directions" class="form-control"></textarea>
+                            <span asp-validation-for="RecipeSteps[@i].Directions" class="text-danger"></span>
+                        </td>
+                        <td style="width: 20%;">
+                            <div class="d-flex">
+                                @if (!string.IsNullOrEmpty(Model.RecipeSteps[i].ImageURL))
+                                {
+                                    <img src=@(url+"images/"+@Model.RecipeSteps[i].ImageURL) alt="Step Image" class="img-fluid" style="max-width: 100px;" />
+                                }
+                                <input type="hidden" asp-for="RecipeSteps[i].ImageURL" />
+                                <input asp-for="RecipeSteps[@i].FileStep" type="file" class="form-control" />
+                            </div>
+                        </td>
+                        <td style="width: 10%;">
+                            <button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" onclick="addStep()">Add Step</button>
+
+        <hr />
 
         <hr />
 

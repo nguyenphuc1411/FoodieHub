@@ -30,24 +30,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             string orderreport = "7days",
             string revenuereport = "7days"
             )
-        {
-            var responseProfile = await _httpClient.GetFromJsonAsync<APIResponse<UpdateProfileDTO>>("auth/profile");
-            if (responseProfile != null && responseProfile.Success)
-            {
-                var opt = new CookieOptions
-                {
-                    HttpOnly = false,
-                    Expires = DateTime.Now.AddDays(30)
-                };
-                Response.Cookies.Append("NameAdmin", responseProfile.Data.Fullname, opt);
-                if (!string.IsNullOrEmpty(responseProfile.Data.Avatar))
-                {
-                    Response.Cookies.Append("AvatarAdmin", responseProfile.Data.Avatar, opt);
-                }
-
-            }
-
-
+        {         
             var responseOrder = await _httpClient.GetAsync("statistics/order"+"?by="+order);
             if (responseOrder.IsSuccessStatusCode)
             {
