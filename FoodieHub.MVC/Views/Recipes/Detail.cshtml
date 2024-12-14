@@ -210,47 +210,68 @@
             </div>
         </div>
     </div>
-
-    <h2 class="ms-2">
-        More delicious ideas for you
-    </h2>
-    <div class="card-container">
-        @if (ViewBag.RelatedRecipes != null && ViewBag.RelatedRecipes.Count > 0)
+    <div>
+        <h2 class="ms-2">
+            More delicious ideas for you
+        </h2>
+        @if (ViewBag.RelatedRecipes != null)
         {
-            @foreach (var recipe in ViewBag.RelatedRecipes)
-            {
-                <div class="card">
-                    <a href="@Url.Action("Detail", "Recipes", new { id = recipe.RecipeID })">
-                        <img alt="@recipe.Title" src="@(url + "images/" + recipe.ImageURL)" height="150" width="250" />
-                        <div class="card-content">
-                            <div class="badges">
-                                <span class="badge time">
-                                    <i class="far fa-clock"></i> @recipe.CookTime min
-                                </span>
-                                <span class="badge vegetarian">
-                                    @recipe.CategoryName
-                                </span>
-                            </div>
-                            <h3>@recipe.Title</h3>
-                        </div>
-                    </a>
+            <div id="carouselExampleControlsNoTouching" class="carousel slide" data-bs-touch="false" data-bs-interval="false">
+                <div class="carousel-inner">
+                    @for (int i = 0; i < ViewBag.RelatedRecipes.Count; i += 3)
+                    {
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <div class="row fw-bold">
+                                @for (int j = i; j < i + 3 && j < ViewBag.RelatedRecipes.Count; j++)
+                                {
+                                    var recipe = ViewBag.RelatedRecipes[j];
+                                    <div class="col-md-4 d-flex justify-content-center">
+                                        <div class="card-more-delicious-item">
+                                            <a href="@Url.Action("Detail", "Recipes", new { id = recipe.RecipeID })">
+                                                <img alt="@recipe.Title" src="@(url + "images/" + recipe.ImageURL)" height="150" width="250" />
+                                                <div class="card-more-delicious-item-content">
+                                                    <div class="badges">
+                                                        <span class="badge time">
+                                                            <i class="far fa-clock"></i> @recipe.CookTime min
+                                                        </span>
+                                                        <span class="badge vegetarian">
+                                                            @recipe.CategoryName
+                                                        </span>
+                                                    </div>
+                                                    <h3>@recipe.Title</h3>
+                                                </div>
+                                            </a>
 
-                    <div class="card-footer">
-                        <div class="author">
-                            <img alt="avatar" src="@($"{url}images/{recipe.Avatar}")" height="30" width="30" />
-                            <span>@recipe.FullName</span>
+                                            <div class="card-more-delicious-item-footer">
+                                                <div class="author">
+                                                    <img alt="avatar" src="@($"{url}images/{recipe.Avatar}")" height="30" width="30" />
+                                                    <span>@recipe.FullName</span>
+                                                </div>
+                                                <div class="rating">
+                                                    <span> @recipe.RatingAverage</span>
+                                                    <i class="fas fa-star ms-1"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
                         </div>
-                        <div class="rating">
-                            <span> @recipe.RatingAverage</span>
-                            <i class="fas fa-star ms-1"></i>
-                        </div>
-                    </div>
+                    }
                 </div>
-            }
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControlsNoTouching" data-bs-slide="prev" style="width: 5%">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControlsNoTouching" data-bs-slide="next" style="width: 5%">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
         }
         else
         {
-            <p>No related recipes found.</p>
+            
         }
     </div>
     <hr class="my-5">
@@ -425,12 +446,26 @@
     }
 
     .more-delicious-item {
+        background-color:white;
         display: flex;
         flex-direction: column;
+        border-radius: 12px;
         align-items: center;
         position: relative;
         color: #555;
+        transition: transform 0.3s ease;
+        overflow: visible; /* Đảm bảo không bị cắt mất */
+        transform-origin: center; /* Phóng lớn từ trung tâm */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
     }
+
+        .more-delicious-item:hover {
+            transform: scale(1.05); /* Phóng lớn nhẹ */
+            z-index: 10; /* Đảm bảo nổi lên trên các phần tử khác */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
 
         .more-delicious-item img {
             width: 100%;
@@ -689,39 +724,41 @@
 
     .card-container {
         display: flex;
+        justify-content: center;
         gap: 20px;
-        overflow-x: auto;
+        overflow-x: hidden;
     }
 
-    .card {
+    .card-more-delicious-item {
+        background-color: white;
         border: 1px solid #ddd;
         border-radius: 8px;
-        overflow: hidden;
         width: 250px;
-        flex-shrink: 0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
 
-        .card img {
+
+        .card-more-delicious-item img {
             width: 100%;
             height: auto;
         }
 
-    .card-content {
+    .card-more-delicious-item-content {
         padding: 15px;
     }
 
-        .card-content h3 {
+        .card-more-delicious-item-content h3 {
             font-size: 18px;
             margin: 10px 0;
             color: #333;
         }
 
-        .card-content p {
+        .card-more-delicious-item-content p {
             font-size: 14px;
             color: #555;
         }
 
-    .card-footer {
+    .card-more-delicious-item-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -729,24 +766,24 @@
         border-top: 1px solid #ddd;
     }
 
-        .card-footer .author {
+        .card-more-delicious-item-footer .author {
             display: flex;
             align-items: center;
         }
 
-            .card-footer .author img {
+            .card-more-delicious-item-footer .author img {
                 border-radius: 50%;
                 width: 30px;
                 height: 30px;
                 margin-right: 10px;
             }
 
-        .card-footer .likes {
+        .card-more-delicious-item-footer .rating {
             display: flex;
             align-items: center;
         }
 
-            .card-footer .likes i {
+            .card-more-delicious-item-footer .rating i {
                 margin-right: 5px;
             }
 
@@ -865,7 +902,20 @@
 
     }
 
-    
+    .carousel-control-prev,
+    .carousel-control-next {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 36px;
+    }
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        filter: invert(100%);
+    }
+
+
 </style>
 
 <script>
