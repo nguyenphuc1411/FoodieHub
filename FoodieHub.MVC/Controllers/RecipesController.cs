@@ -128,7 +128,10 @@ namespace FoodieHub.MVC.Controllers
                     r.Title,
                     r.ImageURL,
                     r.CookTime,
-                    r.CategoryName
+                    r.CategoryName,
+                    r.Avatar,
+                    r.FullName,
+                    r.RatingAverage
                 })
                 .ToList();
 

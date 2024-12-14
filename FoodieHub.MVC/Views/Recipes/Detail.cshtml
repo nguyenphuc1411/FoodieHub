@@ -198,7 +198,7 @@
                             <div class="time-label">
                                 <i class="far fa-clock"></i> @recipe.CookTime min
                             </div>
-                            <img alt="@recipe.Title" src="@recipe.ImageURL" />
+                            <img alt="@recipe.Title" src="@(url + "images/" + recipe.ImageURL)" />
                             <div class="item-title">@recipe.Title</div>
                         </a>
                     }
@@ -211,134 +211,47 @@
         </div>
     </div>
 
-    <h2>
+    <h2 class="ms-2">
         More delicious ideas for you
     </h2>
     <div class="card-container">
-        <div class="card">
-            <img alt="Malfatti with wild garlic and brown butter" height="150" src="https://storage.googleapis.com/a1aa/image/ZP6Y83PF8jIzMdXcWAXhzi8RIwcoMEiPLkRHdR0Ji6rlOTeJA.jpg" width="250" />
-            <div class="card-content">
-                <div class="badges">
-                    <span class="badge time">
-                        45 min
-                    </span>
-                    <span class="badge vegetarian">
-                        Vegetarian
-                    </span>
+        @if (ViewBag.RelatedRecipes != null && ViewBag.RelatedRecipes.Count > 0)
+        {
+            @foreach (var recipe in ViewBag.RelatedRecipes)
+            {
+                <div class="card">
+                    <a href="@Url.Action("Detail", "Recipes", new { id = recipe.RecipeID })">
+                        <img alt="@recipe.Title" src="@(url + "images/" + recipe.ImageURL)" height="150" width="250" />
+                        <div class="card-content">
+                            <div class="badges">
+                                <span class="badge time">
+                                    <i class="far fa-clock"></i> @recipe.CookTime min
+                                </span>
+                                <span class="badge vegetarian">
+                                    @recipe.CategoryName
+                                </span>
+                            </div>
+                            <h3>@recipe.Title</h3>
+                        </div>
+                    </a>
+
+                    <div class="card-footer">
+                        <div class="author">
+                            <img alt="avatar" src="@($"{url}images/{recipe.Avatar}")" height="30" width="30" />
+                            <span>@recipe.FullName</span>
+                        </div>
+                        <div class="rating">
+                            <span> @recipe.RatingAverage</span>
+                            <i class="fas fa-star ms-1"></i>
+                        </div>
+                    </div>
                 </div>
-                <h3>
-                    Malfatti with wild garlic and brown butter
-                </h3>
-            </div>
-            <div class="card-footer">
-                <div class="author">
-                    <img alt="Carolin Roitzheim" height="30" src="https://storage.googleapis.com/a1aa/image/sxgEfQvKbvR1AqEfxMKqn2Yhl0EQCa43cI8pmKew1rjq0ZynA.jpg" width="30" />
-                    <span>
-                        Carolin Roitzheim
-                    </span>
-                </div>
-                <div class="likes">
-                    <i class="fas fa-heart">
-                    </i>
-                    <span>
-                        2.7k
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <img alt="Easy colorful carrot tart with ricotta" height="150" src="https://storage.googleapis.com/a1aa/image/0bKrLpsf4kWjAKWvO1VAHVAvflq6Vyb7aFpNjwQBWEsZ6M5TA.jpg" width="250" />
-            <div class="card-content">
-                <div class="badges">
-                    <span class="badge time">
-                        25 min
-                    </span>
-                    <span class="badge vegetarian">
-                        Vegetarian
-                    </span>
-                </div>
-                <h3>
-                    Easy colorful carrot tart with ricotta
-                </h3>
-            </div>
-            <div class="card-footer">
-                <div class="author">
-                    <img alt="Marco Hartz" height="30" src="https://storage.googleapis.com/a1aa/image/lBeEgBeNxzj0eobEeaO3zuelpwm0FidculyFe8tW3gcwlOTeJA.jpg" width="30" />
-                    <span>
-                        Marco Hartz
-                    </span>
-                </div>
-                <div class="likes">
-                    <i class="fas fa-heart">
-                    </i>
-                    <span>
-                        3.2k
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <img alt="Creamy carrot orzo (orzotto)" height="150" src="https://storage.googleapis.com/a1aa/image/9Qw4fg8Lp4R1EqP9fTXwbsf1oqEwCrepFfeonqBs2xfTNdm8JA.jpg" width="250" />
-            <div class="card-content">
-                <div class="badges">
-                    <span class="badge time">
-                        35 min
-                    </span>
-                    <span class="badge vegetarian">
-                        Vegetarian
-                    </span>
-                </div>
-                <h3>
-                    Creamy carrot orzo (orzotto)
-                </h3>
-            </div>
-            <div class="card-footer">
-                <div class="author">
-                    <img alt="Martina Trommer" height="30" src="https://storage.googleapis.com/a1aa/image/dp0y0YflJhW3EqcReooSRfFfUxPeEnB8T4L5DuFyd0fmkOTeJA.jpg" width="30" />
-                    <span>
-                        Martina Trommer
-                    </span>
-                </div>
-                <div class="likes">
-                    <i class="fas fa-heart">
-                    </i>
-                    <span>
-                        4.2k
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <img alt="Vegetarian stuffed peppers with rice and feta" height="150" src="https://storage.googleapis.com/a1aa/image/sSeJb3kfyNlP3koYwDeYWU4PbRIjh76yUHCd58zjQiup0ZynA.jpg" width="250" />
-            <div class="card-content">
-                <div class="badges">
-                    <span class="badge time">
-                        20 min
-                    </span>
-                    <span class="badge vegetarian">
-                        Vegetarian
-                    </span>
-                </div>
-                <h3>
-                    Vegetarian stuffed peppers with rice and feta
-                </h3>
-            </div>
-            <div class="card-footer">
-                <div class="author">
-                    <img alt="Martina Trommer" height="30" src="https://storage.googleapis.com/a1aa/image/dp0y0YflJhW3EqcReooSRfFfUxPeEnB8T4L5DuFyd0fmkOTeJA.jpg" width="30" />
-                    <span>
-                        Martina Trommer
-                    </span>
-                </div>
-                <div class="likes">
-                    <i class="fas fa-heart">
-                    </i>
-                    <span>
-                        12.7k
-                    </span>
-                </div>
-            </div>
-        </div>
+            }
+        }
+        else
+        {
+            <p>No related recipes found.</p>
+        }
     </div>
     <hr class="my-5">
 
@@ -516,6 +429,7 @@
         flex-direction: column;
         align-items: center;
         position: relative;
+        color: #555;
     }
 
         .more-delicious-item img {
@@ -799,6 +713,7 @@
         .card-content h3 {
             font-size: 18px;
             margin: 10px 0;
+            color: #333;
         }
 
         .card-content p {
@@ -949,6 +864,8 @@
         }
 
     }
+
+    
 </style>
 
 <script>
