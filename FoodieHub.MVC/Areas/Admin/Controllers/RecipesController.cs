@@ -27,10 +27,12 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             ViewBag.Query = query;
             return View(result);     
         }
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> Create(CreateRecipeDTO recipe)
         {

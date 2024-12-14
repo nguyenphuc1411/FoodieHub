@@ -8,29 +8,10 @@
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var url = config["BaseHost"];
     var categories = await categoryService.GetAll() ?? new List<GetRecipeCategoryDTO>();
-    List<string> units = new List<string>
-{
-    "Gam (g)",
-    "Kilôgam (kg)",
-    "Lạng",
-    "Miligam (mg)",
-    "Mililit (ml)",
-    "Lít (l)",
-    "Muỗng cà phê (tsp)",
-    "Muỗng canh (tbsp)",
-    "Chén (cốc)",
-    "Bát",
-    "Quả",
-    "Củ",
-    "Miếng",
-    "Nắm",
-    "Bó",
-    "Thìa nhỏ",
-    "Thìa lớn",
-    "Tép",
-    "Gói",
-    "Lon"
-};
+    List<string> units = new List<string>{
+    "Gam (g)","Kilôgam (kg)","Lạng","Miligam (mg)","Mililit (ml)",
+    "Lít (l)","Muỗng cà phê (tsp)","Muỗng canh (tbsp)","Chén (cốc)","Bát",
+    "Quả","Củ","Miếng","Nắm","Bó","Thìa nhỏ","Thìa lớn","Tép","Gói","Lon"};
 }
 
 @model UpdateRecipeDTO

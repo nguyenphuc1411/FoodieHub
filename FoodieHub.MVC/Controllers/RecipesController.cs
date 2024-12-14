@@ -21,9 +21,11 @@ namespace FoodieHub.MVC.Controllers
             _commentService = commentService;
         }
         [ValidateTokenForUser]
+        [HttpGet]
         public IActionResult Create()
-        {          
-            return View();
+        {
+            var model = new CreateRecipeDTO();
+            return View(model);
         }
         [HttpPost]
         public async Task<IActionResult> Create(CreateRecipeDTO recipe)
