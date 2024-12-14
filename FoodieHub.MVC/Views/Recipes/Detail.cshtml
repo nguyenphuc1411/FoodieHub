@@ -190,161 +190,89 @@
 
             <!-- Phần more-delicious chia cột -->
             <div class="more-delicious-items">
-                <div class="more-delicious-item">
-                    <div class="time-label">
-                        <i class="far fa-clock"></i> 45 min
-                    </div>
-                    <img alt="Malfatti with wild garlic and brown butter" src="https://storage.googleapis.com/a1aa/image/YHux08HnDnI5JhenH8YI2dz8bPGb2MWPbQNzzejlHkGVdM5TA.jpg" />
-                    <div class="item-title">Malfatti with wild garlic and brown butter</div>
-                </div>
-
-                <div class="more-delicious-item">
-                    <div class="time-label">
-                        <i class="far fa-clock"></i> 30 min
-                    </div>
-                    <img alt="Malfatti with wild garlic and brown butter" src="https://storage.googleapis.com/a1aa/image/ZP6Y83PF8jIzMdXcWAXhzi8RIwcoMEiPLkRHdR0Ji6rlOTeJA.jpg" />
-                    <div class="item-title">Malfatti with wild garlic and brown butter</div>
-                </div>
-
-                <div class="more-delicious-item">
-                    <div class="time-label">
-                        <i class="far fa-clock"></i> 40 min
-                    </div>
-                    <img alt="Easy colorful carrot tart with ricotta" src="https://storage.googleapis.com/a1aa/image/0bKrLpsf4kWjAKWvO1VAHVAvflq6Vyb7aFpNjwQBWEsZ6M5TA.jpg" />
-                    <div class="item-title">Easy colorful carrot tart with ricotta</div>
-                </div>
+                @if (ViewBag.RelatedRecipes != null && ViewBag.RelatedRecipes.Count > 0)
+                {
+                    foreach (var recipe in ViewBag.RelatedRecipes)
+                    {
+                        <a class="more-delicious-item" href="@Url.Action("Detail", "Recipes", new { id = recipe.RecipeID })">
+                            <div class="time-label">
+                                <i class="far fa-clock"></i> @recipe.CookTime min
+                            </div>
+                            <img alt="@recipe.Title" src="@(url + "images/" + recipe.ImageURL)" />
+                            <div class="item-title">@recipe.Title</div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <p>No related recipes found.</p>
+                }
             </div>
         </div>
     </div>
+    <div>
+        <h2 class="ms-2">
+            More delicious ideas for you
+        </h2>
+        @if (ViewBag.RelatedRecipes != null)
+        {
+            <div id="carouselExampleControlsNoTouching" class="carousel slide" data-bs-touch="false" data-bs-interval="false">
+                <div class="carousel-inner">
+                    @for (int i = 0; i < ViewBag.RelatedRecipes.Count; i += 3)
+                    {
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <div class="row fw-bold">
+                                @for (int j = i; j < i + 3 && j < ViewBag.RelatedRecipes.Count; j++)
+                                {
+                                    var recipe = ViewBag.RelatedRecipes[j];
+                                    <div class="col-md-4 d-flex justify-content-center">
+                                        <div class="card-more-delicious-item">
+                                            <a href="@Url.Action("Detail", "Recipes", new { id = recipe.RecipeID })">
+                                                <img alt="@recipe.Title" src="@(url + "images/" + recipe.ImageURL)" height="150" width="250" />
+                                                <div class="card-more-delicious-item-content">
+                                                    <div class="badges">
+                                                        <span class="badge time">
+                                                            <i class="far fa-clock"></i> @recipe.CookTime min
+                                                        </span>
+                                                        <span class="badge vegetarian">
+                                                            @recipe.CategoryName
+                                                        </span>
+                                                    </div>
+                                                    <h3>@recipe.Title</h3>
+                                                </div>
+                                            </a>
 
-    <h2>
-        More delicious ideas for you
-    </h2>
-    <div class="card-container">
-        <div class="card">
-            <img alt="Malfatti with wild garlic and brown butter" height="150" src="https://storage.googleapis.com/a1aa/image/ZP6Y83PF8jIzMdXcWAXhzi8RIwcoMEiPLkRHdR0Ji6rlOTeJA.jpg" width="250" />
-            <div class="card-content">
-                <div class="badges">
-                    <span class="badge time">
-                        45 min
-                    </span>
-                    <span class="badge vegetarian">
-                        Vegetarian
-                    </span>
+                                            <div class="card-more-delicious-item-footer">
+                                                <div class="author">
+                                                    <img alt="avatar" src="@($"{url}images/{recipe.Avatar}")" height="30" width="30" />
+                                                    <span>@recipe.FullName</span>
+                                                </div>
+                                                <div class="rating">
+                                                    <span> @recipe.RatingAverage</span>
+                                                    <i class="fas fa-star ms-1"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
-                <h3>
-                    Malfatti with wild garlic and brown butter
-                </h3>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControlsNoTouching" data-bs-slide="prev" style="width: 5%">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControlsNoTouching" data-bs-slide="next" style="width: 5%">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
-            <div class="card-footer">
-                <div class="author">
-                    <img alt="Carolin Roitzheim" height="30" src="https://storage.googleapis.com/a1aa/image/sxgEfQvKbvR1AqEfxMKqn2Yhl0EQCa43cI8pmKew1rjq0ZynA.jpg" width="30" />
-                    <span>
-                        Carolin Roitzheim
-                    </span>
-                </div>
-                <div class="likes">
-                    <i class="fas fa-heart">
-                    </i>
-                    <span>
-                        2.7k
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <img alt="Easy colorful carrot tart with ricotta" height="150" src="https://storage.googleapis.com/a1aa/image/0bKrLpsf4kWjAKWvO1VAHVAvflq6Vyb7aFpNjwQBWEsZ6M5TA.jpg" width="250" />
-            <div class="card-content">
-                <div class="badges">
-                    <span class="badge time">
-                        25 min
-                    </span>
-                    <span class="badge vegetarian">
-                        Vegetarian
-                    </span>
-                </div>
-                <h3>
-                    Easy colorful carrot tart with ricotta
-                </h3>
-            </div>
-            <div class="card-footer">
-                <div class="author">
-                    <img alt="Marco Hartz" height="30" src="https://storage.googleapis.com/a1aa/image/lBeEgBeNxzj0eobEeaO3zuelpwm0FidculyFe8tW3gcwlOTeJA.jpg" width="30" />
-                    <span>
-                        Marco Hartz
-                    </span>
-                </div>
-                <div class="likes">
-                    <i class="fas fa-heart">
-                    </i>
-                    <span>
-                        3.2k
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <img alt="Creamy carrot orzo (orzotto)" height="150" src="https://storage.googleapis.com/a1aa/image/9Qw4fg8Lp4R1EqP9fTXwbsf1oqEwCrepFfeonqBs2xfTNdm8JA.jpg" width="250" />
-            <div class="card-content">
-                <div class="badges">
-                    <span class="badge time">
-                        35 min
-                    </span>
-                    <span class="badge vegetarian">
-                        Vegetarian
-                    </span>
-                </div>
-                <h3>
-                    Creamy carrot orzo (orzotto)
-                </h3>
-            </div>
-            <div class="card-footer">
-                <div class="author">
-                    <img alt="Martina Trommer" height="30" src="https://storage.googleapis.com/a1aa/image/dp0y0YflJhW3EqcReooSRfFfUxPeEnB8T4L5DuFyd0fmkOTeJA.jpg" width="30" />
-                    <span>
-                        Martina Trommer
-                    </span>
-                </div>
-                <div class="likes">
-                    <i class="fas fa-heart">
-                    </i>
-                    <span>
-                        4.2k
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <img alt="Vegetarian stuffed peppers with rice and feta" height="150" src="https://storage.googleapis.com/a1aa/image/sSeJb3kfyNlP3koYwDeYWU4PbRIjh76yUHCd58zjQiup0ZynA.jpg" width="250" />
-            <div class="card-content">
-                <div class="badges">
-                    <span class="badge time">
-                        20 min
-                    </span>
-                    <span class="badge vegetarian">
-                        Vegetarian
-                    </span>
-                </div>
-                <h3>
-                    Vegetarian stuffed peppers with rice and feta
-                </h3>
-            </div>
-            <div class="card-footer">
-                <div class="author">
-                    <img alt="Martina Trommer" height="30" src="https://storage.googleapis.com/a1aa/image/dp0y0YflJhW3EqcReooSRfFfUxPeEnB8T4L5DuFyd0fmkOTeJA.jpg" width="30" />
-                    <span>
-                        Martina Trommer
-                    </span>
-                </div>
-                <div class="likes">
-                    <i class="fas fa-heart">
-                    </i>
-                    <span>
-                        12.7k
-                    </span>
-                </div>
-            </div>
-        </div>
+        }
+        else
+        {
+            
+        }
     </div>
     <hr class="my-5">
 
@@ -518,11 +446,26 @@
     }
 
     .more-delicious-item {
+        background-color:white;
         display: flex;
         flex-direction: column;
+        border-radius: 12px;
         align-items: center;
         position: relative;
+        color: #555;
+        transition: transform 0.3s ease;
+        overflow: visible; /* Đảm bảo không bị cắt mất */
+        transform-origin: center; /* Phóng lớn từ trung tâm */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
     }
+
+        .more-delicious-item:hover {
+            transform: scale(1.05); /* Phóng lớn nhẹ */
+            z-index: 10; /* Đảm bảo nổi lên trên các phần tử khác */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
 
         .more-delicious-item img {
             width: 100%;
@@ -781,38 +724,41 @@
 
     .card-container {
         display: flex;
+        justify-content: center;
         gap: 20px;
-        overflow-x: auto;
+        overflow-x: hidden;
     }
 
-    .card {
+    .card-more-delicious-item {
+        background-color: white;
         border: 1px solid #ddd;
         border-radius: 8px;
-        overflow: hidden;
         width: 250px;
-        flex-shrink: 0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
 
-        .card img {
+
+        .card-more-delicious-item img {
             width: 100%;
             height: auto;
         }
 
-    .card-content {
+    .card-more-delicious-item-content {
         padding: 15px;
     }
 
-        .card-content h3 {
+        .card-more-delicious-item-content h3 {
             font-size: 18px;
             margin: 10px 0;
+            color: #333;
         }
 
-        .card-content p {
+        .card-more-delicious-item-content p {
             font-size: 14px;
             color: #555;
         }
 
-    .card-footer {
+    .card-more-delicious-item-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -820,24 +766,24 @@
         border-top: 1px solid #ddd;
     }
 
-        .card-footer .author {
+        .card-more-delicious-item-footer .author {
             display: flex;
             align-items: center;
         }
 
-            .card-footer .author img {
+            .card-more-delicious-item-footer .author img {
                 border-radius: 50%;
                 width: 30px;
                 height: 30px;
                 margin-right: 10px;
             }
 
-        .card-footer .likes {
+        .card-more-delicious-item-footer .rating {
             display: flex;
             align-items: center;
         }
 
-            .card-footer .likes i {
+            .card-more-delicious-item-footer .rating i {
                 margin-right: 5px;
             }
 
@@ -955,6 +901,21 @@
         }
 
     }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 36px;
+    }
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        filter: invert(100%);
+    }
+
+
 </style>
 
 <script>
