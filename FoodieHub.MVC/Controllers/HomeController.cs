@@ -16,7 +16,6 @@ namespace FoodieHub.MVC.Controllers
 
         public async Task<IActionResult> Index()
         {
-
             var token = Request.GetCookie("TokenUser");
             
             if (!string.IsNullOrEmpty(token))
