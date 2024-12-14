@@ -56,12 +56,26 @@ namespace FoodieHub.API.Repositories.Implementations
 
         public async Task<bool> Delete(FavoriteDTO favorite)
         {
-            var entityToDelete = await _context.Favorites
-                .FirstOrDefaultAsync(x=>x.RecipeID==favorite.RecipeID && x.ArticleID==favorite.ArticleID);
-            if (entityToDelete == null) return false;
             var userID = _authService.GetUserID();
-            if(entityToDelete.UserID != userID) return false;
-            _context.Favorites.Remove(entityToDelete);
+            if(favorite.RecipeID != null)
+            {
+                var entityToDelete = await _context.Favorites
+               .FirstOrDefaultAsync(x => x.RecipeID == favorite.RecipeID && x.UserID==userID);
+                if(entityToDelete != null)
+                    _context.Favorites.Remove(entityToDelete);
+
+            }
+            else
+            {
+                if(favorite.ArticleID != null)
+                {
+                    var entityToDelete = await _context.Favorites
+                    .FirstOrDefaultAsync(x => x.ArticleID == favorite.ArticleID && x.UserID == userID);
+                    if (entityToDelete != null)
+                        _context.Favorites.Remove(entityToDelete);
+                }
+            }
+          
             return await _context.SaveChangesAsync()>0;
         }
     }
