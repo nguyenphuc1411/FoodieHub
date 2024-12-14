@@ -5,6 +5,7 @@ using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using FoodieHub.MVC.Helpers;
+using FoodieHub.MVC.Models.Recipe;
 namespace FoodieHub.MVC.Controllers
 {
     public class CartController : Controller
@@ -183,6 +184,62 @@ namespace FoodieHub.MVC.Controllers
             return RedirectToAction("Checkout");
         }
         [ValidateTokenForUser]
+        public async Task<IActionResult> AddRecipeItemsToCart(string id)
+        {
+            var response = await _httpClient.GetAsync($"Recipes/{id}");
+            var recipeDetails = await response.Content.ReadFromJsonAsync<DetailRecipeDTO>();
+
+            // Lấy giỏ hàng hiện tại từ cookie
+            var cartItemsJson = Request.Cookies["cart"] ?? "[]";
+            var cartItems = System.Text.Json.JsonSerializer.Deserialize<List<CartItem>>(cartItemsJson) ?? new List<CartItem>();
+
+            var hasProduct = false;
+
+            foreach (var ingredient in recipeDetails.Ingredients)
+            {
+                if (ingredient.ProductID.HasValue)
+                {
+                    hasProduct = true;
+
+                    // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+                    var existingItem = cartItems.FirstOrDefault(item => item.ProductID == ingredient.ProductID);
+                    if (existingItem != null)
+                    {
+                        existingItem.Quantity += 1;
+                    }
+                    else
+                    {
+                        cartItems.Add(new CartItem
+                        {
+                            ProductID = (int)ingredient.ProductID,
+                            Quantity = 1
+                        });
+                    }
+                }
+            }
+
+            if (!hasProduct)
+            {
+                TempData["ErrorMessage"] = "No products were found in the ingredients!";
+                return RedirectToAction("Detail", "Recipes", new { id = recipeDetails.RecipeID });
+            }
+
+            // Lưu lại giỏ hàng vào cookie
+            var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                Expires = DateTime.UtcNow.AddDays(30)
+            };
+
+            Response.Cookies.Append("cart", newCartItemsJson, cookieOptions);
+
+            TempData["SuccessMessage"] = "All products from the order have been added to the cart successfully!";
+
+            return RedirectToAction("Checkout");
+        }
+
         [HttpPost]
         public IActionResult UpdateCartItem(int productId, int quantity)
         {
