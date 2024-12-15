@@ -49,6 +49,11 @@ namespace FoodieHub.MVC.Service.Implementations
             return await response.Content.ReadFromJsonAsync<PaginatedModel<GetArticleDTO>>() ?? new PaginatedModel<GetArticleDTO>();
         }
 
+        public async Task<IEnumerable<ArticleByCategory>> GetByCategory()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<ArticleByCategory>>("articles/categories") ?? new List<ArticleByCategory>();
+        }
+
         public async Task<GetArticleDTO?> GetByID(int id)
         {
             return await _httpClient.GetFromJsonAsync<GetArticleDTO>("articles/" + id);

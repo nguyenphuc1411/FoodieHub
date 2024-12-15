@@ -133,5 +133,23 @@ namespace FoodieHub.API.Repositories.Implementations
                 .ProjectTo<GetArticleDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<ArticleByCategory>> GetByCategory()
+        {
+            var articlesByCategory = await _context.Articles
+                .GroupBy(a => a.ArticleCategory.CategoryID)
+                .Select(g => new ArticleByCategory
+                {
+                    CategoryID = g.Key,
+                    CategoryName = g.FirstOrDefault().ArticleCategory.CategoryName, // Lấy CategoryName từ bài viết đầu tiên
+                                                                                    // Lấy bài viết có nhiều lượt thích nhất
+                    FeatureArticle = _mapper.Map<GetArticleDTO>(g.OrderByDescending(a => a.FavoriteArticles.Count()).FirstOrDefault() ?? new Article()),
+                    // Lấy danh sách các bài viết mới nhất
+                    LastedArticles = _mapper.Map<IEnumerable<GetArticleDTO>>(g.OrderByDescending(a => a.CreatedAt).ToList())
+                }).ToListAsync(); // Sử dụng ToListAsync() để thực hiện async/await
+
+            return articlesByCategory;
+        }
+
     }
 }

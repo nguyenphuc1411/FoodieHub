@@ -139,19 +139,19 @@
                             <option value="RatingAverage">Sort by Rating</option>
                         }
                     </select>
+                    <!-- Apply Filters Button -->
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="button button-dark">Apply Filters</button>
+                    </div>
 
+                    <!-- Clear Filters Button -->
+                    <div class="d-grid gap-2 mt-2">
+                        <a href="/recipes" class="button button-light">Clear Filters</a>
+                    </div>
                 </div>
             </form>
 
-            <!-- Apply Filters Button -->
-            <div class="d-grid gap-2">
-                <button class="button button-dark">Apply Filters</button>
-            </div>
-
-            <!-- Clear Filters Button -->
-            <div class="d-grid gap-2 mt-2">
-                <a href="/recipes" class="button button-light">Clear Filters</a>
-            </div>
+           
         </div>
 
         <!-- Recipe Cards -->
@@ -185,50 +185,57 @@
                 }
             </div>
 
-            <form id="paginationForm" method="get" class="d-flex justify-content-between align-items-center mt-3">
-                <!-- Hidden input để giữ giá trị của trang -->
-                <input type="hidden" name="Page" id="pageInput" value="@Model.Page" />
-                <input type="hidden" name="PageSize" id="pageSizeInput" value="@Model.PageSize" />
+           <form method="get" class="form-pagination d-flex justify-content-between align-items-center mt-3">
+    <!-- Hidden input to keep the current query values -->
+    <input type="hidden" name="SearchItem" value="@query.SearchItem" />
+    <input type="hidden" name="SearchIngredient" value="@query.SearchIngredient" />
+    <input type="hidden" name="CategoryID" value="@query.CategoryID" />
+    <input type="hidden" name="SortBy" value="@query.SortBy" />
+    <input type="hidden" name="CookOption" value="@query.CookOption" />
+    <input type="hidden" name="IsAdminUpload" value="@query.IsAdminUpload" />
+    <input type="hidden" name="Page" value="@Model.Page" /> <!-- Hidden input to track the current page -->
 
-                <!-- Select box for page size -->
-                <div>
-                    <select name="PageSize" class="form-select form-select-sm" style="width: 70px;" onchange="this.form.submit()">
-                        @for (int i = 2; i <= 20; i += 2)
-                        {
-                            @if(Model.PageSize==i){
-                                <option value="@i" selected>@i</option>
-                            }
-                            else {
-                                <option value="@i">@i</option>
-                            }
-                        }
-                    </select>
-                </div>
+    <!-- Select box for page size -->
+    <div>
+        <select name="PageSize" class="form-select form-select-sm" style="width: 70px;" onchange="this.form.submit()">
+            @for (int i = 2; i <= 20; i += 2)
+            {
+                @if (Model.PageSize == i)
+                {
+                    <option value="@i" selected>@i</option>
+                }
+                else
+                {
+                    <option value="@i">@i</option>
+                }
+            }
+        </select>
+    </div>
 
-                <!-- Pagination navigation -->
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
-                            <button type="submit" class="page-link" onclick="document.getElementById('pageInput').value = @(Model.Page - 1)">
-                                Previous
-                            </button>
-                        </li>
+    <!-- Pagination navigation -->
+    <nav aria-label="Page navigation example">
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                <button type="button" class="page-link" onclick="changePage(@(Model.Page - 1))" @(Model.Page == 1 ? "disabled" : "")>
+                    Previous
+                </button>
+            </li>
 
-                        @for (int i = 1; i <= Model.TotalPages; i++)
-                        {
-                            <li class="page-item @(i == Model.Page ? "active" : "")">
-                                <button type="submit" class="page-link" onclick="document.getElementById('pageInput').value = @i">@i</button>
-                            </li>
-                        }
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <button type="button" class="page-link" onclick="changePage(@i)">@i</button>
+                </li>
+            }
 
-                        <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
-                            <button type="submit" class="page-link" onclick="document.getElementById('pageInput').value = @(Model.Page + 1)">
-                                Next
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
-            </form>
+            <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                <button type="button" class="page-link" onclick="changePage(@(Model.Page + 1))" @(Model.Page == Model.TotalPages ? "disabled" : "")>
+                    Next
+                </button>
+            </li>
+        </ul>
+    </nav>
+</form>
 
         </div>
     </div>
@@ -268,6 +275,14 @@
     <a href="/recipes/create" class="button button-dark">CREATE A RECIPE</a>
 </div>
 
+
+<script>
+    function changePage(page) {
+        const form = document.querySelector('.form-pagination'); // Select the pagination form by its class
+        form.querySelector('input[name="Page"]').value = page; // Set the page value
+        form.submit(); // Submit the form
+    }
+</script>
 <style>
     body {
         background-color: #f8f9fa;

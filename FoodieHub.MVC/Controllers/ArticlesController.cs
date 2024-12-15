@@ -47,6 +47,8 @@ namespace FoodieHub.MVC.Controllers
                 TopArticles = topArticles.Items,
                 LatestArticlesList = lastedArticle.Items,
             };
+            var result = await _articleService.GetByCategory();
+            ViewBag.Data = result;
             return View(viewModel);
         }
 
