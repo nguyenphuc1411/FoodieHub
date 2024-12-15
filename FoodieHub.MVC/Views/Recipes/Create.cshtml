@@ -88,7 +88,7 @@
                                         <!-- Input hidden to store the ProductID -->
                                         <input asp-for="Ingredients[@i].ProductID" type="hidden" id="productID-@i" />
 
-                                        <ul id="ingredient-results-@i" class="search-results-list mt-3"></ul>
+                                        <ul id="ingredient-results-@i" class="search-results-list"></ul>
                                     </td>
                                     <td style="width: 20%;">
                                         <input asp-for="Ingredients[@i].Quantity" class="form-control" placeholder="Quantity" />
@@ -159,6 +159,32 @@
     </div>
 </div>
 
+<style>
+    .search-results-list {
+        width: 30%;
+        list-style: none;
+        padding: 0;
+        position: absolute;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        z-index: 1000;
+        max-height: 200px;
+        overflow-y: auto;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+    }
+
+        .search-results-list li {
+            padding: 5px;
+            cursor: pointer;
+            border-bottom: 1px solid #ddd;
+        }
+
+            .search-results-list li:hover {
+                background-color: #f5f5f5;
+            }
+</style>
+
 @section Scripts {
     <script>
         const units = @Html.Raw(Json.Serialize(units));
@@ -195,7 +221,7 @@
                     <!-- Input hidden để lưu ProductID -->
                     <input name="Ingredients[${rowCount}].ProductID" type="hidden" id="productID-${rowCount}" />
 
-                    <ul id="ingredient-results-${rowCount}" class="search-results-list mt-3"></ul>
+                    <ul id="ingredient-results-${rowCount}" class="search-results-list"></ul>
                 </td>
                 <td><input name="Ingredients[${rowCount}].Quantity" class="form-control" placeholder="Quantity" /></td>
                 <td>
@@ -213,6 +239,10 @@
             });
         }
 
+        function removeDiacritics(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
         function searchIngredient(index) {
             const inputId = `ingredient-${index}`;
             const resultId = `ingredient-results-${index}`;
@@ -222,23 +252,28 @@
                 clearTimeout(searchTimeouts[inputId]);
             }
 
-            // Thiết lập timeout mới cho trường hiện tại
             searchTimeouts[inputId] = setTimeout(() => {
                 const query = document.getElementById(inputId).value.toLowerCase();
                 const resultList = document.getElementById(resultId);
-                resultList.innerHTML = '';
+                resultList.innerHTML = ''; // Xóa danh sách cũ
 
-                if (query.length > 2) {
-                    const filteredProducts = products.filter(p => p.productName.toLowerCase().includes(query));
+                if (query.length > 0) { // Hiển thị gợi ý nếu query có nội dung
+                    const filteredProducts = products.filter(p =>
+                        removeDiacritics(p.productName).includes(query)
+                    );
 
-                    filteredProducts.forEach(product => {
-                        const li = document.createElement('li');
-                        li.textContent = product.productName;
-                        li.onclick = () => selectIngredient(product, inputId, resultId);
-                        resultList.appendChild(li);
-                    });
+                    // Kiểm tra có sản phẩm khớp không
+                    if (filteredProducts.length > 0) {
+                        filteredProducts.forEach(product => {
+                            const li = document.createElement('li');
+                            li.textContent = product.productName;
+                            li.onclick = () => selectIngredient(product, inputId, resultId);
+                            li.style.cursor = 'pointer'; // Thêm con trỏ cho dễ nhận biết
+                            resultList.appendChild(li);
+                        });
+                    }
                 }
-            }, 1000); // Trì hoãn tìm kiếm 1 giây
+            }, 300);
         }
 
         function selectIngredient(product, inputId, resultId) {
@@ -249,7 +284,13 @@
             const hiddenInputId = inputId.replace('ingredient', 'productID');
             document.getElementById(hiddenInputId).value = product.productID; // Set ProductID
         }
-
+        // Tắt gợi ý khi bấm ra ngoài
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.search-results-list') && !e.target.closest('input')) {
+                const allResultLists = document.querySelectorAll('.search-results-list');
+                allResultLists.forEach(list => list.innerHTML = '');
+            }
+        });
 
 
         function addStep() {
