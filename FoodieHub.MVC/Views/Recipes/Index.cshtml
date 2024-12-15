@@ -165,7 +165,7 @@
                                 <img src=@(url+"images/"+recipe.ImageURL) class="card-img-top" alt="Recipe Image">
                                 <div class="card-body">
                                     <h5 class="card-title">@recipe.Title</h5>
-                                    <p class="card-text">@recipe.Description</p>
+                                    <p class="card-text">@Html.Raw(recipe.Description)</p>
                                     <div class="recipe-stats">
                                         <span>Created on: @recipe.CreatedAt</span>
                                         <span>Likes: @recipe.TotalFavorites</span>

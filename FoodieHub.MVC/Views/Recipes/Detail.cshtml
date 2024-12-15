@@ -85,7 +85,7 @@
             </div>
             <div class="description-recipe">
                 <p class="description">
-                    @Model.Description    
+                    @Html.Raw(Model.Description)
                 </p>
                 <div class="read-less">
                     Read less
@@ -171,13 +171,13 @@
                                 <img src="@(url + "images/" + item.value.ImageURL)" class="img-fluid mb-2 rounded shadow-sm " alt="Step Image" height="400" width="600">
                             </div>
                             <div class="description">
-                                <p>@item.value.Directions</p>
+                                <p>@Html.Raw(item.value.Directions)</p>
                             </div>
                             
                         }
                         else
                         {
-                            <p>@item.value.Directions</p>
+                            <p>@Html.Raw(item.value.Directions)</p>
                         }
                     </div>
                 }
