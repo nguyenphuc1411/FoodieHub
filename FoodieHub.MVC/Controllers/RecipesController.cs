@@ -21,10 +21,13 @@ namespace FoodieHub.MVC.Controllers
             _commentService = commentService;
         }
         [ValidateTokenForUser]
+        [HttpGet]
         public IActionResult Create()
-        {          
-            return View();
+        {
+            var model = new CreateRecipeDTO();
+            return View(model);
         }
+        [ValidateTokenForUser]
         [HttpPost]
         public async Task<IActionResult> Create(CreateRecipeDTO recipe)
         {
@@ -46,9 +49,7 @@ namespace FoodieHub.MVC.Controllers
             return View(recipe);
         }
 
-
-
-
+        [ValidateTokenForUser]
         public async Task<IActionResult> Edit(int id)
         {
             var response = await _recipeService.GetByID(id);
@@ -72,13 +73,24 @@ namespace FoodieHub.MVC.Controllers
             NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Recipes", "Account");
         }
-
+        [ValidateTokenForUser]
         [HttpPost]
-        public IActionResult Edit(UpdateRecipeDTO update)
+        public async Task<IActionResult> Edit(UpdateRecipeDTO update)
         {
+            if (update.Ingredients.Count() == 0 || update.RecipeSteps.Count() == 0)
+            {
+                NotificationHelper.SetErrorNotification(this,"List step and ingredient is required");
+                return View(update);
+            }
             if (ModelState.IsValid)
             {
-               
+                var result = await _recipeService.Update(update);
+                if (result)
+                {
+                    NotificationHelper.SetSuccessNotification(this);
+                    return RedirectToAction("Recipes","Account");
+                }
+                NotificationHelper.SetErrorNotification(this);
             }
             return View(update);
         }
@@ -104,6 +116,29 @@ namespace FoodieHub.MVC.Controllers
                 NotificationHelper.SetErrorNotification(this,"Not found this recipe");
                 return RedirectToAction("Index");
             }
+            var relatedRecipesResult = await _recipeService.GetAll(new QueryRecipeModel
+            {
+                CategoryID = data.CategoryID,
+                IsActive = true,
+            });
+
+            // Lọc các bài viết liên quan, loại trừ bài viết hiện tại
+            var relatedRecipes = relatedRecipesResult.Items
+                .Where(r => r.RecipeID != id)
+                .Select(r => new
+                {
+                    r.RecipeID,
+                    r.Title,
+                    r.ImageURL,
+                    r.CookTime,
+                    r.CategoryName,
+                    r.Avatar,
+                    r.FullName,
+                    r.RatingAverage
+                })
+                .ToList();
+
+            ViewBag.RelatedRecipes = relatedRecipes;
             ViewBag.UserID = Request.GetCookie("UserID");
             return View(data);
         }
@@ -156,7 +191,7 @@ namespace FoodieHub.MVC.Controllers
                 NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Recipes", "Account");
         }
-
+        [ValidateTokenForUser]
         public async Task<IActionResult> CreateComment(CommentDTO comment)
         {
             bool result = await _commentService.Create(comment);
@@ -164,7 +199,7 @@ namespace FoodieHub.MVC.Controllers
             else NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Detail", new { id = comment.RecipeID});
         }
-
+        [ValidateTokenForUser]
         public async Task<IActionResult> DeleteComment(int id,int recipeID)
         {
             bool result = await _commentService.Delete(id);
@@ -172,7 +207,7 @@ namespace FoodieHub.MVC.Controllers
             else NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Detail", new { id = recipeID });
         }
-
+        [ValidateTokenForUser]
         public async Task<IActionResult> EditComment(int CommentID,string CommentContent,int RecipeID)
         {
             bool result = await _commentService.Edit(CommentID,new CommentDTO

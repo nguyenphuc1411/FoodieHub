@@ -1,16 +1,14 @@
-﻿using FoodieHub.MVC.Models.User;
-using FoodieHub.MVC.Helpers;
-using FoodieHub.MVC.Models.Response;
+﻿using FoodieHub.MVC.Helpers;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace FoodieHub.MVC.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IAuthService authService;
-
         public HomeController(IAuthService authService)
         {
             this.authService = authService;
@@ -34,6 +32,7 @@ namespace FoodieHub.MVC.Controllers
                 }           
             }
             return View();
-        }       
+        }
+     
     }
 }

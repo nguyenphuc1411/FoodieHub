@@ -1,18 +1,17 @@
-﻿@using FoodieHub.MVC.Models.Article
+﻿@{
+    ViewData["Title"] = "ViewAll";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using FoodieHub.MVC.Models.Article
 @using FoodieHub.MVC.Models.DTOs
 @using FoodieHub.MVC.Models.QueryModel
 @using FoodieHub.MVC.Models.Response
 @using FoodieHub.MVC.Service.Interfaces
-@inject IConfiguration Configuration
-
-@{
-    ViewData["Title"] = "ViewAll";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    var apiUrl = Configuration["BaseHost"];
-    var query = ViewBag.Query as QueryArticleModel ?? new QueryArticleModel();
-    var categories = ViewBag.Categories as IEnumerable<ArticleCategoryDTO> ?? new List<ArticleCategoryDTO>();
-}
 @model PaginatedModel<GetArticleDTO>
+@inject IConfiguration Configuration
+@{
+    var apiUrl = "";
+}
 
 <div class="container my-5">
     <div class="row">
@@ -20,28 +19,49 @@
         <div class="col-md-3 sidebar-profile">
             <h5>Filter By:</h5>
             <form id="filterForm" method="get" asp-action="ViewAll">
-                <ul class="list-unstyled">
-                    <!-- Thêm tùy chọn View All -->
-                    <li class="d-flex justify-content-between align-items-center">
-                        <label class="me-auto">View All</label>
-                        <input type="radio" name="category" value=""
-                        @(string.IsNullOrEmpty((string)ViewData["SelectedCategory"]) ? "checked" : "")
-                               onchange="this.form.submit();">
-                    </li>
+                <div class="mb-3">
+                    <select name="CategoryID" class="form-select">
+                        <option value="">Filter by Category</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var item in ViewBag.Categories)
+                            {
+                                if (ViewBag.Query.CategoryID == item.CategoryID)
+                                {
+                                    <option selected value="@item.CategoryID">@item.CategoryName</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.CategoryID">@item.CategoryName</option>
+                                }
+                            }
+                        }
+                    </select>
 
-                    <!-- Hiển thị tất cả các danh mục từ ViewData["AllCategories"] -->
-                    @foreach (var item in categories)
-                    {
-                        <li class="d-flex justify-content-between align-items-center">
-                            <label class="me-auto">@item.CategoryName</label>
-                            <input type="radio" name="category" value="@item.CategoryID"
-                            @(query.CategoryID == item.CategoryID ? "checked" : "")
-                                   onchange="this.form.submit();">
-                        </li>
-                    }
-                </ul>
-                <input type="hidden" name="sortOrder" value="@ViewData["SortOrder"]" />
-                <input type="hidden" name="currentPage" value="1" />
+                </div>
+                <!-- Sort by Dropdown -->
+                <div class="mb-3">
+                    <select name="SortBy" class="form-select">
+                        @if (ViewBag.Query.SortBy == "CreatedAt")
+                        {
+                            <option value="CreatedAt" selected>Sort by Date</option>
+                        }
+                        else
+                        {
+                            <option value="CreatedAt">Sort by Date</option>
+                        }
+
+                        @if (ViewBag.Query.SortBy == "TotalFavorites")
+                        {
+                            <option value="TotalFavorites" selected>Sort by Likes</option>
+                        }
+                        else
+                        {
+                            <option value="TotalFavorites">Sort by Likes</option>
+                        }
+                    </select>
+
+                </div>
             </form>
         </div>
 

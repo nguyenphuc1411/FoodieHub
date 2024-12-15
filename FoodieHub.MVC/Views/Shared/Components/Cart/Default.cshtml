@@ -46,7 +46,7 @@
                                         <input type="hidden" name="productId" value="@item.ProductID" />
                                         <div class="input-group" style="width: 120px;">
                                             <button type="button" class="btn btn-outline-secondary decrease-quantity">-</button>
-                                            <input readonly type="number" name="quantity" class="form-control text-center quantity-input" value="@item.Quantity" min="1">
+                                            <input readonly type="number" name="quantity" class="form-control text-center quantity-input" value="@item.Quantity" min="1" data-max-stock="@item.StockQuantity">
                                             <button type="button" class="btn btn-outline-secondary increase-quantity">+</button>
                                         </div>
                                     </form>

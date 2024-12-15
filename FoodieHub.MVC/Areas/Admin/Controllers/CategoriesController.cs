@@ -74,8 +74,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             var newCate = new ArticleCategoryDTO
             {
                 CategoryID = articleCategoryDTO.CategoryID,
-                CategoryName = articleCategoryDTO.CategoryName,
-                IsDeleted = false
+                CategoryName = articleCategoryDTO.CategoryName
             };
             var obj = await _articleCategoryService.UpdateArticleCategory(articleCategoryDTO);
             return RedirectToAction("Index");
@@ -87,8 +86,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             var newCate = new ArticleCategoryDTO
             {
                 CategoryID = articleCategoryDTO.CategoryID,
-                CategoryName = articleCategoryDTO.CategoryName,
-                IsDeleted = true
+                CategoryName = articleCategoryDTO.CategoryName
             };
             var obj = await _articleCategoryService.UpdateArticleCategory(newCate);
             return RedirectToAction("Index");
@@ -101,8 +99,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             var newCate = new ArticleCategoryDTO
             {
                 CategoryID = articleCategoryDTO.CategoryID,
-                CategoryName = articleCategoryDTO.CategoryName,
-                IsDeleted = articleCategoryDTO.IsDeleted
+                CategoryName = articleCategoryDTO.CategoryName
             };
             var obj = await _articleCategoryService.UpdateArticleCategory(newCate);
             return RedirectToAction("Index");
@@ -131,8 +128,6 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             var obj = new RecipeCategoryStatusDTO
             {
                 CategoryID = recipeCategoryDTO.CategoryID,
-                IsActice = true,
-                IsDeleted = false
             };
             var result = await _recipeCategoryService.UpdateRecipeStatus(obj);
             return RedirectToAction("Index");
@@ -145,8 +140,6 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             var obj = new RecipeCategoryStatusDTO
             {
                 CategoryID = recipeCategoryDTO.CategoryID,
-                IsActice = false,
-                IsDeleted = true
             };
             var result = await _recipeCategoryService.UpdateRecipeStatus(obj);
             return RedirectToAction("Index");

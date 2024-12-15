@@ -1,4 +1,5 @@
-﻿using FoodieHub.MVC.Models.Authentication;
+﻿
+using FoodieHub.MVC.Models.Authentication;
 using FoodieHub.MVC.Models.User;
 using FoodieHub.MVC.Configurations;
 using Microsoft.AspNetCore.Mvc;

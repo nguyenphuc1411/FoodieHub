@@ -12,5 +12,6 @@ namespace FoodieHub.API.Repositories.Interfaces
         Task<PaginatedModel<GetArticleDTO>> Get(QueryArticleModel query);
         Task<GetArticleDTO?> GetByID(int id);
         Task<bool> Delete(int id);
+        Task<IEnumerable<ArticleByCategory>> GetByCategory();
     }
 }

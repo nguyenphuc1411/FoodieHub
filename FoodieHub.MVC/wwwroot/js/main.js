@@ -27,22 +27,31 @@ navLinks.forEach(element => {
 
 document.querySelectorAll('.decrease-quantity').forEach(button => {
     button.addEventListener('click', function () {
-        const form = this.closest('.update-cart-form'); // Get the form
-        const inputField = form.querySelector('.quantity-input'); // Get the input field
+        const form = this.closest('.update-cart-form'); 
+        const inputField = form.querySelector('.quantity-input'); //
         let quantity = parseInt(inputField.value) - 1;
-        quantity = Math.max(quantity, 1); // Prevent quantity from going below 1
+        quantity = Math.max(quantity, 1); 
         inputField.value = quantity;
-        form.submit(); // Submit the form to update the cart
+        form.submit();
     });
 });
 
 document.querySelectorAll('.increase-quantity').forEach(button => {
     button.addEventListener('click', function () {
-        const form = this.closest('.update-cart-form'); // Get the form
-        const inputField = form.querySelector('.quantity-input'); // Get the input field
-        let quantity = parseInt(inputField.value) + 1;
-        inputField.value = quantity;
-        form.submit(); // Submit the form to update the cart
+        const form = this.closest('.update-cart-form'); 
+        const inputField = form.querySelector('.quantity-input'); 
+        const maxStock = parseInt(inputField.getAttribute('data-max-stock'));
+        let quantity = parseInt(inputField.value);
+        const contactModal = new bootstrap.Modal(document.getElementById('contactModalCheckOut'));
+        
+        if (quantity < maxStock) {
+            quantity++;
+            inputField.value = quantity;
+            form.submit();
+        } else {
+            alert(`The maximum available stock is ${maxStock}.`);
+            contactModal.show(); 
+        }
     });
 });
 

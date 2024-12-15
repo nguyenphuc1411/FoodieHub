@@ -4,6 +4,24 @@ namespace FoodieHub.MVC.Models.Recipe
 {
     public class CreateRecipeDTO
     {
+        public CreateRecipeDTO()
+        {
+            Ingredients = new List<CreateIngredient> {
+                new() {
+                    Name = "Ingredient 1",
+                    Quantity = 100,
+                    Unit = "Gam (g)"
+                }
+            };
+            RecipeSteps = new List<CreateRecipeSteps>
+            {
+                new()
+                {
+                    Step = 1,
+                    Directions = "Directions"
+                }
+            };
+        }
         [Required(ErrorMessage = "Title is required.")]
         [MaxLength(255, ErrorMessage = "Title cannot exceed 255 characters.")]
         public string Title { get; set; } = default!;
@@ -25,10 +43,8 @@ namespace FoodieHub.MVC.Models.Recipe
 
         [Required(ErrorMessage = "CategoryID is required.")]
         public int CategoryID { get; set; }
-        [Required(ErrorMessage = "Ingredients are required.")]
         public List<CreateIngredient> Ingredients { get; set; } = new List<CreateIngredient>();
 
-        [Required(ErrorMessage = "Recipe steps are required.")]
         public List<CreateRecipeSteps> RecipeSteps { get; set; } = new List<CreateRecipeSteps>();
 
         public List<int> RelativeProducts { get; set; } = new List<int>();

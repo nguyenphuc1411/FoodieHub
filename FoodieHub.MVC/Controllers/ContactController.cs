@@ -1,7 +1,6 @@
 ﻿using FoodieHub.MVC.Helpers;
 using FoodieHub.MVC.Models.Contact;
 using FoodieHub.MVC.Models.Response;
-using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodieHub.MVC.Controllers

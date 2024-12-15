@@ -6,6 +6,7 @@ using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Text.Json;
+using FoodieHub.MVC.Helpers;
 
 namespace FoodieHub.MVC.Controllers
 {
@@ -14,11 +15,13 @@ namespace FoodieHub.MVC.Controllers
         private readonly PaypalClient _paypalClient;
         private readonly HttpClient _httpClient;
 		private readonly IVnPayService _vnPayService;
-        public PaymentController(IHttpClientFactory httpClientFactory, PaypalClient paypalClient, IVnPayService vnPayService)
+        private readonly IOrderService _orderService;
+        public PaymentController(IHttpClientFactory httpClientFactory, PaypalClient paypalClient, IVnPayService vnPayService, IOrderService orderService)
         {
             _httpClient = httpClientFactory.CreateClient("MyAPI");
             _paypalClient = paypalClient;
             _vnPayService = vnPayService;
+            _orderService = orderService;
         }
         [HttpPost("/Paypal/create-paypal-order")]
 		public async Task<IActionResult> CreatePaypalOrder(CancellationToken cancellationToken)
@@ -100,21 +103,17 @@ namespace FoodieHub.MVC.Controllers
 		{
             ViewBag.PaypalClientdId = _paypalClient.ClientId;
 
-			var response = await _httpClient.GetAsync("orders/" + id);
-			if (response.IsSuccessStatusCode)
-			{
-				var data = await response.Content.ReadFromJsonAsync<APIResponse<GetDetailOrder>>();
-				if (data.Data.PaymentStatus)
-				{
-                    TempData["ErrorMessage"] = "The order has been paid.";
-                    return RedirectToAction("Order", "Account");
-                }
-                var dataOrder = JsonSerializer.Serialize(data.Data);
-				HttpContext.Session.SetString("CurrentOrder",dataOrder);
-                return View(data.Data);
-			}
-			TempData["ErrorMessage"] = "Not found this order";
-            return RedirectToAction("Order","Account");
+            var result = await _orderService.GetByID(int.Parse(id));
+            if (result == null)
+            {
+                NotificationHelper.SetErrorNotification(this);
+                return RedirectToAction("Order", "Account");
+            }
+            else {
+                var dataOrder = JsonSerializer.Serialize(result);
+				HttpContext.Session.SetString("CurrentOrder", dataOrder);
+                return View(result);
+			}	
         }
         public IActionResult VnPay()
 		{

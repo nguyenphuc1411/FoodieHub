@@ -8,10 +8,11 @@ namespace FoodieHub.API.Repositories.Implementations
     public class StatisticsService : IStatisticsService
     {
         private readonly AppDbContext _context;
-
-        public StatisticsService(AppDbContext context)
+        private readonly IAuthService _authService;
+        public StatisticsService(AppDbContext context, IAuthService authService)
         {
             _context = context;
+            _authService = authService;
         }
 
         public async Task<StatisticsDTO<int>> GetOrder(string by)
@@ -174,14 +175,22 @@ namespace FoodieHub.API.Repositories.Implementations
 
         public async Task<StatisticsDTO<int>> GetCustomer(string by)
         {
+            var listUsers = await _context.Users.ToListAsync();
+            var listCustomers = new List<ApplicationUser>();
+            foreach (var item in listUsers)
+            {
+                bool isAdmin = await _authService.IsAdmin(item.Id);
+                if(!isAdmin) listCustomers.Add(item);
+            }
+
             var data = new StatisticsDTO<int>();
             if (by == "Today")
             {
-                var todayCount = await _context.Users
-                    .Where(x => DateOnly.FromDateTime(x.JoinedAt.Date) == DateOnly.FromDateTime(DateTime.Now)).CountAsync();
+                var todayCount = listCustomers
+                    .Where(x => DateOnly.FromDateTime(x.JoinedAt.Date) == DateOnly.FromDateTime(DateTime.Now)).Count();
 
-                var yesterdayCount = await _context.Users
-                    .Where(x => DateOnly.FromDateTime(x.JoinedAt.Date) == DateOnly.FromDateTime(DateTime.Now.AddDays(-1))).CountAsync();
+                var yesterdayCount = listCustomers
+                    .Where(x => DateOnly.FromDateTime(x.JoinedAt.Date) == DateOnly.FromDateTime(DateTime.Now.AddDays(-1))).Count();
                 data.Total = todayCount;
                 data.GetBy = "Today";
                 if (yesterdayCount > 0)
@@ -198,14 +207,14 @@ namespace FoodieHub.API.Repositories.Implementations
                 if (by == "ThisMonth")
                 {
                     var firstDayOfThisMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-                    var thisMonthCount = await _context.Users
+                    var thisMonthCount = listCustomers
                         .Where(x => x.JoinedAt.Date >= firstDayOfThisMonth && x.JoinedAt.Date < firstDayOfThisMonth.AddMonths(1))
-                        .CountAsync();
+                        .Count();
 
                     var firstDayOfLastMonth = firstDayOfThisMonth.AddMonths(-1);
-                    var lastMonthCount = await _context.Users
+                    var lastMonthCount = listCustomers
                         .Where(x => x.JoinedAt.Date >= firstDayOfLastMonth && x.JoinedAt.Date < firstDayOfThisMonth)
-                        .CountAsync();
+                        .Count();
 
                     data.Total = thisMonthCount;
                     data.GetBy = "This Month";
@@ -222,15 +231,15 @@ namespace FoodieHub.API.Repositories.Implementations
                 else
                 {
                     var firstDayOfThisYear = new DateTime(DateTime.Now.Year, 1, 1);
-                    var thisYearCount = await _context.Users
+                    var thisYearCount = listCustomers
                         .Where(x => x.JoinedAt.Date >= firstDayOfThisYear && x.JoinedAt.Date < firstDayOfThisYear.AddYears(1))
-                        .CountAsync();
+                        .Count();
 
                     // Lấy số đơn hàng trong năm trước
                     var firstDayOfLastYear = firstDayOfThisYear.AddYears(-1);
-                    var lastYearCount = await _context.Users
+                    var lastYearCount = listCustomers
                         .Where(x => x.JoinedAt.Date >= firstDayOfLastYear && x.JoinedAt.Date < firstDayOfThisYear)
-                        .CountAsync();
+                        .Count();
 
                     data.Total = thisYearCount;
                     data.GetBy = "This year";

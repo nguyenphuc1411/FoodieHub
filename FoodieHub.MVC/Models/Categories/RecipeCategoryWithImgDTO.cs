@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace FoodieHub.MVC.Models.Categories
+﻿namespace FoodieHub.MVC.Models.Categories
 {
     public class RecipeCategoryWithImgDTO
     {

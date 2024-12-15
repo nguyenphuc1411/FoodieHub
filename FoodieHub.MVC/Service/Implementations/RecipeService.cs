@@ -100,5 +100,61 @@ namespace FoodieHub.MVC.Service.Implementations
             var queryString = query.ToQueryString();
             return await _httpClient.GetFromJsonAsync<PaginatedModel<GetRecipeDTO>>("recipes"+queryString);
         }
+
+        public async Task<bool> Update(UpdateRecipeDTO recipeDTO)
+        {
+            // Create a multipart form data content
+            var content = new MultipartFormDataContent();
+            content.Add(new StringContent(recipeDTO.RecipeID.ToString()), nameof(recipeDTO.RecipeID));
+            content.Add(new StringContent(recipeDTO.Title), nameof(recipeDTO.Title));
+            content.Add(new StringContent(recipeDTO.Description ?? ""), nameof(recipeDTO.Description));
+            content.Add(new StringContent(recipeDTO.CookTime.ToString()), nameof(recipeDTO.CookTime));
+            content.Add(new StringContent(recipeDTO.Serves.ToString()), nameof(recipeDTO.Serves));
+            content.Add(new StringContent(recipeDTO.IsActive.ToString()), nameof(recipeDTO.IsActive));
+            content.Add(new StringContent(recipeDTO.CategoryID.ToString()), nameof(recipeDTO.CategoryID));
+
+            // Handle the optional file field (main recipe image)
+            if (recipeDTO.File != null)
+            {
+                var fileContent = new StreamContent(recipeDTO.File.OpenReadStream());
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(recipeDTO.File.ContentType);
+                content.Add(fileContent, nameof(recipeDTO.File), recipeDTO.File.FileName);
+            }
+
+            // Handle steps and step images
+            for (int i = 0; i < recipeDTO.RecipeSteps.Count; i++)
+            {
+                var step = recipeDTO.RecipeSteps[i];
+                content.Add(new StringContent(step.Id.ToString()), $"RecipeSteps[{i}].Id");
+                content.Add(new StringContent(step.Step.ToString()), $"RecipeSteps[{i}].Step");
+                content.Add(new StringContent(step.Directions), $"RecipeSteps[{i}].Directions");
+
+                if (step.FileStep != null)
+                {
+                    var stepFileContent = new StreamContent(step.FileStep.OpenReadStream());
+                    stepFileContent.Headers.ContentType = new MediaTypeHeaderValue(step.FileStep.ContentType);
+                    content.Add(stepFileContent, $"RecipeSteps[{i}].FileStep", step.FileStep.FileName);
+                }
+            }
+
+            // Handle ingredients
+            for (int i = 0; i < recipeDTO.Ingredients.Count; i++)
+            {
+                var ingredient = recipeDTO.Ingredients[i];
+                content.Add(new StringContent(ingredient.Id.ToString()), $"Ingredients[{i}].Id");
+                content.Add(new StringContent(ingredient.Name), $"Ingredients[{i}].Name");
+                content.Add(new StringContent(ingredient.Quantity.ToString()), $"Ingredients[{i}].Quantity");
+                content.Add(new StringContent(ingredient.Unit), $"Ingredients[{i}].Unit");
+                if (ingredient.ProductID.HasValue)
+                {
+                    content.Add(new StringContent(ingredient.ProductID.Value.ToString()), $"Ingredients[{i}].ProductID");
+                }
+            }
+
+            var response = await _httpClient.PutAsync("recipes/"+recipeDTO.RecipeID, content);
+
+            // Check if the response indicates success
+            return response.IsSuccessStatusCode;
+        }
     }
 }

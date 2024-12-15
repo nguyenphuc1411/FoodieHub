@@ -11,6 +11,8 @@ namespace FoodieHub.MVC.Service.Interfaces
 
         Task<bool> Create(CreateRecipeDTO recipeDTO);
 
+        Task<bool> Update(UpdateRecipeDTO recipeDTO);
+
         Task<IEnumerable<GetRecipeDTO>?> GetOfUser();
         Task<IEnumerable<GetRecipeDTO>?> GetByUser(string userId);
 

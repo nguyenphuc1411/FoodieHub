@@ -9,6 +9,7 @@ using FoodieHub.API.Models.Response;
 using FoodieHub.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace FoodieHub.API.Repositories.Implementations
 {
@@ -114,6 +115,13 @@ namespace FoodieHub.API.Repositories.Implementations
         public async Task<PaginatedModel<GetRecipeDTO>> Get(QueryRecipeModel query)
         {
             var listRecipes = _context.Recipes.AsQueryable();
+            if (!string.IsNullOrEmpty(query.SearchIngredient))
+            {
+                listRecipes = listRecipes.Where(recipe =>
+                    recipe.Ingredients.Any(ingredient =>
+                        ingredient.Name.ToLower().Contains(query.SearchIngredient.ToLower())));
+            }
+
             if (query.CategoryID.HasValue)
             {
                 listRecipes = listRecipes.Where(x => x.CategoryID == query.CategoryID.Value);
@@ -292,7 +300,14 @@ namespace FoodieHub.API.Repositories.Implementations
                 var entityToUpdate = await _context.Recipes.FindAsync(recipeDTO.RecipeID);
                 if (entityToUpdate == null) return false;
 
-                _mapper.Map(recipeDTO, entityToUpdate);
+                // Cap nhat recipe
+                entityToUpdate.Title = recipeDTO.Title;
+                entityToUpdate.Description=recipeDTO.Description;
+                entityToUpdate.CookTime = recipeDTO.CookTime;
+                entityToUpdate.Serves = recipeDTO.Serves;
+                entityToUpdate.IsActive = recipeDTO.IsActive;
+                entityToUpdate.CategoryID = recipeDTO.CategoryID;
+
                 if (recipeDTO.File != null)
                 {
                     var uploadResult = await _imageServices.UploadImage(recipeDTO.File, "Recipes");
@@ -305,9 +320,11 @@ namespace FoodieHub.API.Repositories.Implementations
                 _context.Recipes.Update(entityToUpdate);
 
                 // STEP
+                var listSteps = await _context.RecipeSteps.Where(x => x.RecipeID == entityToUpdate.RecipeID).ToListAsync();
+
                 foreach (var item in recipeDTO.RecipeSteps)
                 {
-                    var step = await _context.RecipeSteps.FindAsync(item.Id);
+                    var step = listSteps.FirstOrDefault(x => x.Id == item.Id);
                     if(step != null)
                     {
                         // cap nhat
@@ -347,11 +364,27 @@ namespace FoodieHub.API.Repositories.Implementations
                         await _context.RecipeSteps.AddAsync(newStep);
                     }
                 }
+                var listStepIdCurrent = recipeDTO.RecipeSteps.Select(x => x.Id);
+                var listImage = new List<string>();
+                foreach (var item in listSteps)
+                {
+                    if (!listStepIdCurrent.Contains(item.Id))
+                    {
+                        if (item.ImageURL != null)
+                        {
+                            listImage.Add(item.ImageURL);
+                        }
+                        _context.RecipeSteps.Remove(item);
+                    }
+                }
+
 
                 // INGREDIENT
+                var listIngredients = await _context.Ingredients.Where(x => x.RecipeID == entityToUpdate.RecipeID).ToListAsync();
+
                 foreach (var item in recipeDTO.Ingredients)
                 {
-                    var ingredient = await _context.Ingredients.FindAsync(item.Id);
+                    var ingredient = listIngredients.FirstOrDefault(x => x.Id == item.Id);
                     if (ingredient != null)
                     {
                         // cap nhat
@@ -376,11 +409,24 @@ namespace FoodieHub.API.Repositories.Implementations
                         await _context.Ingredients.AddAsync(newIngredient);
                     }
                 }
+                var listIngredientIdCurrent = recipeDTO.Ingredients.Select(x => x.Id);
+                foreach (var item in listIngredients)
+                {
+                    if (!listIngredientIdCurrent.Contains(item.Id))
+                    {
+                        _context.Ingredients.Remove(item);
+                    }
+                }
 
                 var result = await _context.SaveChangesAsync();
                 int entityChangeCount = recipeDTO.Ingredients.Count() + recipeDTO.RecipeSteps.Count();
                 if(result > entityChangeCount)
                 {
+                    foreach (var item in listImage)
+                    {
+                        _imageServices.DeleteImage(item);
+                    }
+
                     await transaction.CommitAsync();
                     return true;
                 }

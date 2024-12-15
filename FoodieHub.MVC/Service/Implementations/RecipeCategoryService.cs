@@ -30,8 +30,6 @@ namespace FoodieHub.MVC.Service.Implementations
 
             content.Add(new StringContent(recipeCategoryDTO.CategoryID.ToString()), "CategoryID");
             content.Add(new StringContent(recipeCategoryDTO.CategoryName), "CategoryName");
-            content.Add(new StringContent(recipeCategoryDTO.IsActice.ToString()), "IsActice");
-            content.Add(new StringContent(recipeCategoryDTO.IsDeleted.ToString()), "IsDeleted");
 
             // Xử lý file nếu có
             if (recipeCategoryDTO.ImageURL != null)

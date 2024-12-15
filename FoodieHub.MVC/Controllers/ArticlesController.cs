@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FoodieHub.MVC.Service.Interfaces;
 using FoodieHub.MVC.Models.Article;
-using System.Text.Json;
 using FoodieHub.MVC.Configurations;
 using FoodieHub.MVC.Models.Favorite;
 using FoodieHub.MVC.Helpers;
@@ -48,6 +47,8 @@ namespace FoodieHub.MVC.Controllers
                 TopArticles = topArticles.Items,
                 LatestArticlesList = lastedArticle.Items,
             };
+            var result = await _articleService.GetByCategory();
+            ViewBag.Data = result;
             return View(viewModel);
         }
 
@@ -61,12 +62,10 @@ namespace FoodieHub.MVC.Controllers
                 return RedirectToAction("Index");
             }
             var categories = await categoryService.GetAll();
-            ViewBag.Categories = categories;
-            ViewBag.Query = queryArticle;
+           ViewBag.Categories = categories;
+           ViewBag.Query = queryArticle;
            return View(result);
-        }
-
-
+        }  
         public async Task<IActionResult> Detail(int id, string order = "desc")
         {
             var data = await _articleService.GetByID(id);
@@ -91,6 +90,7 @@ namespace FoodieHub.MVC.Controllers
             }
             return RedirectToAction("Detail", new { id = comment.ArticleID, order });
         }
+        [ValidateTokenForUser]
         [HttpPost]
         public async Task<IActionResult> EditComment(int CommentID, string CommentContent, int articleID)
         {
@@ -142,7 +142,7 @@ namespace FoodieHub.MVC.Controllers
                 NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Detail", new { id });
         }
-
+        [ValidateTokenForUser]
         public async Task<IActionResult> DeleteComment(int id, int articleID)
         {
             bool result = await _commentService.Delete(id);

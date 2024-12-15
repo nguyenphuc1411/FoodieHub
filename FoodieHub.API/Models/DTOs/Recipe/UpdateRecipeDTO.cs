@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FoodieHub.API.Models.DTOs.Recipe
 {
@@ -29,7 +30,6 @@ namespace FoodieHub.API.Models.DTOs.Recipe
         [Required(ErrorMessage = "Category is required.")]
         public int CategoryID { get; set; }
         public List<RecipeStepVM> RecipeSteps { get; set; } = new List<RecipeStepVM>();
-
         public List<IngredientVM> Ingredients { get; set; } = new List<IngredientVM>();
     }
 }

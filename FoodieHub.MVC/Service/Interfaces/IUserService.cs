@@ -14,5 +14,7 @@ namespace FoodieHub.MVC.Service.Interfaces
         Task<APIResponse> Create(CreateUserDTO createUserDTO);
 
         Task<UserDTO?> GetByID(string id);
+
+        Task<IEnumerable<UserDTO>> GetAdmin();
     }
 }

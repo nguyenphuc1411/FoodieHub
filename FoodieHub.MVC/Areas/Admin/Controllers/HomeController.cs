@@ -7,6 +7,7 @@ using FoodieHub.MVC.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using FoodieHub.MVC.Service.Interfaces;
 using FoodieHub.MVC.Helpers;
+using FoodieHub.MVC.Models.QueryModel;
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
@@ -30,24 +31,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             string orderreport = "7days",
             string revenuereport = "7days"
             )
-        {
-            var responseProfile = await _httpClient.GetFromJsonAsync<APIResponse<UpdateProfileDTO>>("auth/profile");
-            if (responseProfile != null && responseProfile.Success)
-            {
-                var opt = new CookieOptions
-                {
-                    HttpOnly = false,
-                    Expires = DateTime.Now.AddDays(30)
-                };
-                Response.Cookies.Append("NameAdmin", responseProfile.Data.Fullname, opt);
-                if (!string.IsNullOrEmpty(responseProfile.Data.Avatar))
-                {
-                    Response.Cookies.Append("AvatarAdmin", responseProfile.Data.Avatar, opt);
-                }
-
-            }
-
-
+        {         
             var responseOrder = await _httpClient.GetAsync("statistics/order"+"?by="+order);
             if (responseOrder.IsSuccessStatusCode)
             {
@@ -66,12 +50,14 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 var data = await responseCustomer.Content.ReadFromJsonAsync<Statistics<int>>();
                 ViewBag.DataCustomer = data;
             }
-         
-            var responseRecent = await _httpClient.GetAsync("orders/recently");
+
+            var queryOrder = new QueryOrderModel { SortBy = "OrderedAt" };
+            var responseRecent = await _httpClient.GetAsync("orders");
             if (responseRecent.IsSuccessStatusCode)
             {
-                var data = await responseRecent.Content.ReadFromJsonAsync<List<RecentlyOrder>>();
-                ViewBag.RecentlyOrder = data;
+
+                var data = await responseRecent.Content.ReadFromJsonAsync<PaginatedModel<GetDetailOrder>>();
+                ViewBag.RecentlyOrder = data?.Items;
             }
 
             var topSelling = await _httpClient.GetAsync("statistics/topselling?by="+topsellingby);

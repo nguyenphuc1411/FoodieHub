@@ -36,8 +36,9 @@ namespace FoodieHub.API.Controllers
 
         [Authorize]
         [HttpPut("{recipeID}")]
-        public async Task<IActionResult> Update(int recipeID, UpdateRecipeDTO recipeDTO)
+        public async Task<IActionResult> Update(int recipeID,[FromForm] UpdateRecipeDTO recipeDTO)
         {
+            if (recipeID != recipeDTO.RecipeID) return BadRequest();
             var result = await _service.Update(recipeDTO);
             return result ? NoContent() : BadRequest();
         }

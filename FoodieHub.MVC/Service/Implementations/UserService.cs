@@ -2,7 +2,6 @@
 using FoodieHub.MVC.Models.QueryModel;
 using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Helpers;
-using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using System.Net.Http.Headers;
 
@@ -57,6 +56,11 @@ namespace FoodieHub.MVC.Service.Implementations
         {
             var queryString = query.ToQueryString();
             return await _httpClient.GetFromJsonAsync<PaginatedModel<UserDTO>>("users"+queryString);
+        }
+
+        public async Task<IEnumerable<UserDTO>> GetAdmin()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<UserDTO>>("users/admins") ?? new List<UserDTO>();
         }
 
         public async Task<UserDTO?> GetByID(string id)

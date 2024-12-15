@@ -2,10 +2,17 @@
 @using FoodieHub.MVC.Models.Categories
 @using FoodieHub.MVC.Service.Interfaces
 @inject IRecipeCategoryService categoryService
+@inject IProductService productService
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var categories = await categoryService.GetAll() ?? new List<GetRecipeCategoryDTO>();
+    var units = new List<string>{
+    "Gam (g)","Kilôgam (kg)","Lạng","Miligam (mg)","Mililit (ml)",
+    "Lít (l)","Muỗng cà phê (tsp)","Muỗng canh (tbsp)","Chén (cốc)","Bát",
+    "Quả","Củ","Miếng","Nắm","Bó","Thìa nhỏ","Thìa lớn","Tép","Gói","Lon"};
+
+    var products = await productService.GetAll();
 }
 @model CreateRecipeDTO
 
@@ -19,74 +26,125 @@
                         <img src="/images/horizontal-line1 1.png" alt="horizontal line">
                     </div>
 
-                    <!-- Recipe Title -->
-                    <div class="mb-3">
-                        <label asp-for="Title" class="form-label">Recipe Title *</label>
-                        <input asp-for="Title" class="form-control" placeholder="This is title">
+                    <!-- Recipe Information -->
+                    <div class="form-group">
+                        <label asp-for="Title" class="font-weight-bold">Recipe Title</label>
+                        <input asp-for="Title" class="form-control" placeholder="Enter the recipe title" />
                         <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
 
-                    <!-- Recipe Description -->
-                    <div class="mb-3">
-                        <label asp-for="Description" class="form-label">Description</label>
-                        <input asp-for="Description" class="form-control" placeholder="This is description">
+                    <div class="form-group">
+                        <label asp-for="Description" class="font-weight-bold">Description</label>
+                        <textarea asp-for="Description" class="form-control" placeholder="Enter the recipe description"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
-
-                    <!-- Recipe Cooking time -->
-                    <div class="mb-3">
-                        <label asp-for="CookTime" class="form-label">Cooking Time *</label>
-                        <input type="time" asp-for="CookTime" class="form-control">
-                        <span asp-validation-for="CookTime" class="text-danger"></span>
-                    </div>
-
-                    <!-- Recipe Servings -->
-                    <div class="mb-3">
-                        <label asp-for="Serves" class="form-label">This Recipe Serves *</label>
-                        <input asp-for="Serves" class="form-control">
-                        <span asp-validation-for="Serves" class="text-danger"></span>
-                    </div>
-
-                    <!-- Ingredients Section (Initially Empty) -->
-                    <div class="mb-3">
-                        <label asp-for="Ingredients" class="form-label">Ingredient *</label>
-                        <div id="ingredients-section">
-                            <!-- Ingredients will be added here -->
+                    <div class="row">
+                        <div class="form-group col-12 col-md-4">
+                            <label asp-for="CookTime" class="font-weight-bold">Cook Time</label>
+                            <input asp-for="CookTime" type="time" class="form-control" placeholder="Enter cook time" />
+                            <span asp-validation-for="CookTime" class="text-danger"></span>
                         </div>
-                        <span asp-validation-for="Ingredients" class="text-danger"></span>
-                        <button type="button" id="add-ingredient" class="btn btn-secondary">Add Ingredient</button>
-                    </div>
 
-                    <!-- Steps Section (Initially Empty) -->
-                    <div class="mb-3">
-                        <label class="form-label">Steps *</label>
-                        <div id="steps-section">
-                            <!-- Steps inputs will be added here -->
+                        <div class="form-group col-12 col-md-4">
+                            <label asp-for="Serves" class="font-weight-bold">Serves</label>
+                            <input asp-for="Serves" class="form-control" placeholder="Enter number of servings" />
+                            <span asp-validation-for="Serves" class="text-danger"></span>
                         </div>
-                        <span asp-validation-for="RecipeSteps" class="text-danger"></span>
-                        <button type="button" id="add-step" class="btn btn-secondary">Add Step</button>
+
+                        <div class="form-group col-12 col-md-4">
+                            <label asp-for="CategoryID" class="font-weight-bold">Category</label>
+                            <select asp-for="CategoryID" asp-items="@(new SelectList(categories, "CategoryID", "CategoryName"))" class="form-control">
+                                <option value="">Select Category</option>
+                            </select>
+                            <span asp-validation-for="CategoryID" class="text-danger"></span>
+                        </div>
                     </div>
 
-                    <!-- Upload Image -->
-                    <div class="mb-3">
-                        <label asp-for="File" class="form-label">Upload Main Image *</label>
-                        <input asp-for="File" type="file" class="form-control" accept="image/*">
-                        <span asp-validation-for="File" class="text-danger"></span>
+                    <div class="row my-3">
+                        <div class="form-group">
+                            <label asp-for="File" class="font-weight-bold">Upload Image</label>
+                            <input asp-for="File" type="file" class="form-control" accept="images/*" />
+                        </div>
                     </div>
 
-                    <!-- Category -->
-                    <div class="mb-3">
-                        <label asp-for="CategoryID" class="form-label">Category *</label>
-                        <select asp-for="CategoryID" class="form-select">
-                            <option selected>Select Category</option>
-                         
-                            @foreach (var item in categories)
+                    <h4 class="mb-3">Ingredients</h4>
+                    <table class="table" id="ingredientsTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%;" class="text-center">Ingredient</th>
+                                <th style="width: 20%;" class="text-center">Quantity</th>
+                                <th style="width: 20%;" class="text-center">Unit</th>
+                                <th style="width: 10%;" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.Ingredients.Count(); i++)
                             {
-                                <option value="@item.CategoryID">@item.CategoryName</option>
+                                <tr>
+                                    <td style="width: 50%;">
+                                        <input asp-for="Ingredients[@i].Name" class="form-control" placeholder="Ingredient name" id="ingredient-@i" />
+                                        <span asp-validation-for="Ingredients[@i].Name" class="text-danger"></span>
+
+                                        <ul id="ingredient-results-@i" class="search-results-list" ></ul>
+                                        <!-- Input hidden to store the ProductID -->
+                                        <input asp-for="Ingredients[@i].ProductID" type="hidden" id="productID-@i" />
+                                    </td>
+                                    <td style="width: 20%;">
+                                        <input asp-for="Ingredients[@i].Quantity" class="form-control" placeholder="Quantity" />
+                                        <span asp-validation-for="Ingredients[@i].Quantity" class="text-danger"></span>
+                                    </td>
+                                    <td style="width: 20%;">
+                                        <select asp-for="Ingredients[@i].Unit" asp-items="@(new SelectList(units))" class="form-control">
+                                            <option value="">Select Unit</option>
+                                        </select>
+                                    </td>
+                                    <td style="width: 10%;">
+                                        <button type="button" class="btn btn-danger" onclick="removeIngredient(this)">Delete</button>
+                                    </td>
+                                </tr>
                             }
-                        </select>
-                        <span asp-validation-for="CategoryID" class="text-danger"></span>
-                    </div>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" onclick="addIngredient()">Add Ingredient</button>
+
+
+                    <!-- Recipe Steps -->
+                    <h4 class="mb-3">Recipe Steps</h4>
+                    <table class="table" id="stepsTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;" class="text-center">Step Number</th>
+                                <th style="width: 60%;" class="text-center">Directions</th>
+                                <th style="width: 20%;" class="text-center">Step Image</th>
+                                <th style="width: 10%;" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @for (var i = 0; i < Model.RecipeSteps.Count(); i++)
+                            {
+                                <tr>
+                                    <td style="width: 10%;">
+                                        <input asp-for="RecipeSteps[@i].Step" class="form-control" />
+                                        <span asp-validation-for="RecipeSteps[@i].Step" class="text-danger"></span>
+                                    </td>
+                                    <td style="width: 60%;">
+                                        <textarea asp-for="RecipeSteps[@i].Directions" class="form-control"></textarea>
+                                        <span asp-validation-for="RecipeSteps[@i].Directions" class="text-danger"></span>
+                                    </td>
+                                    <td style="width: 20%;">
+                                        <input asp-for="RecipeSteps[@i].ImageStep" type="file" accept="images/*" class="form-control" />
+                                    </td>
+                                    <td style="width: 10%;">
+                                        <button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                            
+                            
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" onclick="addStep()">Add Step</button>
 
                     <!-- Action Buttons -->
                     <div class="d-flex justify-content-end">
@@ -100,141 +158,187 @@
     </div>
 </div>
 
+<style>
+    .search-results-list {
+        width: 40%;
+        list-style: none;
+        padding: 0;
+        position: absolute;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        z-index: 1000;
+        max-height: 200px;
+        overflow-y: auto;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+        display: none;
+    }
+
+        .search-results-list li {
+            padding: 5px;
+            cursor: pointer;
+            border-bottom: 1px solid #ddd;
+        }
+
+            .search-results-list li:hover {
+                background-color: #f5f5f5;
+            }
+</style>
+
 @section Scripts {
+    <script src="https://cdn.tiny.cloud/1/duegha34dr7j1t0qyhfswxzknx2j50fyq02kkj4d1ylv0stm/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+
     <script>
-        // Add Step
-        document.getElementById("add-step").addEventListener("click", function () {
-            const stepsSection = document.getElementById("steps-section");
 
-            // Get current step count for index
-            const stepIndex = stepsSection.childElementCount;
+          tinymce.init({
+            selector: 'textarea',
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+        });
 
-            // Create container for step
-            const stepDiv = document.createElement("div");
-            stepDiv.className = "step-item mb-3";
-            stepDiv.dataset.index = stepIndex;
 
-            // Step Title
-            const stepTitle = document.createElement("h5");
-            stepTitle.className = "mb-2";
-            stepTitle.innerText = `Step ${stepIndex + 1}`;
+        const units = @Html.Raw(Json.Serialize(units));
 
-            // Step (hidden input)
-            const stepInput = document.createElement("input");
-            stepInput.type = "hidden";
-            stepInput.name = `RecipeSteps[${stepIndex}].Step`;
-            stepInput.value = stepIndex + 1; // Step number
+        let products = @Html.Raw(Json.Serialize(products)); // Lấy danh sách sản phẩm từ Razor view
 
-            // Directions Textarea
-            const directionsInput = document.createElement("textarea");
-            directionsInput.name = `RecipeSteps[${stepIndex}].Directions`;
-            directionsInput.className = "form-control mb-2";
-            directionsInput.placeholder = "Describe this step";
-            directionsInput.required = true;
+                document.addEventListener("DOMContentLoaded", function() {
+            // Attach keyup event to all existing ingredient input fields on page load
+            const ingredientCount = @Model.Ingredients.Count();
+            for (let i = 0; i < ingredientCount; i++) {
+                const ingredientInput = document.getElementById(`ingredient-${i}`);
+                if (ingredientInput) {
+                    ingredientInput.addEventListener('keyup', function() {
+                        searchIngredient(i);
+                    });
+                }
+            }
+        });
 
-            // ImageStep File Input
-            const imageInput = document.createElement("input");
-            imageInput.type = "file";
-            imageInput.name = `RecipeSteps[${stepIndex}].ImageStep`;
-            imageInput.className = "form-control mb-2";
+        let searchTimeouts = {}; // Sử dụng một đối tượng để lưu trữ timeout của từng input
 
-            // Delete Button for Step
-            const deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.className = "btn btn-danger";
-            deleteButton.innerText = "Delete";
+        function addIngredient() {
+            var table = document.getElementById('ingredientsTable').getElementsByTagName('tbody')[0];
+            var rowCount = table.rows.length;
+            var row = table.insertRow(rowCount);
 
-            // Delete Step Event
-            deleteButton.addEventListener("click", function () {
-                stepsSection.removeChild(stepDiv);
+            var unitOptions = units.map(unit => `<option value="${unit}">${unit}</option>`).join('');
 
-                // Update indices and titles after deletion
-                Array.from(stepsSection.children).forEach((child, newIndex) => {
-                    child.dataset.index = newIndex;
-                    child.querySelector("h5").innerText = `Step ${newIndex + 1}`;
-                    child.querySelector(`[name^="RecipeSteps"]`).name = `RecipeSteps[${newIndex}].Step`;
-                    child.querySelector(`[name$=".Directions"]`).name = `RecipeSteps[${newIndex}].Directions`;
-                    child.querySelector(`[name$=".ImageStep"]`).name = `RecipeSteps[${newIndex}].ImageStep`;
+            row.innerHTML = `
+                <td>
+                    <input name="Ingredients[${rowCount}].Name" class="form-control" placeholder="Ingredient name" id="ingredient-${rowCount}" />
+                    <span asp-validation-for="Ingredients[${rowCount}].Name" class="text-danger"></span>
+
+                    <!-- Input hidden để lưu ProductID -->
+                    <input name="Ingredients[${rowCount}].ProductID" type="hidden" id="productID-${rowCount}" />
+
+                    <ul id="ingredient-results-${rowCount}" class="search-results-list"></ul>
+                </td>
+                <td><input name="Ingredients[${rowCount}].Quantity" class="form-control" placeholder="Quantity" /></td>
+                <td>
+                    <select name="Ingredients[${rowCount}].Unit" class="form-control">
+                        <option value="">Select Unit</option>
+                        ${unitOptions}
+                    </select>
+                </td>
+                <td><button type="button" class="btn btn-danger" onclick="removeIngredient(this)">Delete</button></td>`;
+
+            // Gán sự kiện tìm kiếm cho ô mới
+            const newIngredientInput = document.getElementById(`ingredient-${rowCount}`);
+            newIngredientInput.addEventListener('keyup', function() {
+                searchIngredient(rowCount);
+            });
+        }
+
+        function removeDiacritics(str) {
+            return str.normalize('NFD').toLowerCase().trim();
+        }
+
+        function searchIngredient(index) {
+            const inputId = `ingredient-${index}`;
+            const resultId = `ingredient-results-${index}`;
+
+            if (searchTimeouts[inputId]) {
+                clearTimeout(searchTimeouts[inputId]);
+            }
+
+            searchTimeouts[inputId] = setTimeout(() => {
+                const query = removeDiacritics(document.getElementById(inputId).value);
+                const resultList = document.getElementById(resultId);
+                resultList.innerHTML = '';
+
+                if (query.length > 0) {
+                    const filteredProducts = products.filter(p =>
+                        removeDiacritics(p.productName).includes(query)
+                    );
+
+                    if (filteredProducts.length > 0) {
+                        resultList.style.display = 'block';
+
+                        filteredProducts.forEach(product => {
+                            const li = document.createElement('li');
+                            li.textContent = product.productName;
+                            li.onclick = () => selectIngredient(product, inputId, resultId);
+                            resultList.appendChild(li);
+                        });
+                    } else {
+                        resultList.style.display = 'none';
+                    }
+                } else {
+                    resultList.style.display = 'none';
+                }
+            }, 300);
+
+            const inputField = document.getElementById(inputId);
+            const hiddenInputId = inputId.replace('ingredient', 'productID');
+
+            inputField.oninput = () => {
+                document.getElementById(hiddenInputId).value = null;
+            };
+        }
+        function selectIngredient(product, inputId, resultId) {
+            document.getElementById(inputId).value = product.productName;
+            document.getElementById(resultId).innerHTML = ''; 
+
+            const hiddenInputId = inputId.replace('ingredient', 'productID');
+            document.getElementById(hiddenInputId).value = product.productID;
+            document.getElementById(resultId).style.display = 'none';
+        }
+        document.addEventListener('click', function (e) {
+            const clickedElement = e.target;
+
+            if (!clickedElement.closest('.search-results-list') &&
+                !clickedElement.closest('input')) {
+
+                const allResultLists = document.querySelectorAll('.search-results-list');
+                allResultLists.forEach(list => {
+                    list.innerHTML = '';
+                    list.style.display = 'none';
                 });
-            });
-
-            // Append new step elements to container
-            stepDiv.appendChild(stepTitle);
-            stepDiv.appendChild(stepInput);
-            stepDiv.appendChild(directionsInput);
-            stepDiv.appendChild(imageInput);
-            stepDiv.appendChild(deleteButton);
-
-            // Append step container to steps section
-            stepsSection.appendChild(stepDiv);
+            }
         });
 
 
-                // Fetch available units for the dropdown
-        const availableUnits = ["cái", "kg", "g", "thìa", "ml", "lít", "tấn", "mét", "chén", "muỗng", "hũ"];
+        function addStep() {
+            var table = document.getElementById('stepsTable').getElementsByTagName('tbody')[0];
+            var rowCount = table.rows.length;
+            var row = table.insertRow(rowCount);
 
-        document.getElementById("add-ingredient").addEventListener("click", function () {
-            const ingredientsSection = document.getElementById("ingredients-section");
+            row.innerHTML = `
+                <td><input name="RecipeSteps[${rowCount}].Step" class="form-control" /></td>
+                <td><textarea name="RecipeSteps[${rowCount}].Directions" class="form-control"></textarea></td>
+                <td><input name="RecipeSteps[${rowCount}].ImageStep" type="file" accept="images/*" class="form-control" /></td>
+                <td><button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button></td>`;
+        }
 
-            // Get current ingredient count for index
-            const ingredientIndex = ingredientsSection.childElementCount;
+        function removeIngredient(button) {
+            var row = button.closest('tr');
+            row.parentNode.removeChild(row);
+        }
 
-            // Create container for ingredient
-            const ingredientDiv = document.createElement("div");
-            ingredientDiv.className = "ingredient-item mb-3";
-            ingredientDiv.dataset.index = ingredientIndex;
-
-            // Ingredient Name Input
-            const nameInput = document.createElement("input");
-            nameInput.type = "text";
-            nameInput.name = `Ingredients[${ingredientIndex}].Name`;
-            nameInput.className = "form-control mb-2";
-            nameInput.placeholder = "Enter ingredient name";
-            nameInput.required = true;
-
-            // Ingredient Quantity Input
-            const quantityInput = document.createElement("input");
-            quantityInput.type = "number";
-            quantityInput.name = `Ingredients[${ingredientIndex}].Quantity`;
-            quantityInput.className = "form-control form-control-sm mb-2";
-            quantityInput.placeholder = "Quantity";
-            quantityInput.required = true;
-            quantityInput.min = 0;
-
-            // Ingredient Unit Select
-            const unitSelect = document.createElement("select");
-            unitSelect.name = `Ingredients[${ingredientIndex}].Unit`;
-            unitSelect.className = "form-select form-select-sm mb-2";
-            unitSelect.required = true;
-
-            // Add available units to the dropdown
-            availableUnits.forEach(unit => {
-                const option = document.createElement("option");
-                option.value = unit;
-                option.text = unit;
-                unitSelect.appendChild(option);
-            });
-
-            // Delete Button for Ingredient
-            const deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.className = "btn btn-danger";
-            deleteButton.innerText = "Delete";
-
-            // Delete Ingredient Event
-            deleteButton.addEventListener("click", function () {
-                ingredientsSection.removeChild(ingredientDiv);
-            });
-
-            // Append new ingredient elements to container
-            ingredientDiv.appendChild(nameInput);
-            ingredientDiv.appendChild(quantityInput);
-            ingredientDiv.appendChild(unitSelect);
-            ingredientDiv.appendChild(deleteButton);
-
-            // Append ingredient container to ingredients section
-            ingredientsSection.appendChild(ingredientDiv);
-        });
+        function removeStep(button) {
+            var row = button.closest('tr');
+            row.parentNode.removeChild(row);
+        }     
 
     </script>
 }

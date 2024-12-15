@@ -28,12 +28,22 @@ namespace FoodieHub.MVC.Service.Implementations
 
         public async Task<IEnumerable<GetArticleDTO>?> GetFA()
         {
-            return await _httpClient.GetFromJsonAsync<IEnumerable<GetArticleDTO>>("favorites/articles");
+            var response = await _httpClient.GetAsync("favorites/articles");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<IEnumerable<GetArticleDTO>>();
+            }
+            return null;
         }
 
         public async Task<IEnumerable<GetRecipeDTO>?> GetFR()
         {
-            return await _httpClient.GetFromJsonAsync<IEnumerable<GetRecipeDTO>>("favorites/recipes");
+            var response = await _httpClient.GetAsync("favorites/recipes");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<IEnumerable<GetRecipeDTO>>();
+            }
+            return null;
         }
     }
 }

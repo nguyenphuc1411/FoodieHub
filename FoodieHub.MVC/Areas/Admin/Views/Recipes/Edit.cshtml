@@ -1,11 +1,298 @@
 ﻿@using FoodieHub.MVC.Models.Recipe
+@using FoodieHub.MVC.Models.Categories
 @using FoodieHub.MVC.Service.Interfaces
-@inject IRecipeCategoryService category
 @inject IConfiguration config
+@inject IRecipeCategoryService categoryService
+@inject IProductService productService
 @{
-    ViewData["Title"] = "Update Recipe";
+    ViewData["Title"] = "Edit Recipe";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var url = config["BaseHost"];
-    var categories = await category.GetAll();
+    var categories = await categoryService.GetAll() ?? new List<GetRecipeCategoryDTO>();
+    List<string> units = new List<string>{
+    "Gam (g)","Kilôgam (kg)","Lạng","Miligam (mg)","Mililit (ml)",
+    "Lít (l)","Muỗng cà phê (tsp)","Muỗng canh (tbsp)","Chén (cốc)","Bát",
+    "Quả","Củ","Miếng","Nắm","Bó","Thìa nhỏ","Thìa lớn","Tép","Gói","Lon"};
+
+    var products = await productService.GetAll() ?? new List<GetProductDTO>();
 }
-@model CreateRecipeDTO
+
+@model UpdateRecipeDTO
+<div class="container-sm my-3">
+    <h2 class="mb-4">Edit Recipe</h2>
+
+    <form asp-action="Edit" enctype="multipart/form-data" method="post">
+        <input type="hidden" asp-for="RecipeID" />
+
+        <!-- Recipe Information -->
+        <div class="form-group">
+            <label asp-for="Title" class="font-weight-bold">Recipe Title</label>
+            <input asp-for="Title" class="form-control" placeholder="Enter the recipe title" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description" class="font-weight-bold">Description</label>
+            <textarea asp-for="Description" class="form-control" placeholder="Enter the recipe description"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <div class="row">
+            <div class="form-group col-12 col-md-3">
+                <label asp-for="CookTime" class="font-weight-bold">Cook Time</label>
+                <input asp-for="CookTime" type="time" class="form-control" placeholder="Enter cook time" />
+                <span asp-validation-for="CookTime" class="text-danger"></span>
+            </div>
+
+            <div class="form-group col-12 col-md-3">
+                <label asp-for="Serves" class="font-weight-bold">Serves</label>
+                <input asp-for="Serves" class="form-control" placeholder="Enter number of servings" />
+                <span asp-validation-for="Serves" class="text-danger"></span>
+            </div>
+
+            <div class="form-group col-12 col-md-3">
+                <label asp-for="CategoryID" class="font-weight-bold">Category</label>
+                <select asp-for="CategoryID" asp-items="@(new SelectList(categories, "CategoryID", "CategoryName"))" class="form-control">
+                    <option value="">Select Category</option>
+                </select>
+                <span asp-validation-for="CategoryID" class="text-danger"></span>
+            </div>
+            <div class="form-group col-12 col-md-3">
+                <label asp-for="IsActive" class="font-weight-bold">Status</label>
+                <select asp-for="IsActive" class="form-control">
+                    @if (Model.IsActive)
+                    {
+                        <option selected value="true">True</option>
+                        <option value="false">False</option>
+                    }
+                    else
+                    {
+                        <option value="true">True</option>
+                        <option selected value="false">False</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="row my-3">
+            <div class="form-group col-12 col-md-6">
+                <label asp-for="ImageURL" class="font-weight-bold">Current Image</label>
+                <input type="hidden" asp-for="ImageURL" />
+                <img src=@(url+"images/"+@Model.ImageURL) alt="Recipe Image" class="img-fluid" style="max-width: 100px;" />
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <label asp-for="File" class="font-weight-bold">Upload New Image</label>
+                <input asp-for="File" type="file" class="form-control" accept="images/*" />
+            </div>
+        </div>
+
+        <!-- Ingredients -->
+        <h4 class="mb-3">Ingredients</h4>
+        <table class="table" id="ingredientsTable">
+            <thead>
+                <tr>
+                    <th style="width: 50%;" class="text-center">Ingredient</th>
+                    <th style="width: 20%;" class="text-center">Quantity</th>
+                    <th style="width: 20%;" class="text-center">Unit</th>
+                    <th style="width: 10%;" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Ingredients.Count(); i++)
+                {
+                    <tr>
+                        <td style="width: 50%;">
+                            <input type="hidden" asp-for="Ingredients[@i].Id" />
+                            <input asp-for="Ingredients[@i].Name" class="form-control" placeholder="Ingredient name" id="ingredient-@i" />
+                            <span asp-validation-for="Ingredients[@i].Name" class="text-danger"></span>
+
+                            <!-- Input hidden to store the ProductID -->
+                            <input asp-for="Ingredients[@i].ProductID" type="hidden" id="productID-@i" />
+
+                            <ul id="ingredient-results-@i" class="search-results-list mt-3"></ul>
+                        </td>
+                        <td style="width: 20%;">
+                            <input asp-for="Ingredients[@i].Quantity" class="form-control" placeholder="Quantity" />
+                            <span asp-validation-for="Ingredients[@i].Quantity" class="text-danger"></span>
+                        </td>
+                        <td style="width: 20%;">
+                            <select asp-for="Ingredients[@i].Unit" asp-items="@(new SelectList(units))" class="form-control">
+                                <option value="">Select Unit</option>
+                            </select>
+                        </td>
+                        <td style="width: 10%;">
+                            <button type="button" class="btn btn-danger" onclick="removeIngredient(this)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" onclick="addIngredient()">Add Ingredient</button>
+
+        <!-- Recipe Steps -->
+        <h4 class="mb-3">Recipe Steps</h4>
+        <table class="table" id="stepsTable">
+            <thead>
+                <tr>
+                    <th style="width: 10%;" class="text-center">Step Number</th>
+                    <th style="width: 60%;" class="text-center">Directions</th>
+                    <th style="width: 20%;" class="text-center">Step Image</th>
+                    <th style="width: 10%;" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.RecipeSteps.Count; i++)
+                {
+                    <tr>
+                        <td style="width: 10%;">
+                            <input type="hidden" asp-for="RecipeSteps[@i].Id" />
+                            <input asp-for="RecipeSteps[@i].Step" class="form-control" />
+                            <span asp-validation-for="RecipeSteps[@i].Step" class="text-danger"></span>
+                        </td>
+                        <td style="width: 60%;">
+                            <textarea asp-for="RecipeSteps[@i].Directions" class="form-control"></textarea>
+                            <span asp-validation-for="RecipeSteps[@i].Directions" class="text-danger"></span>
+                        </td>
+                        <td style="width: 20%;">
+                            <div class="d-flex">
+                                @if (!string.IsNullOrEmpty(Model.RecipeSteps[i].ImageURL))
+                                {
+                                    <img src=@(url+"images/"+@Model.RecipeSteps[i].ImageURL) alt="Step Image" class="img-fluid" style="max-width: 100px;" />
+                                }
+                                <input type="hidden" asp-for="RecipeSteps[i].ImageURL" />
+                                <input asp-for="RecipeSteps[@i].FileStep" type="file" class="form-control" />
+                            </div>
+                        </td>
+                        <td style="width: 10%;">
+                            <button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" onclick="addStep()">Add Step</button>
+
+        <hr />
+
+        <hr />
+
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-warning">Update</button>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    <script>
+        function addStep() {
+            var table = document.getElementById('stepsTable').getElementsByTagName('tbody')[0];
+            var rowCount = table.rows.length;
+            var row = table.insertRow(rowCount);
+
+            row.innerHTML = `
+                <td><input name="RecipeSteps[${rowCount}].Step" class="form-control" /></td>
+                <td><textarea name="RecipeSteps[${rowCount}].Directions" class="form-control"></textarea></td>
+                <td><input name="RecipeSteps[${rowCount}].FileStep" type="file" class="form-control" /></td>
+                <td><button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button></td>`;
+        }
+
+        function removeStep(button) {
+            var row = button.closest('tr');
+            row.parentNode.removeChild(row);
+        }
+
+         const units = @Html.Raw(Json.Serialize(units));
+
+        let products = @Html.Raw(Json.Serialize(products)); // Lấy danh sách sản phẩm từ Razor view
+
+                document.addEventListener("DOMContentLoaded", function() {
+            // Attach keyup event to all existing ingredient input fields on page load
+            const ingredientCount = @Model.Ingredients.Count();
+            for (let i = 0; i < ingredientCount; i++) {
+                const ingredientInput = document.getElementById(`ingredient-${i}`);
+                if (ingredientInput) {
+                    ingredientInput.addEventListener('keyup', function() {
+                        searchIngredient(i);
+                    });
+                }
+            }
+        });
+
+        let searchTimeouts = {}; // Sử dụng một đối tượng để lưu trữ timeout của từng input
+
+        function addIngredient() {
+            var table = document.getElementById('ingredientsTable').getElementsByTagName('tbody')[0];
+            var rowCount = table.rows.length;
+            var row = table.insertRow(rowCount);
+
+            var unitOptions = units.map(unit => `<option value="${unit}">${unit}</option>`).join('');
+
+            row.innerHTML = `
+                <td>
+                    <input name="Ingredients[${rowCount}].Name" class="form-control" placeholder="Ingredient name" id="ingredient-${rowCount}" />
+                    <span asp-validation-for="Ingredients[${rowCount}].Name" class="text-danger"></span>
+
+                    <!-- Input hidden để lưu ProductID -->
+                    <input name="Ingredients[${rowCount}].ProductID" type="hidden" id="productID-${rowCount}" />
+
+                    <ul id="ingredient-results-${rowCount}" class="search-results-list mt-3"></ul>
+                </td>
+                <td><input name="Ingredients[${rowCount}].Quantity" class="form-control" placeholder="Quantity" /></td>
+                <td>
+                    <select name="Ingredients[${rowCount}].Unit" class="form-control">
+                        <option value="">Select Unit</option>
+                        ${unitOptions}
+                    </select>
+                </td>
+                <td><button type="button" class="btn btn-danger" onclick="removeIngredient(this)">Delete</button></td>`;
+
+            // Gán sự kiện tìm kiếm cho ô mới
+            const newIngredientInput = document.getElementById(`ingredient-${rowCount}`);
+            newIngredientInput.addEventListener('keyup', function() {
+                searchIngredient(rowCount);
+            });
+        }
+
+        function searchIngredient(index) {
+            const inputId = `ingredient-${index}`;
+            const resultId = `ingredient-results-${index}`;
+
+            // Hủy timeout trước đó cho trường này (nếu có)
+            if (searchTimeouts[inputId]) {
+                clearTimeout(searchTimeouts[inputId]);
+            }
+
+            // Thiết lập timeout mới cho trường hiện tại
+            searchTimeouts[inputId] = setTimeout(() => {
+                const query = document.getElementById(inputId).value.toLowerCase();
+                const resultList = document.getElementById(resultId);
+                resultList.innerHTML = '';
+
+                if (query.length > 2) {
+                    const filteredProducts = products.filter(p => p.productName.toLowerCase().includes(query));
+
+                    filteredProducts.forEach(product => {
+                        const li = document.createElement('li');
+                        li.textContent = product.productName;
+                        li.onclick = () => selectIngredient(product, inputId, resultId);
+                        resultList.appendChild(li);
+                    });
+                }
+            }, 1000); // Trì hoãn tìm kiếm 1 giây
+        }
+
+        function selectIngredient(product, inputId, resultId) {
+            document.getElementById(inputId).value = product.productName; // Set tên sản phẩm vào input
+            document.getElementById(resultId).innerHTML = ''; // Xóa danh sách kết quả
+
+            // Set ProductID vào input ẩn
+            const hiddenInputId = inputId.replace('ingredient', 'productID');
+            document.getElementById(hiddenInputId).value = product.productID; // Set ProductID
+        }
+
+        function removeIngredient(button) {
+            var row = button.closest('tr');
+            row.parentNode.removeChild(row);
+        }
+    </script>
+}
