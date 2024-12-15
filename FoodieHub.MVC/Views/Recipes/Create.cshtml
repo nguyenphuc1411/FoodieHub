@@ -239,10 +239,6 @@
             });
         }
 
-        function removeDiacritics(str) {
-            return str.normalize('NFD').toLowerCase().trim();
-        }
-
         function searchIngredient(index) {
             const inputId = `ingredient-${index}`;
             const resultId = `ingredient-results-${index}`;
@@ -252,13 +248,13 @@
             }
 
             searchTimeouts[inputId] = setTimeout(() => {
-                const query = removeDiacritics(document.getElementById(inputId).value);
+                const query = document.getElementById(inputId).value.toLowerCase();
                 const resultList = document.getElementById(resultId);
                 resultList.innerHTML = '';
 
                 if (query.length > 0) {
                     const filteredProducts = products.filter(p =>
-                        removeDiacritics(p.productName).includes(query)
+                        p.productName.toLowerCase().includes(query)
                     );
 
                     if (filteredProducts.length > 0) {
@@ -293,6 +289,8 @@
             document.getElementById(hiddenInputId).value = product.productID;
             document.getElementById(resultId).style.display = 'none';
         }
+
+
         document.addEventListener('click', function (e) {
             const clickedElement = e.target;
 
