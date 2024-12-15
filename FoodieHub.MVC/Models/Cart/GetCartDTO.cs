@@ -8,5 +8,6 @@
         public decimal Discount { get; set; }
         public string MainImage { get; set; }
         public int Quantity { get; set; }
+        public int StockQuantity { get; set; }
     }
 }
