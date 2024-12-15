@@ -160,7 +160,7 @@
                                             <input type="hidden" name="productId" value="@item.ProductID" />
                                             <div class="input-group" style="width: 120px;">
                                                 <button type="button" class="btn btn-outline-secondary decrease-quantity">-</button>
-                                                <input readonly type="number" name="quantity" class="form-control text-center quantity-input" value="@item.Quantity" min="1">
+                                                <input readonly type="number" name="quantity" class="form-control text-center quantity-input" value="@item.Quantity" min="1" data-max-stock="@item.StockQuantity">
                                                 <button type="button" class="btn btn-outline-secondary increase-quantity">+</button>
                                             </div>
                                         </form>
@@ -188,6 +188,43 @@
                                         </a>
                                     </td>
                                 </tr>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="contactModalCheckOut" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="contactModalLabel">Contact Us</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>The quantity exceeds available stock. Please provide your contact details to proceed.</p>
+                                                <form id="contactForm" asp-controller="Contact" asp-action="AddContact" method="post">
+                                                    <div class="mb-3">
+                                                        <label for="fullName" class="form-label">Full Name</label>
+                                                        <input type="text" class="form-control" id="fullName" name="FullName" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="email" class="form-label">Email</label>
+                                                        <input type="email" class="form-control" id="email" name="Email" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                                                        <input type="tel" class="form-control" id="phoneNumber" name="PhoneNumber"
+                                                               maxlength="11" required pattern="^(84|0[35789])[0-9]{8}$"
+                                                               title="Phone number must start with 84 or 0 followed by 3, 5, 7, 8, 9, and have 8 more digits.">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="note" class="form-label">Note (Optional)</label>
+                                                        <textarea class="form-control" id="note" name="Note" required></textarea>
+                                                    </div>
+                                                    <input type="hidden" id="productID" name="ProductID" value="@item.ProductID">
+                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             }
                         </tbody>
                     </table>

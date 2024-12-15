@@ -22,21 +22,19 @@ namespace FoodieHub.MVC.Controllers
         [ValidateTokenForUser]
         public async Task<IActionResult> Checkout()
         {
-            // Lấy danh sách sản phẩm trong giỏ hàng từ cookie
             var cartItemsJson = Request.Cookies["cart"] ?? "[]";
             var cartItems = System.Text.Json.JsonSerializer.Deserialize<List<CartItem>>(cartItemsJson) ?? new List<CartItem>();
 
             var getCart = new List<GetCartDTO>();
 
-            // Duyệt qua từng item trong giỏ hàng để lấy thông tin chi tiết từ API
+            
             foreach (var item in cartItems)
             {
-                // Gọi API để lấy thông tin sản phẩm
                 var response = await _productService.GetById(item.ProductID);
                 if (response.Data!=null && response.Success)
                 {
                     var product = response.Data;
-                    // Thêm thông tin sản phẩm vào danh sách cartDetails
+                    
                     getCart.Add(new GetCartDTO
                     {
                         ProductID = product.ProductID,
@@ -44,7 +42,8 @@ namespace FoodieHub.MVC.Controllers
                         Price = product.Price,
                         Discount = product.Discount,
                         MainImage = product.MainImage,
-                        Quantity = item.Quantity // Lưu số lượng từ giỏ hàng
+                        Quantity = item.Quantity,
+                        StockQuantity = product.StockQuantity
                     });
                 }
             }

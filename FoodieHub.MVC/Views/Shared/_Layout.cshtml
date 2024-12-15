@@ -184,26 +184,35 @@
             timer: 5000
         });
     }
-    document.querySelectorAll('.decrease-quantity').forEach(button => {
-        button.addEventListener('click', function () {
-            const form = this.closest('.update-cart-form1'); // Get the form
-            const inputField = form.querySelector('.quantity-input'); // Get the input field
-            let quantity = parseInt(inputField.value) - 1;
-            quantity = Math.max(quantity, 1); // Prevent quantity from going below 1
-            inputField.value = quantity;
-            form.submit(); // Submit the form to update the cart
+        document.querySelectorAll('.decrease-quantity').forEach(button => {
+            button.addEventListener('click', function () {
+                const form = this.closest('.update-cart-form1'); // Get the form
+                const inputField = form.querySelector('.quantity-input'); // Get the input field
+                let quantity = parseInt(inputField.value) - 1;
+                quantity = Math.max(quantity, 1); // Prevent quantity from going below 1
+                inputField.value = quantity;
+                form.submit(); // Submit the form to update the cart
+            });
         });
-    });
 
-    document.querySelectorAll('.increase-quantity').forEach(button => {
-        button.addEventListener('click', function () {
-            const form = this.closest('.update-cart-form1'); // Get the form
-            const inputField = form.querySelector('.quantity-input'); // Get the input field
-            let quantity = parseInt(inputField.value) + 1;
-            inputField.value = quantity;
-            form.submit(); // Submit the form to update the cart
+        document.querySelectorAll('.increase-quantity').forEach(button => {
+            button.addEventListener('click', function () {
+                const form = this.closest('.update-cart-form1'); // Get the form
+                const inputField = form.querySelector('.quantity-input'); // Get the input field
+                const maxStock = parseInt(inputField.getAttribute('data-max-stock')); // Get the max stock
+                let quantity = parseInt(inputField.value);
+
+                // If the current quantity is less than the max stock, increase it
+                if (quantity < maxStock) {
+                    quantity++;
+                    inputField.value = quantity;
+                    form.submit(); // Submit the form to update the cart
+                } else {
+                    // Disable the increase button if quantity equals stock
+                    this.disabled = true;
+                }
+            });
         });
-    });
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;

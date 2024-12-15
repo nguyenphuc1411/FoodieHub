@@ -83,8 +83,8 @@
                     <a href=@("/account/userinfo/"+Model.UserID) class="btn btn-outline-secondary ms-auto">View Profile</a>
                 }
             </div>
-            <div class="description">
-                <p>
+            <div class="description-recipe">
+                <p class="description">
                     @Model.Description    
                 </p>
                 <div class="read-less">
@@ -106,7 +106,7 @@
                             Preparation
                         </p>
                         <p class="value">
-                            @Model.CookTime.ToString(@"HH\:mm")
+                            @Model.CookTime.ToString(@"HH\:mm") min
                         </p>
                     </div>
                     <div>
@@ -445,6 +445,11 @@
         margin-bottom: 10px;
     }
 
+    .more-delicious-items{
+        height: 1200px;
+        padding: 5px;
+        overflow: auto;
+    }
     .more-delicious-item {
         background-color:white;
         display: flex;
@@ -458,6 +463,7 @@
         transform-origin: center; /* Phóng lớn từ trung tâm */
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         transition: all 0.3s ease;
+        margin: 5px;
     }
 
         .more-delicious-item:hover {
@@ -565,7 +571,7 @@
             color: #666;
         }
 
-    .description {
+    .description-recipe {
         font-size: 16px;
         line-height: 1.5;
         margin-bottom: 20px;
@@ -577,6 +583,21 @@
         font-size: 14px;
         margin-bottom: 20px;
     }
+
+    .description {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        max-height: 4.5em; 
+        transition: max-height 0.3s ease;
+    }
+
+        .description.expanded {
+            -webkit-line-clamp: unset;
+            max-height: none;
+        }
 
     .details {
         display: flex;
@@ -1015,4 +1036,15 @@
         // Chuyển hướng đến controller
         window.location.href = `/Products?searchName=${encodeURIComponent(name)}`;
     }
+
+    document.querySelector('.read-less').addEventListener('click', function () {
+        const description = document.querySelector('.description');
+        if (description.classList.contains('expanded')) {
+            description.classList.remove('expanded');
+            this.textContent = 'Read more';
+        } else {
+            description.classList.add('expanded');
+            this.textContent = 'Read less';
+        }
+    });
 </script>
