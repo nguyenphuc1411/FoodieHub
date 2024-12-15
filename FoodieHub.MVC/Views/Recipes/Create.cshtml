@@ -171,6 +171,7 @@
         overflow-y: auto;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         border-radius: 5px;
+        display: none;
     }
 
         .search-results-list li {
@@ -239,60 +240,70 @@
         }
 
         function removeDiacritics(str) {
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            return str.normalize('NFD').toLowerCase().trim();
         }
 
         function searchIngredient(index) {
             const inputId = `ingredient-${index}`;
             const resultId = `ingredient-results-${index}`;
 
-            // Hủy timeout trước đó cho trường này (nếu có)
             if (searchTimeouts[inputId]) {
                 clearTimeout(searchTimeouts[inputId]);
             }
 
             searchTimeouts[inputId] = setTimeout(() => {
-                const query = document.getElementById(inputId).value.toLowerCase();
+                const query = removeDiacritics(document.getElementById(inputId).value);
                 const resultList = document.getElementById(resultId);
-                resultList.innerHTML = ''; // Xóa danh sách cũ
+                resultList.innerHTML = '';
 
-                if (query.length > 0) { // Hiển thị gợi ý nếu query có nội dung
+                if (query.length > 0) {
                     const filteredProducts = products.filter(p =>
                         removeDiacritics(p.productName).includes(query)
                     );
 
-                    // Kiểm tra có sản phẩm khớp không
                     if (filteredProducts.length > 0) {
+                        resultList.style.display = 'block';
+
                         filteredProducts.forEach(product => {
                             const li = document.createElement('li');
                             li.textContent = product.productName;
                             li.onclick = () => selectIngredient(product, inputId, resultId);
-                            li.style.cursor = 'pointer'; // Thêm con trỏ cho dễ nhận biết
                             resultList.appendChild(li);
                         });
+                    } else {
+                        resultList.style.display = 'none';
                     }
+                } else {
+                    resultList.style.display = 'none';
                 }
             }, 300);
 
-            // Đặt ProductID về null nếu người dùng thay đổi nội dung input
             const inputField = document.getElementById(inputId);
             const hiddenInputId = inputId.replace('ingredient', 'productID');
+
             inputField.oninput = () => {
                 document.getElementById(hiddenInputId).value = null;
             };
         }
-
         function selectIngredient(product, inputId, resultId) {
             document.getElementById(inputId).value = product.productName;
             document.getElementById(resultId).innerHTML = ''; 
 
             const hiddenInputId = inputId.replace('ingredient', 'productID');
-            document.getElementById(hiddenInputId).value = product.productID; 
+            document.getElementById(hiddenInputId).value = product.productID;
+            document.getElementById(resultId).style.display = 'none';
         }
         document.addEventListener('click', function (e) {
-            if (!e.target.closest('.search-results-list') && !e.target.closest('input')) {
+            const clickedElement = e.target;
+
+            if (!clickedElement.closest('.search-results-list') &&
+                !clickedElement.closest('input')) {
+
                 const allResultLists = document.querySelectorAll('.search-results-list');
-                allResultLists.forEach(list => list.innerHTML = '');
+                allResultLists.forEach(list => {
+                    list.innerHTML = '';
+                    list.style.display = 'none';
+                });
             }
         });
 
