@@ -148,7 +148,6 @@
                         <tr class="text-center">
                             <th>ID</th>
                             <th>Category Name</th>
-                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -159,37 +158,11 @@
                             {
                                 <tr class="text-center">
                                     <td>@item.CategoryID</td>
-                                    <td>@item.CategoryName</td>
-                                    <td class="fw-bold">
-                                        @if (item.IsDeleted)
-                                        {
-                                            <span class="text-danger">Deleted</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-success">Active</span>
-                                        }
-                                    </td>
-                                   
+                                    <td>@item.CategoryName</td>                                  
                                     <td>
 
                                         <a data-bs-toggle="modal" data-bs-target="#ArticleCategoryRename@(item.CategoryID)"
                                            class="btn btn-warning mx-1">Rename</a>
-
-                                        @if (item.IsDeleted)
-                                        {
-                                            <!-- Nút mở modal Enable -->
-                                            <button type="button" class="btn btn-success mx-1" data-bs-toggle="modal" data-bs-target="#enableRecipeCategorymodal(@item.CategoryID)">
-                                                Enable
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <!-- Nút mở modal Disable -->
-                                            <button type="button" class="btn btn-danger mx-1" data-bs-toggle="modal" data-bs-target="#disableRecipeCategorymodal(@item.CategoryID)">
-                                                Disable
-                                            </button>
-                                        }
                                     </td>
                                 </tr>
                             }
@@ -374,11 +347,6 @@
                                    pattern="[A-Za-z0-9À-ỹ\s]+"
                                    title="Name should be 3-50 characters and contain only letters, numbers, and spaces." />
                         </div>
-                        <input type="hidden" class="form-control"
-                               id="IsDeleted@(item.CategoryID)"
-                               name="IsDeleted"
-                               value="@item.IsDeleted"
-                               readonly />
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -440,59 +408,4 @@
             </div>
         </div>
     </div>
-}
-@* Set Recipe Status *@
-@foreach (var item in listArticleCategories) 
-{
-    <!-- Modal Enable -->
-    @if (item.IsDeleted)
-    {
-        <div class="modal fade" id="enableRecipeCategorymodal(@item.CategoryID)" tabindex="-1" aria-labelledby="enableRecipeCategorymodal(@item.CategoryID)" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="enableRecipeCategorymodal(@item.CategoryID)">Confirm Enable</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to enable the category <strong>@item.CategoryName</strong>?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form asp-action="SetArticleCategoryOn" method="post" class="d-inline">
-                            <input type="hidden" name="CategoryID" value="@item.CategoryID" />
-                            <input type="hidden" name="CategoryName" value="@item.CategoryName" />
-                            <button type="submit" class="btn btn-success">Yes, Enable</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-    <!-- Modal Disable -->
-    @if (!item.IsDeleted)
-    {
-        <div class="modal fade" id="disableRecipeCategorymodal(@item.CategoryID)" tabindex="-1" aria-labelledby="disableRecipeCategorymodal(@item.CategoryID)" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="disableRecipeCategorymodal(@item.CategoryID)">Confirm Disable</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to disable the category <strong>@item.CategoryName</strong>?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form asp-action="SetArticleCategoryOff" method="post" class="d-inline">
-                            <input type="hidden" name="CategoryID" value="@item.CategoryID" />
-                            <input type="hidden" name="CategoryName" value="@item.CategoryName" />
-                            <button type="submit" class="btn btn-danger">Yes, Disable</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
 }

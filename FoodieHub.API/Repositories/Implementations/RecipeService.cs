@@ -115,6 +115,13 @@ namespace FoodieHub.API.Repositories.Implementations
         public async Task<PaginatedModel<GetRecipeDTO>> Get(QueryRecipeModel query)
         {
             var listRecipes = _context.Recipes.AsQueryable();
+            if (!string.IsNullOrEmpty(query.SearchIngredient))
+            {
+                listRecipes = listRecipes.Where(recipe =>
+                    recipe.Ingredients.Any(ingredient =>
+                        ingredient.Name.ToLower().Contains(query.SearchIngredient.ToLower())));
+            }
+
             if (query.CategoryID.HasValue)
             {
                 listRecipes = listRecipes.Where(x => x.CategoryID == query.CategoryID.Value);

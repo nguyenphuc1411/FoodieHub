@@ -133,28 +133,31 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if(Model?.RecipeSteps?.Count()>0){
-                                for (var i = 0; i < Model.RecipeSteps.Count; i++)
-                                {
-                                    <tr>
-                                        <td style="width: 10%;">
-                                            <input asp-for="RecipeSteps[@i].Step" class="form-control" />
-                                            <span asp-validation-for="RecipeSteps[@i].Step" class="text-danger"></span>
-                                        </td>
-                                        <td style="width: 60%;">
-                                            <textarea asp-for="RecipeSteps[@i].Directions" class="form-control"></textarea>
-                                            <span asp-validation-for="RecipeSteps[@i].Directions" class="text-danger"></span>
-                                        </td>
-                                        <td style="width: 20%;">
-                                            <div class="d-flex">
-                                                <input asp-for="RecipeSteps[@i].ImageStep" type="file" class="form-control" />
-                                            </div>
-                                        </td>
-                                        <td style="width: 10%;">
-                                            <button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button>
-                                        </td>
-                                    </tr>
-                                }
+                            @for (var i = 0; i < Model.Ingredients.Count(); i++)
+                            {
+                                <tr>
+                                    <td style="width: 50%;">
+                                        <input asp-for="Ingredients[@i].Name" class="form-control" placeholder="Ingredient name" id="ingredient-@i" />
+                                        <span asp-validation-for="Ingredients[@i].Name" class="text-danger"></span>
+
+                                        <!-- Input hidden to store the ProductID -->
+                                        <input asp-for="Ingredients[@i].ProductID" type="hidden" id="productID-@i" />
+
+                                        <ul id="ingredient-results-@i" class="search-results-list mt-3"></ul>
+                                    </td>
+                                    <td style="width: 20%;">
+                                        <input asp-for="Ingredients[@i].Quantity" class="form-control" placeholder="Quantity" />
+                                        <span asp-validation-for="Ingredients[@i].Quantity" class="text-danger"></span>
+                                    </td>
+                                    <td style="width: 20%;">
+                                        <select asp-for="Ingredients[@i].Unit" asp-items="@(new SelectList(units))" class="form-control">
+                                            <option value="">Select Unit</option>
+                                        </select>
+                                    </td>
+                                    <td style="width: 10%;">
+                                        <button type="button" class="btn btn-danger" onclick="removeIngredient(this)">Delete</button>
+                                    </td>
+                                </tr>
                             }
                             
                         </tbody>
@@ -178,165 +181,117 @@
 
 @section Scripts {
     <script>
-        // Add Step
-        document.getElementById("add-step").addEventListener("click", function () {
-            const stepsSection = document.getElementById("steps-section");
+        const units = @Html.Raw(Json.Serialize(units));
 
-            // Get current step count for index
-            const stepIndex = stepsSection.childElementCount;
+        let products = @Html.Raw(Json.Serialize(products)); // Lấy danh sách sản phẩm từ Razor view
 
-            // Create container for step
-            const stepDiv = document.createElement("div");
-            stepDiv.className = "step-item mb-3";
-            stepDiv.dataset.index = stepIndex;
-
-            // Step Title
-            const stepTitle = document.createElement("h5");
-            stepTitle.className = "mb-2";
-            stepTitle.innerText = `Step ${stepIndex + 1}`;
-
-            // Step (hidden input)
-            const stepInput = document.createElement("input");
-            stepInput.type = "hidden";
-            stepInput.name = `RecipeSteps[${stepIndex}].Step`;
-            stepInput.value = stepIndex + 1; // Step number
-
-            // Directions Textarea
-            const directionsInput = document.createElement("textarea");
-            directionsInput.name = `RecipeSteps[${stepIndex}].Directions`;
-            directionsInput.className = "form-control mb-2";
-            directionsInput.placeholder = "Describe this step";
-            directionsInput.required = true;
-
-            // ImageStep File Input
-            const imageInput = document.createElement("input");
-            imageInput.type = "file";
-            imageInput.name = `RecipeSteps[${stepIndex}].ImageStep`;
-            imageInput.className = "form-control mb-2";
-
-            // Delete Button for Step
-            const deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.className = "btn btn-danger";
-            deleteButton.innerText = "Delete";
-
-            // Delete Step Event
-            deleteButton.addEventListener("click", function () {
-                stepsSection.removeChild(stepDiv);
-
-                // Update indices and titles after deletion
-                Array.from(stepsSection.children).forEach((child, newIndex) => {
-                    child.dataset.index = newIndex;
-                    child.querySelector("h5").innerText = `Step ${newIndex + 1}`;
-                    child.querySelector(`[name^="RecipeSteps"]`).name = `RecipeSteps[${newIndex}].Step`;
-                    child.querySelector(`[name$=".Directions"]`).name = `RecipeSteps[${newIndex}].Directions`;
-                    child.querySelector(`[name$=".ImageStep"]`).name = `RecipeSteps[${newIndex}].ImageStep`;
-                });
-            });
-
-            // Append new step elements to container
-            stepDiv.appendChild(stepTitle);
-            stepDiv.appendChild(stepInput);
-            stepDiv.appendChild(directionsInput);
-            stepDiv.appendChild(imageInput);
-            stepDiv.appendChild(deleteButton);
-
-            // Append step container to steps section
-            stepsSection.appendChild(stepDiv);
+                document.addEventListener("DOMContentLoaded", function() {
+            // Attach keyup event to all existing ingredient input fields on page load
+            const ingredientCount = @Model.Ingredients.Count();
+            for (let i = 0; i < ingredientCount; i++) {
+                const ingredientInput = document.getElementById(`ingredient-${i}`);
+                if (ingredientInput) {
+                    ingredientInput.addEventListener('keyup', function() {
+                        searchIngredient(i);
+                    });
+                }
+            }
         });
 
-        const products = [
-        @foreach (var item in products)
-        {
-            @: { id: '@item.ProductID', name: '@item.ProductName' },
+        let searchTimeouts = {}; // Sử dụng một đối tượng để lưu trữ timeout của từng input
+
+        function addIngredient() {
+            var table = document.getElementById('ingredientsTable').getElementsByTagName('tbody')[0];
+            var rowCount = table.rows.length;
+            var row = table.insertRow(rowCount);
+
+            var unitOptions = units.map(unit => `<option value="${unit}">${unit}</option>`).join('');
+
+            row.innerHTML = `
+                <td>
+                    <input name="Ingredients[${rowCount}].Name" class="form-control" placeholder="Ingredient name" id="ingredient-${rowCount}" />
+                    <span asp-validation-for="Ingredients[${rowCount}].Name" class="text-danger"></span>
+
+                    <!-- Input hidden để lưu ProductID -->
+                    <input name="Ingredients[${rowCount}].ProductID" type="hidden" id="productID-${rowCount}" />
+
+                    <ul id="ingredient-results-${rowCount}" class="search-results-list mt-3"></ul>
+                </td>
+                <td><input name="Ingredients[${rowCount}].Quantity" class="form-control" placeholder="Quantity" /></td>
+                <td>
+                    <select name="Ingredients[${rowCount}].Unit" class="form-control">
+                        <option value="">Select Unit</option>
+                        ${unitOptions}
+                    </select>
+                </td>
+                <td><button type="button" class="btn btn-danger" onclick="removeIngredient(this)">Delete</button></td>`;
+
+            // Gán sự kiện tìm kiếm cho ô mới
+            const newIngredientInput = document.getElementById(`ingredient-${rowCount}`);
+            newIngredientInput.addEventListener('keyup', function() {
+                searchIngredient(rowCount);
+            });
         }
-        ];
 
-        // Fetch available units for the dropdown
-        const availableUnits = ["cái", "kg", "g", "thìa", "ml", "lít", "tấn", "mét", "chén", "muỗng", "hũ"];
+        function searchIngredient(index) {
+            const inputId = `ingredient-${index}`;
+            const resultId = `ingredient-results-${index}`;
 
-        document.getElementById("add-ingredient").addEventListener("click", function () {
-            const ingredientsSection = document.getElementById("ingredients-section");
+            // Hủy timeout trước đó cho trường này (nếu có)
+            if (searchTimeouts[inputId]) {
+                clearTimeout(searchTimeouts[inputId]);
+            }
 
-            // Get current ingredient count for index
-            const ingredientIndex = ingredientsSection.childElementCount;
+            // Thiết lập timeout mới cho trường hiện tại
+            searchTimeouts[inputId] = setTimeout(() => {
+                const query = document.getElementById(inputId).value.toLowerCase();
+                const resultList = document.getElementById(resultId);
+                resultList.innerHTML = '';
 
-            // Create container for ingredient
-            const ingredientDiv = document.createElement("div");
-            ingredientDiv.className = "ingredient-item mb-3";
-            ingredientDiv.dataset.index = ingredientIndex;
+                if (query.length > 2) {
+                    const filteredProducts = products.filter(p => p.productName.toLowerCase().includes(query));
 
-            // Ingredient Name Input
-            const nameInput = document.createElement("input");
-            nameInput.type = "text";
-            nameInput.name = `Ingredients[${ingredientIndex}].Name`;
-            nameInput.className = "form-control mb-2";
-            nameInput.placeholder = "Enter ingredient name";
-            nameInput.required = true;
+                    filteredProducts.forEach(product => {
+                        const li = document.createElement('li');
+                        li.textContent = product.productName;
+                        li.onclick = () => selectIngredient(product, inputId, resultId);
+                        resultList.appendChild(li);
+                    });
+                }
+            }, 1000); // Trì hoãn tìm kiếm 1 giây
+        }
 
-            // Ingredient Quantity Input
-            const quantityInput = document.createElement("input");
-            quantityInput.type = "number";
-            quantityInput.name = `Ingredients[${ingredientIndex}].Quantity`;
-            quantityInput.className = "form-control form-control-sm mb-2";
-            quantityInput.placeholder = "Quantity";
-            quantityInput.required = true;
-            quantityInput.min = 0;
+        function selectIngredient(product, inputId, resultId) {
+            document.getElementById(inputId).value = product.productName; // Set tên sản phẩm vào input
+            document.getElementById(resultId).innerHTML = ''; // Xóa danh sách kết quả
 
-            // Ingredient Unit Select
-            const unitSelect = document.createElement("select");
-            unitSelect.name = `Ingredients[${ingredientIndex}].Unit`;
-            unitSelect.className = "form-select form-select-sm mb-2";
-            unitSelect.required = true;
+            // Set ProductID vào input ẩn
+            const hiddenInputId = inputId.replace('ingredient', 'productID');
+            document.getElementById(hiddenInputId).value = product.productID; // Set ProductID
+        }
 
-            // Add available units to the dropdown
-            availableUnits.forEach(unit => {
-                const option = document.createElement("option");
-                option.value = unit;
-                option.text = unit;
-                unitSelect.appendChild(option);
-            });
 
-            // Ingredient Product Select
-            const productSelect = document.createElement("select");
-            productSelect.name = `Ingredients[${ingredientIndex}].ProductID`;
-            productSelect.className = "form-select-sm mb-2";
 
-            // Add default option
-            const defaultOption = document.createElement("option");
-            defaultOption.value = "";
-            defaultOption.text = "Select Product";
-            productSelect.appendChild(defaultOption);
+        function addStep() {
+            var table = document.getElementById('stepsTable').getElementsByTagName('tbody')[0];
+            var rowCount = table.rows.length;
+            var row = table.insertRow(rowCount);
 
-            // Add product options to the dropdown
-            products.forEach(product => {
-                const option = document.createElement("option");
-                option.value = product.id;
-                option.text = product.name;
-                productSelect.appendChild(option);
-            });
+            row.innerHTML = `
+                <td><input name="RecipeSteps[${rowCount}].Step" class="form-control" /></td>
+                <td><textarea name="RecipeSteps[${rowCount}].Directions" class="form-control"></textarea></td>
+                <td><input name="RecipeSteps[${rowCount}].ImageStep" type="file" accept="images/*" class="form-control" /></td>
+                <td><button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button></td>`;
+        }
 
-            // Delete Button for Ingredient
-            const deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.className = "btn btn-danger";
-            deleteButton.innerText = "Delete";
+        function removeIngredient(button) {
+            var row = button.closest('tr');
+            row.parentNode.removeChild(row);
+        }
 
-            // Delete Ingredient Event
-            deleteButton.addEventListener("click", function () {
-                ingredientsSection.removeChild(ingredientDiv);
-            });
-
-            // Append new ingredient elements to container
-            ingredientDiv.appendChild(nameInput);
-            ingredientDiv.appendChild(quantityInput);
-            ingredientDiv.appendChild(unitSelect);
-            ingredientDiv.appendChild(productSelect);
-            ingredientDiv.appendChild(deleteButton);
-
-            // Append ingredient container to ingredients section
-            ingredientsSection.appendChild(ingredientDiv);
-        });
-
+        function removeStep(button) {
+            var row = button.closest('tr');
+            row.parentNode.removeChild(row);
+        }
     </script>
 }

@@ -3,6 +3,7 @@
 @using FoodieHub.MVC.Service.Interfaces
 @inject IConfiguration config
 @inject IRecipeCategoryService categoryService
+@inject IProductService productService
 @{
     ViewData["Title"] = "Edit Recipe";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -31,6 +32,7 @@
     "Gói",
     "Lon"
 };
+    var products = await productService.GetAll();
 }
 
 @model UpdateRecipeDTO
@@ -111,13 +113,18 @@
                 </tr>
             </thead>
             <tbody>
-                @for (var i = 0; i < Model.Ingredients.Count; i++)
+                @for (var i = 0; i < Model.Ingredients.Count(); i++)
                 {
                     <tr>
                         <td style="width: 50%;">
                             <input type="hidden" asp-for="Ingredients[@i].Id" />
-                            <input asp-for="Ingredients[@i].Name" class="form-control" placeholder="Ingredient name" />
+                            <input asp-for="Ingredients[@i].Name" class="form-control" placeholder="Ingredient name" id="ingredient-@i" />
                             <span asp-validation-for="Ingredients[@i].Name" class="text-danger"></span>
+
+                            <!-- Input hidden to store the ProductID -->
+                            <input asp-for="Ingredients[@i].ProductID" type="hidden" id="productID-@i" />
+
+                            <ul id="ingredient-results-@i" class="search-results-list mt-3"></ul>
                         </td>
                         <td style="width: 20%;">
                             <input asp-for="Ingredients[@i].Quantity" class="form-control" placeholder="Quantity" />
@@ -212,20 +219,41 @@
 
          const units = @Html.Raw(Json.Serialize(units));
 
+        let products = @Html.Raw(Json.Serialize(products)); // Lấy danh sách sản phẩm từ Razor view
+
+                document.addEventListener("DOMContentLoaded", function() {
+            // Attach keyup event to all existing ingredient input fields on page load
+            const ingredientCount = @Model.Ingredients.Count();
+            for (let i = 0; i < ingredientCount; i++) {
+                const ingredientInput = document.getElementById(`ingredient-${i}`);
+                if (ingredientInput) {
+                    ingredientInput.addEventListener('keyup', function() {
+                        searchIngredient(i);
+                    });
+                }
+            }
+        });
+
+        let searchTimeouts = {}; // Sử dụng một đối tượng để lưu trữ timeout của từng input
+
         function addIngredient() {
             var table = document.getElementById('ingredientsTable').getElementsByTagName('tbody')[0];
             var rowCount = table.rows.length;
             var row = table.insertRow(rowCount);
 
-            // Tạo các <option> cho dropdown từ danh sách units
-            var unitOptions = units.map(function(unit) {
-                return `<option value="${unit}">${unit}</option>`;
-            }).join('');
+            var unitOptions = units.map(unit => `<option value="${unit}">${unit}</option>`).join('');
 
-            // Tạo hàng mới với các trường input và select
             row.innerHTML = `
-                <td><input name="Ingredients[${rowCount}].Name" class="form-control" /></td>
-                <td><input name="Ingredients[${rowCount}].Quantity" class="form-control" /></td>
+                <td>
+                    <input name="Ingredients[${rowCount}].Name" class="form-control" placeholder="Ingredient name" id="ingredient-${rowCount}" />
+                    <span asp-validation-for="Ingredients[${rowCount}].Name" class="text-danger"></span>
+
+                    <!-- Input hidden để lưu ProductID -->
+                    <input name="Ingredients[${rowCount}].ProductID" type="hidden" id="productID-${rowCount}" />
+
+                    <ul id="ingredient-results-${rowCount}" class="search-results-list mt-3"></ul>
+                </td>
+                <td><input name="Ingredients[${rowCount}].Quantity" class="form-control" placeholder="Quantity" /></td>
                 <td>
                     <select name="Ingredients[${rowCount}].Unit" class="form-control">
                         <option value="">Select Unit</option>
@@ -233,8 +261,50 @@
                     </select>
                 </td>
                 <td><button type="button" class="btn btn-danger" onclick="removeIngredient(this)">Delete</button></td>`;
+
+            // Gán sự kiện tìm kiếm cho ô mới
+            const newIngredientInput = document.getElementById(`ingredient-${rowCount}`);
+            newIngredientInput.addEventListener('keyup', function() {
+                searchIngredient(rowCount);
+            });
         }
 
+        function searchIngredient(index) {
+            const inputId = `ingredient-${index}`;
+            const resultId = `ingredient-results-${index}`;
+
+            // Hủy timeout trước đó cho trường này (nếu có)
+            if (searchTimeouts[inputId]) {
+                clearTimeout(searchTimeouts[inputId]);
+            }
+
+            // Thiết lập timeout mới cho trường hiện tại
+            searchTimeouts[inputId] = setTimeout(() => {
+                const query = document.getElementById(inputId).value.toLowerCase();
+                const resultList = document.getElementById(resultId);
+                resultList.innerHTML = '';
+
+                if (query.length > 2) {
+                    const filteredProducts = products.filter(p => p.productName.toLowerCase().includes(query));
+
+                    filteredProducts.forEach(product => {
+                        const li = document.createElement('li');
+                        li.textContent = product.productName;
+                        li.onclick = () => selectIngredient(product, inputId, resultId);
+                        resultList.appendChild(li);
+                    });
+                }
+            }, 1000); // Trì hoãn tìm kiếm 1 giây
+        }
+
+        function selectIngredient(product, inputId, resultId) {
+            document.getElementById(inputId).value = product.productName; // Set tên sản phẩm vào input
+            document.getElementById(resultId).innerHTML = ''; // Xóa danh sách kết quả
+
+            // Set ProductID vào input ẩn
+            const hiddenInputId = inputId.replace('ingredient', 'productID');
+            document.getElementById(hiddenInputId).value = product.productID; // Set ProductID
+        }
 
         function removeIngredient(button) {
             var row = button.closest('tr');

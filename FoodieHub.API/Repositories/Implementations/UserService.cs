@@ -177,5 +177,17 @@ namespace FoodieHub.API.Repositories.Implementations
             var user = await _userManager.FindByIdAsync(id);
             return _mapper.Map<UserDTO>(user);
         }
+
+        public async Task<IEnumerable<UserDTO>> GetAdmin()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            var listAdmin = new List<UserDTO>();
+            foreach (var item in users)
+            {
+                var isAdmin = await _authService.IsAdmin(item.Id);
+                if (isAdmin) listAdmin.Add(_mapper.Map<UserDTO>(item));
+            }
+            return listAdmin;
+        }
     }
 }

@@ -3,6 +3,7 @@
 @using FoodieHub.MVC.Models.Response
 @using FoodieHub.MVC.Service.Interfaces
 @inject IRecipeCategoryService categoryService
+@inject IUserService userService
 @inject IConfiguration config
 @{
     ViewData["Title"] = "Index";
@@ -10,6 +11,8 @@
     var url = config["BaseHost"];
     var query = ViewBag.Query as QueryRecipeModel ?? new QueryRecipeModel();
     var categories = await categoryService.GetAll();
+
+    var admins = await userService.GetAdmin();
 }
 @model PaginatedModel<GetRecipeDTO>
 <div class="container py-5">
@@ -28,7 +31,7 @@
 
                 <!-- Filter by Ingredient -->
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Filter by ingredients">
+                    <input type="text" name="SearchIngredient" value=@query.SearchIngredient class="form-control" placeholder="Filter by ingredients">
                 </div>
                 <!-- Filter by Time -->
                 <div class="mb-3">
@@ -138,17 +141,17 @@
                     </select>
 
                 </div>
-
-                <!-- Apply Filters Button -->
-                <div class="d-grid gap-2">
-                    <button class="button button-dark">Apply Filters</button>
-                </div>
-
-                <!-- Clear Filters Button -->
-                <div class="d-grid gap-2 mt-2">
-                    <a href="/recipes" class="button button-light">Clear Filters</a>
-                </div>
             </form>
+
+            <!-- Apply Filters Button -->
+            <div class="d-grid gap-2">
+                <button class="button button-dark">Apply Filters</button>
+            </div>
+
+            <!-- Clear Filters Button -->
+            <div class="d-grid gap-2 mt-2">
+                <a href="/recipes" class="button button-light">Clear Filters</a>
+            </div>
         </div>
 
         <!-- Recipe Cards -->
@@ -182,62 +185,78 @@
                 }
             </div>
 
-            <nav aria-label="Page navigation example">
-                <ul class="pagination pagination-sm mb-0">
-                    <!-- Nút Previous (ẩn nếu đang ở trang đầu tiên) -->
-                    <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
-                        <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page - 1)">Previous</a>
-                    </li>
+            <form id="paginationForm" method="get" class="d-flex justify-content-between align-items-center mt-3">
+                <!-- Hidden input để giữ giá trị của trang -->
+                <input type="hidden" name="Page" id="pageInput" value="@Model.Page" />
+                <input type="hidden" name="PageSize" id="pageSizeInput" value="@Model.PageSize" />
 
-                    <!-- Tạo danh sách các trang -->
-                    @for (int i = 1; i <= Model.TotalPages; i++)
-                    {
-                        <li class="page-item @(i == Model.Page ? "active" : "")">
-                            <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@i">@i</a>
+                <!-- Select box for page size -->
+                <div>
+                    <select name="PageSize" class="form-select form-select-sm" style="width: 70px;" onchange="this.form.submit()">
+                        @for (int i = 2; i <= 20; i += 2)
+                        {
+                            @if(Model.PageSize==i){
+                                <option value="@i" selected>@i</option>
+                            }
+                            else {
+                                <option value="@i">@i</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Pagination navigation -->
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                            <button type="submit" class="page-link" onclick="document.getElementById('pageInput').value = @(Model.Page - 1)">
+                                Previous
+                            </button>
                         </li>
-                    }
 
-                    <!-- Nút Next (ẩn nếu đang ở trang cuối) -->
-                    <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
-                        <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page + 1)">Next</a>
-                    </li>
-                </ul>
-            </nav>
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.Page ? "active" : "")">
+                                <button type="submit" class="page-link" onclick="document.getElementById('pageInput').value = @i">@i</button>
+                            </li>
+                        }
+
+                        <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                            <button type="submit" class="page-link" onclick="document.getElementById('pageInput').value = @(Model.Page + 1)">
+                                Next
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </form>
+
         </div>
     </div>
 
     <!-- More Recipe Cards can be added here -->
 </div>
 
-<div class="py-5 text-center">
-    <h1 style="font-family: Inter; font-size: 35px; font-style: italic; font-weight: 500; line-height: 42px;">
-        Meet Our Residents
-    </h1>
-</div>
+<div class="container">
+    <!-- Meet Our Residents Section -->
+    <div class="text-center mb-5">
+        <h1 class="page-title">Meet Our Residents</h1>
+        <p class="description">The ultimate dream team—our residents will share everything you've ever wanted to know about dinner-wrangling, dessert-whispering, and more.</p>
+    </div>
 
-<div class="text-center">
-    <p class="nho">
-        The ultimate dream team—our residents will share everything you’ve ever wanted to know about dinner-wrangling, dessert-whispering, and more.
-    </p>
-</div>
-
-<div class="container text-center">
-    <div class="row gy-4 justify-content-center">
-        <div class="col-lg-2 col-md-6 col-sm-12 d-flex justify-content-center align-items-center">
-            <div class="infocard text-center">
-                <div class="d-flex justify-content-center">
-                    <img src="/images/profile.jpg" alt="Profile Image" class="img-fluid rounded-circle profile-img">
-                </div>
-                <div class="info-box">
-                    <p class="username">Tên người dùng</p>
-                    <p class="view-profile">VIEW PROFILE &gt;&gt;</p>
+    <div class="row justify-content-center">
+        @foreach (var item in admins)
+        {
+            <div class="col-md-3 mb-4">
+                <div class="profile-card text-center">
+                    <img src=@(item.Avatar!=null? url+"images/"+item.Avatar: "~/images/profile.jpg") alt="Resident" class="profile-image rounded-circle">
+                    <div class="info-box mt-3">
+                        <p class="username">@item.Fullname</p>
+                        <a href="/account/userinfo/@item.Id" class="btn btn-outline-secondary btn-sm">View Profile</a>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
 
-        <div class="py-5">
-            <button class="button button-light">View More</button>
-        </div>
     </div>
 </div>
 
@@ -295,5 +314,40 @@
         font-size: 14px;
         color: #777;
         margin-top: 10px;
+    }
+
+    /* Profile Section */
+    .profile-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-image {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .info-box {
+        background-color: #F7F7F7;
+        padding: 10px;
+        border-radius: 4px;
+    }
+
+    .username {
+        color: #333;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .view-profile {
+        color: #998675;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
     }
 </style>

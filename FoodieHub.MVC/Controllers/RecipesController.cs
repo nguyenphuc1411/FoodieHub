@@ -27,6 +27,7 @@ namespace FoodieHub.MVC.Controllers
             var model = new CreateRecipeDTO();
             return View(model);
         }
+        [ValidateTokenForUser]
         [HttpPost]
         public async Task<IActionResult> Create(CreateRecipeDTO recipe)
         {
@@ -48,7 +49,7 @@ namespace FoodieHub.MVC.Controllers
             return View(recipe);
         }
 
-
+        [ValidateTokenForUser]
         public async Task<IActionResult> Edit(int id)
         {
             var response = await _recipeService.GetByID(id);
@@ -72,7 +73,7 @@ namespace FoodieHub.MVC.Controllers
             NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Recipes", "Account");
         }
-
+        [ValidateTokenForUser]
         [HttpPost]
         public async Task<IActionResult> Edit(UpdateRecipeDTO update)
         {
@@ -190,7 +191,7 @@ namespace FoodieHub.MVC.Controllers
                 NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Recipes", "Account");
         }
-
+        [ValidateTokenForUser]
         public async Task<IActionResult> CreateComment(CommentDTO comment)
         {
             bool result = await _commentService.Create(comment);
@@ -198,7 +199,7 @@ namespace FoodieHub.MVC.Controllers
             else NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Detail", new { id = comment.RecipeID});
         }
-
+        [ValidateTokenForUser]
         public async Task<IActionResult> DeleteComment(int id,int recipeID)
         {
             bool result = await _commentService.Delete(id);
@@ -206,7 +207,7 @@ namespace FoodieHub.MVC.Controllers
             else NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Detail", new { id = recipeID });
         }
-
+        [ValidateTokenForUser]
         public async Task<IActionResult> EditComment(int CommentID,string CommentContent,int RecipeID)
         {
             bool result = await _commentService.Edit(CommentID,new CommentDTO

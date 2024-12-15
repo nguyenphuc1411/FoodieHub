@@ -52,5 +52,12 @@ namespace FoodieHub.API.Controllers
             if (result == null) return NotFound();
             return Ok(result);
         }
+
+        [HttpGet("admins")]
+        public async Task<ActionResult> GetAdmin()
+        {
+            var result = await _service.GetAdmin();
+            return Ok(result);
+        }
     }
 }

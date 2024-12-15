@@ -1,4 +1,5 @@
-﻿using FoodieHub.MVC.Models.Product;
+﻿using FoodieHub.MVC.Configurations;
+using FoodieHub.MVC.Models.Product;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -13,6 +14,7 @@ namespace FoodieHub.MVC.Controllers
         {
             _service = service;
         }
+        [ValidateTokenForUser]
         [HttpPost]
         public async Task<IActionResult> AddNewReview(ReviewDTO review)
         {
@@ -33,7 +35,7 @@ namespace FoodieHub.MVC.Controllers
             }
         }
 
-
+        [ValidateTokenForUser]
         [HttpPost]
         public async Task<IActionResult> UpdateReview(UpdateReviewDTO review)
         {

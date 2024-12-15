@@ -162,20 +162,20 @@
             <ul class="pagination pagination-sm mb-0">
                 <!-- Nút Previous (ẩn nếu đang ở trang đầu tiên) -->
                 <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
-                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page - 1)">Previous</a>
+                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-Page="@(Model.Page - 1)">Previous</a>
                 </li>
 
                 <!-- Tạo danh sách các trang -->
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
                     <li class="page-item @(i == Model.Page ? "active" : "")">
-                        <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@i">@i</a>
+                        <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-Page="@i">@i</a>
                     </li>
                 }
 
                 <!-- Nút Next (ẩn nếu đang ở trang cuối) -->
                 <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page + 1)">Next</a>
+                    <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-Page="@(Model.Page + 1)">Next</a>
                 </li>
             </ul>
         </nav>
