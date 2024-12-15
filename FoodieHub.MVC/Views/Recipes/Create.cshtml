@@ -85,10 +85,9 @@
                                         <input asp-for="Ingredients[@i].Name" class="form-control" placeholder="Ingredient name" id="ingredient-@i" />
                                         <span asp-validation-for="Ingredients[@i].Name" class="text-danger"></span>
 
+                                        <ul id="ingredient-results-@i" class="search-results-list" ></ul>
                                         <!-- Input hidden to store the ProductID -->
                                         <input asp-for="Ingredients[@i].ProductID" type="hidden" id="productID-@i" />
-
-                                        <ul id="ingredient-results-@i" class="search-results-list"></ul>
                                     </td>
                                     <td style="width: 20%;">
                                         <input asp-for="Ingredients[@i].Quantity" class="form-control" placeholder="Quantity" />
@@ -161,7 +160,7 @@
 
 <style>
     .search-results-list {
-        width: 30%;
+        width: 40%;
         list-style: none;
         padding: 0;
         position: absolute;
@@ -274,17 +273,22 @@
                     }
                 }
             }, 300);
+
+            // Đặt ProductID về null nếu người dùng thay đổi nội dung input
+            const inputField = document.getElementById(inputId);
+            const hiddenInputId = inputId.replace('ingredient', 'productID');
+            inputField.oninput = () => {
+                document.getElementById(hiddenInputId).value = null;
+            };
         }
 
         function selectIngredient(product, inputId, resultId) {
-            document.getElementById(inputId).value = product.productName; // Set tên sản phẩm vào input
-            document.getElementById(resultId).innerHTML = ''; // Xóa danh sách kết quả
+            document.getElementById(inputId).value = product.productName;
+            document.getElementById(resultId).innerHTML = ''; 
 
-            // Set ProductID vào input ẩn
             const hiddenInputId = inputId.replace('ingredient', 'productID');
-            document.getElementById(hiddenInputId).value = product.productID; // Set ProductID
+            document.getElementById(hiddenInputId).value = product.productID; 
         }
-        // Tắt gợi ý khi bấm ra ngoài
         document.addEventListener('click', function (e) {
             if (!e.target.closest('.search-results-list') && !e.target.closest('input')) {
                 const allResultLists = document.querySelectorAll('.search-results-list');
