@@ -1,6 +1,7 @@
 ﻿using FoodieHub.MVC.Models.Article;
 using FoodieHub.MVC.Models.QueryModel;
 using FoodieHub.MVC.Models.Response;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FoodieHub.MVC.Service.Interfaces
 {
@@ -12,5 +13,7 @@ namespace FoodieHub.MVC.Service.Interfaces
         Task<bool> Delete(int id);
         Task<bool> Update(int id,UpdateArticleDTO article);
         Task<IEnumerable<GetArticleDTO>> GetOfUser(string userID);
+
+        Task<IEnumerable<ArticleByCategory>> GetByCategory();
     }
 }

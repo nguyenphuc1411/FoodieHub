@@ -57,6 +57,13 @@ namespace FoodieHub.API.Controllers
         {
             var result = await _service.Delete(id);
             return result? NoContent():BadRequest();
-        }      
+        }
+        [HttpGet("categories")]
+        public async Task<ActionResult<IEnumerable<ArticleByCategory>>> GetByCategory()
+        {
+            var result = await _service.GetByCategory();
+            return Ok(result);
+        }
+
     }
 }

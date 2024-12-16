@@ -30,7 +30,8 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            var model = new CreateRecipeDTO();
+            return View(model);
         }
 
         [HttpPost]
