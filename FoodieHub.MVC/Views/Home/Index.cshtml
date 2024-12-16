@@ -1,4 +1,5 @@
-﻿@using FoodieHub.MVC.Service.Interfaces
+﻿@using FoodieHub.MVC.Models.Recipe
+@using FoodieHub.MVC.Service.Interfaces
 @inject IProductService _productService;
 @inject IOrderService _orderService;
 @inject IReviewService _reviewService;
@@ -34,7 +35,7 @@
 
 }
 
-
+@model IEnumerable<GetRecipeDTO>
 <div class="container">
     <div class="row">
         <div class="col-md-3">
@@ -44,8 +45,8 @@
                     <div class="card-body ">
                         <h5 class="card-title">Want to learn cooking but afraid it's hard? Visit our shop and grab your cooking secrets now!</h5>
                         <p class="card-text">Quick cooking tips for beginners</p>
-                        <a class="button button-dark mt-2">
-                            SHOP NOW
+                        <a class="button button-dark mt-2" href="/recipes">
+                            VIEW NOW
                             <i class="fas fa-hand-point-right animated-icon"></i>
                         </a>
                     </div>
@@ -145,24 +146,52 @@
 
         <div class="col-md-3">
             <p class="text-center my-3">Recipes we're leaving</p>
-            <div class="mb-2">
-                <img src="images/background.png" class="card-img-top" alt="Điền tiêu đề công thức ở đây">
-                <div class="card-body">
-                    <p class="card-title text-center">Điền tiêu đề công thức ở đây</p>
-                </div>
-            </div>
-            <div class="mb-2">
-                <img src="images/background.png" class="card-img-top" alt="Điền tiêu đề công thức ở đây">
-                <div class="card-body">
-                    <p class="card-title text-center">Điền tiêu đề công thức ở đây</p>
-                </div>
-            </div>
-            <div class="mb-2">
-                <img src="images/background.png" class="card-img-top" alt="Điền tiêu đề công thức ở đây">
-                <div class="card-body">
-                    <p class="card-title text-center">Điền tiêu đề công thức ở đây</p>
-                </div>
-            </div>
+
+            @foreach (var recipe in Model)
+            {
+                <a href="recipes/detail/@recipe.RecipeID">
+                    <div class="col">
+                        <div class="card recipe-card shadow-sm">
+                            <div class="card-body">
+                                <div class="image-container">
+                                    <img src=@(apiUrl+"images/"+recipe.ImageURL) class="card-img-top" alt="Recipe Image">
+                                    <div class="badges">
+                                        <span class="badge time">
+                                            <i class="far fa-clock"></i> @recipe.CookTime min
+                                        </span>
+                                        <span class="badge catename">
+                                            @recipe.CategoryName
+                                        </span>
+                                    </div>
+                                    <div class="favorite">
+                                        <i class="fas fa-heart"></i> @recipe.TotalFavorites
+                                    </div>
+                                </div>
+                                <h5 class="card-title">@recipe.Title</h5>
+                                <div class="card-more-delicious-item-footer">
+                                    <div class="author">
+                                        @if (recipe.Avatar != null)
+                                        {
+                                            <img alt="@recipe.FullName" src="@($"{apiUrl}images/{recipe.Avatar}")" height="30" width="30" />
+                                        }
+                                        else
+                                        {
+                                            <img src="/images/profile.jpg" alt="User Image" height="30" width="30">
+                                        }
+                                        <span>@recipe.FullName</span>
+                                    </div>
+                                    <div class="rating">
+                                        <span> @recipe.RatingAverage</span>
+                                        <i class="fas fa-star ms-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+            }
+
         </div>
     </div>
     <div class="ngancach"></div>
@@ -245,95 +274,6 @@
             </div>
 
         }
-
-
-    </div>
-    <div class="ngancach"></div>
-
-    <!-- Phần công thức -->
-    <div class="row">
-        <h2 class="my-6">Recipes</h2>
-        <div class="col-md-6">
-            <div class="recipe-image"></div>
-            <p class="my-2">Recipes News</p>
-            <h2 class="my-3">Tiêu đề công thức</h2>
-            <p>Mô tả về công thức</p>
-        </div>
-        <div class="col-md-6">
-            <h2>Lastest</h2>
-            <div class="latest-recipe">
-                <div class="col-8">
-                    <p>TEN DANH MUC</p>
-                    <h4>Tên công thức ở đây</h4>
-                </div>
-                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
-            </div>
-            <div class="latest-recipe">
-                <div class="col-8">
-                    <p>TEN DANH MUC</p>
-                    <h4>Tên công thức ở đây</h4>
-                </div>
-                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
-            </div>
-            <div class="latest-recipe">
-                <div class="col-8">
-                    <p>TEN DANH MUC</p>
-                    <h4>Tên công thức ở đây</h4>
-                </div>
-                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
-            </div>
-            <div class="latest-recipe">
-                <div class="col-8">
-                    <p>TEN DANH MUC</p>
-                    <h4>Tên công thức ở đây</h4>
-                </div>
-                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
-            </div>
-        </div>
-    </div>
-    <div class="ngancach"></div>
-
-    <!-- Phần Bài viết -->
-    <div class="row">
-        <h2 class="my-5">Article</h2>
-        <div class="col-md-5">
-            <div class="recipe-image"></div>
-            <p class="my-2">Article News</p>
-            <h2 class="my-3">Tiêu đề công thức</h2>
-            <p>Mô tả về công thức</p>
-        </div>
-        <div class="col-md-1"></div>
-        <div class="col-md-6">
-            <h2>Lastest</h2>
-            <div class="latest-recipe">
-                <div class="col-8">
-                    <p>TEN DANH MUC</p>
-                    <h4>Tên công thức ở đây</h4>
-                </div>
-                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
-            </div>
-            <div class="latest-recipe">
-                <div class="col-8">
-                    <p>TEN DANH MUC</p>
-                    <h4>Tên công thức ở đây</h4>
-                </div>
-                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
-            </div>
-            <div class="latest-recipe">
-                <div class="col-8">
-                    <p>TEN DANH MUC</p>
-                    <h4>Tên công thức ở đây</h4>
-                </div>
-                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
-            </div>
-            <div class="latest-recipe">
-                <div class="col-8">
-                    <p>TEN DANH MUC</p>
-                    <h4>Tên công thức ở đây</h4>
-                </div>
-                <div class="latest-recipe-image col-4" style="background-image: url('images/background.png');"></div>
-            </div>
-        </div>
     </div>
 </div>
 

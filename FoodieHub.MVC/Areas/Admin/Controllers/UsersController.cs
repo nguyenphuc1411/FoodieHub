@@ -41,6 +41,7 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             if (result.Success)
             {
                 NotificationHelper.SetSuccessNotification(this, result.Message);
+                return RedirectToAction("Index");
             }
             NotificationHelper.SetErrorNotification(this, result.Message);
             return View(user);
