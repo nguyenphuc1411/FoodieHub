@@ -1,17 +1,19 @@
 ﻿using FoodieHub.MVC.Helpers;
+using FoodieHub.MVC.Models.QueryModel;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
 
 namespace FoodieHub.MVC.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IAuthService authService;
-        public HomeController(IAuthService authService)
+        private readonly IRecipeService recipeService;
+        public HomeController(IAuthService authService, IRecipeService recipeService)
         {
             this.authService = authService;
+            this.recipeService = recipeService;
         }
 
         public async Task<IActionResult> Index()
@@ -31,7 +33,13 @@ namespace FoodieHub.MVC.Controllers
                     }
                 }           
             }
-            return View();
+            var query = new QueryRecipeModel
+            {
+                SortBy = "TotalFavorites",
+                PageSize = 3
+            };
+            var result = await recipeService.GetAll(query);
+            return View(result?.Items);
         }
      
     }
