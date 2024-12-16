@@ -1,122 +1,887 @@
 ﻿@using System.Text.Json.Nodes
-@inject IConfiguration config;
+@using FoodieHub.MVC.Models.Recipe
+@using FoodieHub.MVC.Service.Interfaces
+@inject IConfiguration config
+@inject ICommentService commentService
+@inject IFavoriteService favoriteService;
+@model DetailRecipeDTO
 
 @{
     var url = config["BaseHost"];
     ViewData["Title"] = "Recipe Details";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var comments = await commentService.GetCommentRecipe(Model.RecipeID);
+
+    var listFavorites = await favoriteService.GetFR() ?? new List<GetRecipeDTO>();
+
+    var userID = ViewBag.UserID ?? "";
 }
 
-@model JsonObject
+<div class="container-recipedetail">
+    <img alt="A plate of winter pasta with brown butter, hazelnuts, and kale" class="main-image" src="@(url + "images/" + Model.ImageURL)" width="800" />
+    <div class="main-content">
+        <div class="content">
+            <div class="title">
+                @Model.Title
+            </div>
+            <p>@Model.CreatedAt.ToString("dd MMM yyyy")</p>
 
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="text-primary">@Model["title"]?.ToString()</h1>
-        <div>
-            <a href="~/Admin/Recipes" class="btn btn-secondary me-2">Back to List</a>
-            <a href="~/Admin/Recipes/Edit/@Model["recipeID"]?.ToString()" class="btn btn-warning">Edit</a>
-        </div>
-    </div>
+            @{
+                var fullStars = (int)Math.Floor(Model.RatingAverage); // Số sao đầy
+                var hasHalfStar = Model.RatingAverage % 1 >= 0.5;     // Kiểm tra nửa sao
+                var emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Số sao rỗng
+            }
 
-    <div class="row">
-        <!-- Left Column: Recipe Details -->
-        <div class="col-lg-8 mb-4">
-            <div class="card shadow-sm">
-                <img src="@(url + "/images/" + Model["imageURL"]?.ToString())" alt="Recipe Image" class="card-img-top" />
-                <div class="card-body">
-                    <h5 class="card-title">Recipe Information</h5>
-                    <ul class="list-unstyled">
-                        <li><strong>Serves:</strong> @Model["serves"]?.ToString()</li>
-                        <li><strong>Prep Time:</strong> @Model["prepTime"]?.ToString()</li>
-                        <li><strong>Cook Time:</strong> @Model["cookTime"]?.ToString()</li>
-                    </ul>
-                    <hr />
-                    <h5 class="card-title">Ingredients</h5>
-                    <div>@Html.Raw(Model["ingredients"]?.ToString())</div>
-                    <hr />
-                    <h5 class="card-title">Directions</h5>
-                    <div>@Html.Raw(Model["Directions"]?.ToString())</div>
+            <div class="rating">
+                @for (var i = 0; i < fullStars; i++)
+                {
+                    <i class="fas fa-star"></i>
+                }
+                @if (hasHalfStar)
+                {
+                    <i class="fas fa-star-half-alt"></i>
+                }
+                @for (var i = 0; i < emptyStars; i++)
+                {
+                    <i class="far fa-star"></i>
+                }
+                <span>
+                    @Model.TotalRatings ratings
+                </span>
+            </div>
+            <div class="actions">
+                <div>
+                    @* @if (listFavorites.Select(x => x.RecipeID).Contains(Model.RecipeID))
+                    {
+                        <a asp-action="UnFavorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary">
+                            <i class="fas fa-bookmark"></i> UnSave
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Favorite" asp-route-id="@Model.RecipeID" class="btn btn-outline-secondary">
+                            <i class="far fa-bookmark"></i> Save
+                        </a>
+                    } *@
+
+                    <a class="btn btn-outline-secondary">
+                        <i class="far fa-bookmark"></i> Save
+                    </a>
                 </div>
             </div>
-        </div>
+            <div class="profile">
+                @if (Model.Avatar != null)
+                {
+                    <img src="@($"{url}images/{Model.Avatar}")" alt="User Image" class="rounded-circle me-3" width="60">
+                }
+                else
+                {
+                    <img src="/images/profile.jpg" alt="User Image" class="rounded-circle me-3" width="60">
+                }
+                <div class="profile-info">
+                    <h2>
+                        @Model.FullName
+                    </h2>
 
-        <!-- Right Column: Author and Additional Info -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm mb-4 text-center author-info">
-                <div class="card-body">
-                    <h5 class="card-title">Author Information</h5>
-                    <img src="@(Model["avatar"] != null ? (url + "/images/" + Model["avatar"].ToString()) : "/images/profile.jpg")"
-                         alt="Avatar"
-                         class="rounded-circle mb-3"
-                         style="width: 120px; height: 120px;" />
-                    <p class="card-text">@Model["fullname"]?.ToString()</p>
-                    <hr />
-                    <p><strong>Created At:</strong> @(DateTime.Parse(Model["createdAt"]?.ToString() ?? DateTime.MinValue.ToString()).ToString("dd/MM/yyyy HH:mm"))</p>
-                    <h5 class="card-title">Recipe Stats</h5>
-                    <p><strong>Total Comments:</strong> @Model["totalComment"]?.ToString()</p>
-                    <p><strong>Total Ratings:</strong> @Model["totalRating"]?.ToString()</p>
-                    <p><strong>Average Rating:</strong> @Model["averageRating"]?.ToString()</p>
-                    <p><strong>Total Favorites:</strong> @Model["totalFavorite"]?.ToString()</p>
                 </div>
+                @if (Model.UserID != userID)
+                {
+                    <a href=@("/account/userinfo/"+Model.UserID) class="btn btn-outline-secondary ms-auto">View Profile</a>
+                }
+            </div>
+            <div class="description-recipe">
+                <p class="description">
+                    @Html.Raw(Model.Description)
+                </p>
+                <div class="read-less">
+                    Read less
+                </div>
+                <div class="details">
+                    <div>
+                        <p class="label">
+                            Difficulty
+                        </p>
+                        <p class="value">
+                            Easy
+                            <i class="fas fa-thumbs-up">
+                            </i>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="label">
+                            Preparation
+                        </p>
+                        <p class="value">
+                            @Model.CookTime.ToString(@"HH\:mm") min
+                        </p>
+                    </div>
+                    <div>
+                        <p class="label">
+                            Baking
+                        </p>
+                        <p class="value">
+                            0 min
+                        </p>
+                    </div>
+                    <div>
+                        <p class="label">
+                            Resting
+                        </p>
+                        <p class="value">
+                            0 min
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="ingredients-container">
+                <div class="servings">
+                    <button id="decreaseServings" class="btn btn-outline-secondary">-</button>
+                    <span id="servingsValue">@Model.Serves</span>
+                    <button id="increaseServings" class="btn btn-outline-secondary">+</button>
+                    <span class="label">Servings</span>
+                </div>
+
+                <div class="ingredients" id="ingredientsList">
+                    @foreach (var ingredient in Model.Ingredients)
+                    {
+                        var hasProductID = ingredient.ProductID.HasValue;
+                        <div class="ingredient-item">
+                            <span class="ingredient-quantity" data-base-quantity="@ingredient.Quantity" data-unit="@ingredient.Unit">
+                                @ingredient.Quantity @ingredient.Unit
+                            </span>
+                            <span class="ingredient-name @(hasProductID ? "" : "text-black")" onclick="searchProduct('@ingredient.Name')" style="cursor: pointer;">
+                                @ingredient.Name
+                            </span>
+                        </div>
+                    }
+                </div>
+                <div class="divider"></div>
+            </div>
+
+            <div class="steps-container">
+                @foreach (var item in Model.Steps.Select((value, index) => new { value, index }))
+                {
+                    <div class="step-title">
+                        Step @(@item.index + 1)
+                    </div>
+                    <div class="row">
+                        @if (!string.IsNullOrEmpty(item.value.ImageURL))
+                        {
+                            <div class="image-container">
+                                <img src="@(url + "images/" + item.value.ImageURL)" class="img-fluid mb-2 rounded shadow-sm " alt="Step Image" height="400" width="600">
+                            </div>
+                            <div class="description">
+                                <p>@Html.Raw(item.value.Directions)</p>
+                            </div>
+
+                        }
+                        else
+                        {
+                            <p>@Html.Raw(item.value.Directions)</p>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
 </div>
 
-<!-- Styling -->
+
 <style>
-    .card {
-        border: none;
+    .container-recipedetail {
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: #fff;
         border-radius: 10px;
-        background-color: #ffffff;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
     }
 
-    .card-img-top {
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
-        max-height: 400px;
-        object-fit: cover;
+    .main-image {
+        width: 100%;
+        border-bottom: 1px solid #e0e0e0;
     }
 
-    .author-info {
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 10px;
+    .content {
         padding: 20px;
     }
 
-        .author-info img {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 120px;
-            height: 120px;
+    .title {
+        font-size: 24px;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .rating {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .rating i {
+            color: #ff6600;
+            margin-right: 5px;
         }
 
-    .btn-secondary, .btn-warning {
-        font-size: 0.95rem;
-        padding: 0.5rem 1.5rem;
-    }
-
-    .btn-warning {
-        background-color: #ffba00;
-        border: none;
-    }
-
-        .btn-secondary:hover, .btn-warning:hover {
-            opacity: 0.9;
+        .rating span {
+            font-size: 14px;
+            color: #666;
+            margin-left: 10px;
         }
 
-    ul {
-        padding-left: 0;
+    .actions {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
     }
 
-        ul li {
-            list-style: none;
-            margin-bottom: 0.5rem;
+        .actions div {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            font-size: 14px;
+            color: #666;
         }
 
-    p {
-        line-height: 1.75;
-        color: #4a4a4a;
+        .actions i {
+            margin-right: 5px;
+        }
+
+    .more-delicious {
+        padding: 20px;
+        border-top: 1px solid #e0e0e0;
     }
+
+    .more-delicious-title {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .more-delicious-items {
+        height: 1200px;
+        padding: 5px;
+        overflow: auto;
+    }
+
+    .more-delicious-item {
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        align-items: center;
+        position: relative;
+        color: #555;
+        transition: transform 0.3s ease;
+        overflow: visible; /* Đảm bảo không bị cắt mất */
+        transform-origin: center; /* Phóng lớn từ trung tâm */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        margin: 5px;
+    }
+
+        .more-delicious-item:hover {
+            transform: scale(1.05); /* Phóng lớn nhẹ */
+            z-index: 10; /* Đảm bảo nổi lên trên các phần tử khác */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+
+        .more-delicious-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .more-delicious-item .time-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 2px 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            z-index: 1;
+        }
+
+            .more-delicious-item .time-label i {
+                margin-right: 5px;
+            }
+
+        .more-delicious-item div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .more-delicious-item .item-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .more-delicious-item .item-info {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+            .more-delicious-item .item-info span {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.5);
+                color: #fff;
+                padding: 2px 5px;
+                border-radius: 5px;
+            }
+
+            .more-delicious-item .item-info i {
+                margin-right: 5px;
+            }
+
+    .main-content {
+        flex-direction: row;
+    }
+
+    .profile {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .profile img {
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+        }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .profile-info h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .profile-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+    .description-recipe {
+        font-size: 16px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .read-less {
+        color: #e94e77;
+        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .description {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        max-height: 4.5em;
+        transition: max-height 0.3s ease;
+    }
+
+        .description.expanded {
+            -webkit-line-clamp: unset;
+            max-height: none;
+        }
+
+    .details {
+        display: flex;
+        justify-content: space-between;
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+        .details div {
+            text-align: center;
+        }
+
+            .details div p {
+                margin: 5px 0;
+            }
+
+            .details div .label {
+                font-size: 14px;
+                color: #666;
+            }
+
+            .details div .value {
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+    .ingredients-container {
+        padding: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+        .ingredients-container .servings {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .ingredients-container .servings button {
+                background-color: #f5f5f5;
+                border: none;
+                padding: 10px;
+                font-size: 18px;
+                cursor: pointer;
+            }
+
+            .ingredients-container .servings span {
+                margin: 0 10px;
+                font-size: 18px;
+            }
+
+            .ingredients-container .servings .label {
+                margin-left: 10px;
+                font-size: 18px;
+            }
+
+        .ingredients-container .ingredients {
+            margin-bottom: 20px;
+        }
+
+            .ingredients-container .ingredients div {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+            }
+
+                .ingredients-container .ingredients div span {
+                    font-size: 16px;
+                }
+
+                    .ingredients-container .ingredients div span:first-child {
+                        flex: 0 0 100px;
+                    }
+
+                    .ingredients-container .ingredients div span:nth-child(2) {
+                        color: red;
+                        flex: 1;
+                    }
+
+        .ingredients-container .button-container {
+            text-align: center;
+        }
+
+            .ingredients-container .button-container button {
+                background-color: #006400;
+                color: #fff;
+                border: none;
+                padding: 15px 30px;
+                font-size: 16px;
+                cursor: pointer;
+                border-radius: 25px;
+            }
+
+                .ingredients-container .button-container button i {
+                    margin-right: 10px;
+                }
+
+        .ingredients-container .divider {
+            border-top: 1px solid #ccc;
+            margin-top: 20px;
+        }
+
+    .steps-container {
+        padding: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+        .steps-container .step-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .steps-container .image-container {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+            .steps-container .image-container img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+
+        .steps-container .ingredients, .steps-container .tools {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+            .steps-container .ingredients i, .steps-container .tools i {
+                margin-right: 5px;
+            }
+
+        .steps-container .description {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+    h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .card-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        overflow-x: hidden;
+    }
+
+    .card-more-delicious-item {
+        position: relative;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        width: 250px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+        .card-more-delicious-item img {
+            width: 100%;
+            height: auto;
+        }
+
+    .card-more-delicious-item-content {
+        padding: 5px;
+        position: relative;
+    }
+
+        .card-more-delicious-item-content img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .card-more-delicious-item-content h3 {
+            font-size: 15px;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .card-more-delicious-item-content p {
+            font-size: 14px;
+            color: #555;
+        }
+
+    .badges {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+    .badge {
+        color: #fff;
+        font-size: 10px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 3px 8px; /* Add padding for better readability */
+    }
+
+        .badge.catename {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .badge.time {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+    .card-more-delicious-item-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0px 15px;
+        border-top: 1px solid #ddd;
+    }
+
+        .card-more-delicious-item-footer .author {
+            display: flex;
+            align-items: center;
+        }
+
+            .card-more-delicious-item-footer .author img {
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                margin-right: 10px;
+            }
+
+        .card-more-delicious-item-footer .rating {
+            display: flex;
+            align-items: center;
+        }
+
+            .card-more-delicious-item-footer .rating i {
+                margin-right: 5px;
+            }
+
+
+
+    .comments-section {
+        margin-top: 40px;
+    }
+
+        .comments-section h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+    .comment {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+        .comment img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+        }
+
+    .comment-content {
+        max-width: 800px;
+    }
+
+        .comment-content h4 {
+            font-size: 16px;
+            margin: 0 0 5px 0;
+        }
+
+        .comment-content p {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .comment-content .comment-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+    .add-comment {
+        display: flex;
+        align-items: flex-start;
+        margin-top: 20px;
+    }
+
+        .add-comment img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+        }
+
+        .add-comment textarea {
+            width: 100%;
+            max-width: 800px;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            resize: none;
+        }
+
+        .add-comment button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            .add-comment button:hover {
+                background-color: #218838;
+            }
+
+    .star {
+        font-size: 30px;
+        color: gray;
+        text-decoration: none;
+    }
+
+        .star.selected {
+            color: gold;
+        }
+
+        .star:hover {
+            color: gold;
+        }
+
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 36px;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        filter: invert(100%);
+    }
+
 </style>
+
+<script>
+    function openEditModal(commentID, commentContent,recipeID) {
+        // Set values in the modal
+        document.getElementById('editCommentID').value = commentID;
+        document.getElementById('editCommentContent').value = commentContent;
+        document.getElementById('recipeID').value = recipeID;
+
+        // Show the modal
+        var editModal = new bootstrap.Modal(document.getElementById('editCommentModal'));
+        editModal.show();
+    }
+
+
+
+    const stars = document.querySelectorAll('.star');
+    let selectedRating = 0;  // Lưu giá trị rating khi click
+
+    // Hàm tô sáng các sao dựa trên rating
+    function highlightStars(rating) {
+        stars.forEach(star => {
+            if (parseInt(star.getAttribute('data-value')) <= rating) {
+                star.classList.add('selected'); // Thêm class 'selected' cho các sao nhỏ hơn hoặc bằng rating
+            } else {
+                star.classList.remove('selected'); // Bỏ class 'selected' cho các sao lớn hơn rating
+            }
+        });
+    }
+
+    // Xử lý sự kiện hover trên các sao
+    stars.forEach(star => {
+        star.addEventListener('mouseover', function () {
+            const rating = this.getAttribute('data-value');
+            highlightStars(rating); // Tô sáng các sao khi hover
+            document.getElementById('ratingText').textContent = `Rate ${rating} stars`; // Hiển thị văn bản khi hover
+        });
+
+        // Xử lý khi hover ra ngoài
+        star.addEventListener('mouseout', function () {
+            highlightStars(selectedRating); // Quay lại trạng thái rating đã chọn khi hover ra ngoài
+            if (selectedRating === 0) {
+                document.getElementById('ratingText').textContent = 'Hover over the stars to rate'; // Văn bản mặc định
+            }
+        });
+
+        // Xử lý khi click vào sao
+        star.addEventListener('click', function () {
+            selectedRating = this.getAttribute('data-value');  // Gán rating đã chọn khi click
+            highlightStars(selectedRating);  // Tô sáng các sao dựa trên rating đã chọn
+            document.getElementById('ratingText').textContent = `You rated ${selectedRating} stars`; // Cập nhật văn bản khi click
+        });
+    });
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const decreaseButton = document.getElementById('decreaseServings');
+        const increaseButton = document.getElementById('increaseServings');
+        const servingsValue = document.getElementById('servingsValue');
+        const ingredientsList = document.getElementById('ingredientsList');
+
+        let currentServings = parseInt(servingsValue.textContent);
+        const baseServings = currentServings;
+
+        const updateIngredients = () => {
+            const ingredientItems = ingredientsList.querySelectorAll('.ingredient-item');
+
+            ingredientItems.forEach(item => {
+                const quantityElement = item.querySelector('.ingredient-quantity');
+                const baseQuantity = parseFloat(quantityElement.getAttribute('data-base-quantity'));
+                const unit = quantityElement.getAttribute('data-unit');
+                const newQuantity = (baseQuantity / baseServings) * currentServings;
+                quantityElement.textContent = `${newQuantity.toFixed(2)} ${unit}`;
+            });
+        };
+
+        decreaseButton.addEventListener('click', () => {
+            if (currentServings > 1) {
+                currentServings--;
+                servingsValue.textContent = currentServings;
+                updateIngredients();
+            }
+        });
+
+        increaseButton.addEventListener('click', () => {
+            currentServings++;
+            servingsValue.textContent = currentServings;
+            updateIngredients();
+        });
+    });
+    function searchProduct(name) {
+        if (!name) {
+            alert('Ingredient name not found.');
+            return;
+        }
+
+        // Chuyển hướng đến controller
+        window.location.href = `/Products?searchName=${encodeURIComponent(name)}`;
+    }
+
+    document.querySelector('.read-less').addEventListener('click', function () {
+        const description = document.querySelector('.description');
+        if (description.classList.contains('expanded')) {
+            description.classList.remove('expanded');
+            this.textContent = 'Read more';
+        } else {
+            description.classList.add('expanded');
+            this.textContent = 'Read less';
+        }
+    });
+</script>
