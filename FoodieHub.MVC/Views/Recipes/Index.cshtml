@@ -5,13 +5,14 @@
 @inject IRecipeCategoryService categoryService
 @inject IUserService userService
 @inject IConfiguration config
+@inject IFavoriteService favoriteService;
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = config["BaseHost"];
     var query = ViewBag.Query as QueryRecipeModel ?? new QueryRecipeModel();
     var categories = await categoryService.GetAll();
-
+    var listFavorites = await favoriteService.GetFR() ?? new List<GetRecipeDTO>();
     var admins = await userService.GetAdmin();
 }
 @model PaginatedModel<GetRecipeDTO>
@@ -162,20 +163,38 @@
                     <a href="recipes/detail/@recipe.RecipeID">
                         <div class="col">
                             <div class="card recipe-card shadow-sm">
-                                <img src=@(url+"images/"+recipe.ImageURL) class="card-img-top" alt="Recipe Image">
                                 <div class="card-body">
+                                    <div class="image-container">
+                                        <img src=@(url+"images/"+recipe.ImageURL) class="card-img-top" alt="Recipe Image">
+                                        <div class="badges">
+                                            <span class="badge time">
+                                                <i class="far fa-clock"></i> @recipe.CookTime min
+                                            </span>
+                                            <span class="badge catename">
+                                                @recipe.CategoryName
+                                            </span>
+                                        </div>
+                                        <div class="favorite">
+                                            <i class="fas fa-heart"></i> @recipe.TotalFavorites
+                                        </div>
+                                    </div>
                                     <h5 class="card-title">@recipe.Title</h5>
-                                    <p class="card-text">@Html.Raw(recipe.Description)</p>
-                                    <div class="recipe-stats">
-                                        <span>Created on: @recipe.CreatedAt</span>
-                                        <span>Likes: @recipe.TotalFavorites</span>
-                                    </div>
-                                    <div class="recipe-stats">
-                                        <span>Rating: @recipe.RatingAverage/5 (@recipe.TotalRatings)</span>
-                                        <span>Comments: @recipe.TotalComments</span>
-                                    </div>
-                                    <div class="recipe-stats">
-                                        <span>Cooking Time: @recipe.CookTime</span>
+                                    <div class="card-more-delicious-item-footer">
+                                        <div class="author">
+                                            @if (recipe.Avatar != null)
+                                            {
+                                                <img alt="@recipe.FullName" src="@($"{url}images/{recipe.Avatar}")" height="30" width="30" />
+                                            }
+                                            else
+                                            {
+                                                <img src="/images/profile.jpg" alt="User Image" height="30" width="30">
+                                            }
+                                            <span>@recipe.FullName</span>
+                                        </div>
+                                        <div class="rating">
+                                            <span> @recipe.RatingAverage</span>
+                                            <i class="fas fa-star ms-1"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -309,7 +328,8 @@
         }
 
         .recipe-card .card-body {
-            padding: 20px;
+            padding: 10px;
+            position: relative;
         }
 
         .recipe-card .card-title {
@@ -323,13 +343,64 @@
             color: #555;
         }
 
-    .recipe-stats {
-        display: flex;
-        justify-content: space-between;
-        font-size: 14px;
-        color: #777;
-        margin-top: 10px;
+    .image-container {
+        position: relative;
+        width: 100%;
     }
+
+        .image-container img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+    .badges {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        gap: 8px; /* Khoảng cách giữa các badge */
+        align-items: center;
+    }
+
+    .badge {
+        color: #fff;
+        font-size: 12px;
+        border-radius: 10px;
+        padding: 5px 8px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .badge.time {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.catename {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+    .favorite {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background-color: #fff;
+        color: #333;
+        font-size: 15px;
+        border-radius: 15px;
+        padding: 5px 8px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .favorite i {
+            color: #ff6b6b;
+        }
 
     /* Profile Section */
     .profile-card {
@@ -365,4 +436,50 @@
         letter-spacing: 0.5px;
         cursor: pointer;
     }
+
+    .card-more-delicious-item-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        border-top: 1px solid #ddd;
+    }
+
+        .card-more-delicious-item-footer .author {
+            display: flex;
+            align-items: center;
+        }
+
+            .card-more-delicious-item-footer .author img {
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                margin-right: 10px;
+            }
+
+        .card-more-delicious-item-footer .rating {
+            display: flex;
+            align-items: center;
+        }
+
+            .card-more-delicious-item-footer .rating i {
+                margin-right: 5px;
+            }
+
+    .rating {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .rating i {
+            color: #ff6600;
+            margin-right: 5px;
+        }
+
+        .rating span {
+            font-size: 14px;
+            color: #666;
+            margin-left: 10px;
+        }
 </style>

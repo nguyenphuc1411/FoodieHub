@@ -228,13 +228,14 @@
                                     <div class="col-md-4 d-flex justify-content-center">
                                         <div class="card-more-delicious-item">
                                             <a href="@Url.Action("Detail", "Recipes", new { id = recipe.RecipeID })">
-                                                <img alt="@recipe.Title" src="@(url + "images/" + recipe.ImageURL)" height="150" width="250" />
+                                                
                                                 <div class="card-more-delicious-item-content">
+                                                    <img alt="@recipe.Title" src="@(url + "images/" + recipe.ImageURL)" height="150" width="250" />
                                                     <div class="badges">
                                                         <span class="badge time">
                                                             <i class="far fa-clock"></i> @recipe.CookTime min
                                                         </span>
-                                                        <span class="badge vegetarian">
+                                                        <span class="badge catename">
                                                             @recipe.CategoryName
                                                         </span>
                                                     </div>
@@ -278,8 +279,6 @@
 
     <!-- Reviews Section -->
     <div id="reviews" class="mt-5">
-
-
         <!-- Create Comment Form -->
         <form asp-action="CreateComment" method="post" class="mb-4">
             <div class="d-flex justify-content-between">
@@ -751,6 +750,7 @@
     }
 
     .card-more-delicious-item {
+        position: relative;
         background-color: white;
         border: 1px solid #ddd;
         border-radius: 8px;
@@ -765,11 +765,19 @@
         }
 
     .card-more-delicious-item-content {
-        padding: 15px;
+        padding: 5px;
+        position: relative;
     }
 
+        .card-more-delicious-item-content img{
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
         .card-more-delicious-item-content h3 {
-            font-size: 18px;
+            font-size: 15px;
             margin: 10px 0;
             color: #333;
         }
@@ -779,11 +787,41 @@
             color: #555;
         }
 
+    .badges {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+    .badge {
+        color: #fff;
+        font-size: 10px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 3px 8px; /* Add padding for better readability */
+    }
+
+        .badge.catename {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .badge.time {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
     .card-more-delicious-item-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 10px 15px;
+        padding: 0px 15px;
         border-top: 1px solid #ddd;
     }
 
@@ -808,24 +846,7 @@
                 margin-right: 5px;
             }
 
-    .badge {
-        display: inline-block;
-        padding: 5px 10px;
-        background-color: #eee;
-        border-radius: 5px;
-        font-size: 12px;
-        margin-right: 5px;
-    }
-
-        .badge.vegetarian {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .badge.time {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
+    
 
     .comments-section {
         margin-top: 40px;
