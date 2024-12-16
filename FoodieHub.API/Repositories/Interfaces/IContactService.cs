@@ -7,5 +7,6 @@ namespace FoodieHub.API.Repositories.Interfaces
     {
         Task<ServiceResponse> AddContact(ContactDTO contact);
         Task<ServiceResponse> Get();
+        Task<ServiceResponse> ToggleIsRead(int Id);
     }
 }

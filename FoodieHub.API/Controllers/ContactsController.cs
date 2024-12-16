@@ -26,5 +26,12 @@ namespace FoodieHub.API.Controllers
             var result = await _service.Get();
             return StatusCode(result.StatusCode, result);
         }
+
+        [HttpPut("ToggleIsRead/{id}")]
+        public async Task<IActionResult> ToggleIsRead(int id)
+        {
+            var response = await _service.ToggleIsRead(id);
+            return StatusCode(response.StatusCode, response);
+        }
     }
 }

@@ -62,5 +62,46 @@ namespace FoodieHub.API.Repositories.Implementations
                 StatusCode = 200
             };
         }
+
+        public async Task<ServiceResponse> ToggleIsRead(int Id)
+        {
+            // Tìm contact theo Id
+            var contact = await _appDbContext.Contacts.FirstOrDefaultAsync(c => c.Id == Id);
+
+            if (contact == null)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Contact not found.",
+                    StatusCode = 404
+                };
+            }
+
+            contact.IsRead = !contact.IsRead;
+
+            var result = await _appDbContext.SaveChangesAsync();
+
+            if (result > 0)
+            {
+                return new ServiceResponse
+                {
+                    Success = true,
+                    Message = "Contact status updated successfully.",
+                    Data = _mapper.Map<GetContact>(contact),
+                    StatusCode = 200
+                };
+            }
+            else
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Failed to update contact status.",
+                    StatusCode = 400
+                };
+            }
+        }
+
     }
 }

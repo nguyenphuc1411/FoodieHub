@@ -16,7 +16,7 @@ namespace FoodieHub.MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> AddContact(ContactDTO contact)
         {
-            var httpResponse = await _httpClient.PostAsJsonAsync("Contact/AddContact", contact);
+            var httpResponse = await _httpClient.PostAsJsonAsync("Contacts/AddContact", contact);
             var apiResponse = await httpResponse.Content.ReadFromJsonAsync<APIResponse>();
             if (apiResponse!=null && apiResponse.Success)
             {

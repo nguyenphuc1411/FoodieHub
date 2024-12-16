@@ -159,13 +159,29 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
 
         private async Task GetContactInfo()
         {
-            var responseContact = await _httpClient.GetAsync("Contact");
+            var responseContact = await _httpClient.GetAsync("Contacts");
             
             if (responseContact.IsSuccessStatusCode)
             {
                 var contentContact = await responseContact.Content.ReadFromJsonAsync<APIResponse<List<GetContact>>>();
                 ViewBag.ContactInfo = contentContact.Data;
             }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> ToggleIsRead(int id)
+        {
+            var response = await _httpClient.PutAsync($"Contacts/ToggleIsRead/{id}", null);
+            var content = await response.Content.ReadFromJsonAsync<APIResponse>();
+            if (content.Success)
+            {
+                TempData["SuccessMessage"] = content.Message;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = content.Message;
+            }
+            return RedirectToAction("Index");
         }
     }
 }

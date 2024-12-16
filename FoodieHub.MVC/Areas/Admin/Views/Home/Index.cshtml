@@ -357,8 +357,8 @@
                                     @foreach (var item in topSelling)
                                         {
                                             <tr>
-                                                <th scope="row"><a href="@($"/admin/products/details/{item.ProductID}")"><img src="@(url+"/images/"+item.ImageUrl)" alt="@item.ProductName"></a></th>
-                                                <td><a href="@($"/admin/products/details/{item.ProductID}")" class="text-primary fw-bold">@item.ProductName</a></td>
+                                                <th scope="row"><img src="@(url+"/images/"+item.ImageUrl)" alt="@item.ProductName"></th>
+                                                <td>@item.ProductName</td>
                                                 <td>$@item.Price</td>
                                                 <td class="fw-bold">@item.Sold</td>
                                                 <td>$@item.TotalRevenue</td>
@@ -460,7 +460,9 @@
                                 <tbody>
                                     @foreach (var contact in dataContact)
                                     {
-                                        <tr class="contact-row" data-fullname="@contact.FullName"
+                                        <tr class="contact-row"
+                                            data-id="@contact.Id"
+                                            data-fullname="@contact.FullName"
                                             data-email="@contact.Email" data-phonenumber="@contact.PhoneNumber"
                                             data-note="@contact.Note" data-isread="@contact.IsRead"
                                             data-createddate="@contact.CreatedDate.ToString("yyyy-MM-dd")"
@@ -480,145 +482,6 @@
                                 </tbody>
                             </table>
                         </div>
-                        <!-- Modal -->
-                        <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="contactModalLabel">Contact Details</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <strong>Full Name:</strong> <span id="modalFullName"></span>
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Email:</strong> <span id="modalEmail"></span>
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Phone Number:</strong> <span id="modalPhoneNumber"></span>
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Note:</strong> <span id="modalNote"></span>
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Is Read:</strong> <span id="modalIsRead"></span>
-                                            <div class="toggle-border">
-                                                <input id="one" type="checkbox">
-                                                <label for="one">
-                                                    <div class="handle"></div>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Created Date:</strong> <span id="modalCreatedDate"></span>
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Product Name:</strong> <span id="modalProductName"></span>
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Product Image:</strong><br />
-                                            <img class="img-fluid" id="modalProductImage" src="" alt="Product Image" style="width: 200px; height: 200px; object-fit: cover;" />
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <style>
-                            /* From Uiverse.io by cssbuttons-io */
-                            .toggle-border {
-                                border: 2px solid #f0ebeb;
-                                border-radius: 130px;
-                                margin-bottom: 45px;
-                                padding: 1px 2px;
-                                background: linear-gradient(to bottom right, white, rgba(220,220,220,.5)), white;
-                                box-shadow: 0 0 0 2px #fbfbfb;
-                                cursor: pointer;
-                                display: flex;
-                                align-items: center;
-                                width: 65px;
-                            }
-
-                                .toggle-border:last-child {
-                                    margin-bottom: 0;
-                                }
-
-                                .toggle-border input[type="checkbox"] {
-                                    display: none;
-                                }
-
-                                .toggle-border label {
-                                    position: relative;
-                                    display: inline-block;
-                                    width: 65px;
-                                    height: 20px;
-                                    background: #d13613;
-                                    border-radius: 80px;
-                                    cursor: pointer;
-                                    box-shadow: inset 0 0 16px rgba(0,0,0,.3);
-                                    transition: background .5s;
-                                }
-
-                                .toggle-border input[type="checkbox"]:checked + label {
-                                    background: #13d162;
-                                }
-
-                            .handle {
-                                position: absolute;
-                                top: -8px;
-                                left: -10px;
-                                width: 35px;
-                                height: 35px;
-                                border: 1px solid #e5e5e5;
-                                background: repeating-radial-gradient(circle at 50% 50%, rgba(200,200,200,.2) 0%, rgba(200,200,200,.2) 2%, transparent 2%, transparent 3%, rgba(200,200,200,.2) 3%, transparent 3%), conic-gradient(white 0%, silver 10%, white 35%, silver 45%, white 60%, silver 70%, white 80%, silver 95%, white 100%);
-                                border-radius: 50%;
-                                box-shadow: 3px 5px 10px 0 rgba(0,0,0,.4);
-                                transition: left .4s;
-                            }
-
-                            .toggle-border input[type="checkbox"]:checked + label > .handle {
-                                left: calc(100% - 35px + 10px);
-                            }
-                        </style>
-                        <script>
-                            // Wait for the DOM to load
-                            document.addEventListener("DOMContentLoaded", function () {
-                                // Select all rows with the class 'contact-row'
-                                const rows = document.querySelectorAll('.contact-row');
-
-                                // Add event listener to each row
-                                rows.forEach(function (row) {
-                                    row.addEventListener('click', function () {
-                                        // Get data attributes from the clicked row
-                                        const fullName = row.getAttribute('data-fullname');
-                                        const email = row.getAttribute('data-email');
-                                        const phoneNumber = row.getAttribute('data-phonenumber');
-                                        const note = row.getAttribute('data-note');
-                                        const isRead = row.getAttribute('data-isread') === 'True' ? 'Yes' : 'No';  // Show "Yes" or "No" for IsRead
-                                        const createdDate = row.getAttribute('data-createddate');
-                                        const productName = row.getAttribute('data-productname');
-                                        const productImage = row.getAttribute('data-productimage');
-
-                                        // Populate the modal with the data
-                                        document.getElementById('modalFullName').innerText = fullName;
-                                        document.getElementById('modalEmail').innerText = email;
-                                        document.getElementById('modalPhoneNumber').innerText = phoneNumber;
-                                        document.getElementById('modalNote').innerText = note;
-                                        document.getElementById('modalIsRead').innerText = isRead;
-                                        document.getElementById('modalCreatedDate').innerText = createdDate;
-                                        document.getElementById('modalProductName').innerText = productName;
-                                        document.getElementById('modalProductImage').src = productImage;
-
-                                        // Show the modal
-                                        var myModal = new bootstrap.Modal(document.getElementById('contactModal'));
-                                        myModal.show();
-                                    });
-                                });
-                            });
-                        </script>
 
                     </div>
                 </div>
@@ -632,7 +495,165 @@
 </div><!-- End #main -->
 
  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel">Contact Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>Full Name:</strong> <span id="modalFullName"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Email:</strong> <span id="modalEmail"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Phone Number:</strong> <span id="modalPhoneNumber"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Note:</strong> <span id="modalNote"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Is Read:</strong>
+                    <span id="modalIsRead"></span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleIsRead" aria-label="Toggle Read Status">
+                        <div class="toggle-switch-background">
+                            <div class="toggle-switch-handle"></div>
+                        </div>
+                    </label>
+                </div>
+                <div class="mb-3">
+                    <strong>Created Date:</strong> <span id="modalCreatedDate"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Product Name:</strong> <span id="modalProductName"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Product Image:</strong><br />
+                    <img class="img-fluid" id="modalProductImage" src="" alt="Product Image" style="width: 200px; height: 200px; object-fit: cover;" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px; /* Giảm chiều rộng */
+        height: 25px; /* Giảm chiều cao */
+        cursor: pointer;
+    }
 
+        .toggle-switch input[type="checkbox"] {
+            display: none;
+        }
+
+    .toggle-switch-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #ddd;
+        border-radius: 15px; /* Điều chỉnh để tròn đều theo chiều cao */
+        box-shadow: inset 0 0 0 2px #ccc;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .toggle-switch-handle {
+        position: absolute;
+        top: 2.5px; /* Căn chỉnh để handle vừa vặn */
+        left: 2.5px; /* Căn chỉnh để handle vừa vặn */
+        width: 20px; /* Giảm kích thước handle */
+        height: 20px; /* Giảm kích thước handle */
+        background-color: #fff;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .toggle-switch input[type="checkbox"]:checked + .toggle-switch-background {
+        background-color: #05c46b;
+        box-shadow: inset 0 0 0 2px #04b360;
+    }
+
+        .toggle-switch input[type="checkbox"]:checked + .toggle-switch-background .toggle-switch-handle {
+            transform: translateX(25px); /* Điều chỉnh vị trí di chuyển khi bật */
+        }
+</style>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const rows = document.querySelectorAll('.contact-row');
+
+        rows.forEach(function (row) {
+            row.addEventListener('click', function () {
+                const contactId = row.getAttribute('data-id');  // Add data-id attribute to the row
+                const fullName = row.getAttribute('data-fullname');
+                const email = row.getAttribute('data-email');
+                const phoneNumber = row.getAttribute('data-phonenumber');
+                const note = row.getAttribute('data-note');
+                let isRead = row.getAttribute('data-isread') === 'True';  // Set initial value as boolean
+                const createdDate = row.getAttribute('data-createddate');
+                const productName = row.getAttribute('data-productname');
+                const productImage = row.getAttribute('data-productimage');
+
+                // Update modal content
+                document.getElementById('modalFullName').innerText = fullName;
+                document.getElementById('modalEmail').innerText = email;
+                document.getElementById('modalPhoneNumber').innerText = phoneNumber;
+                document.getElementById('modalNote').innerText = note;
+                document.getElementById('modalCreatedDate').innerText = createdDate;
+                document.getElementById('modalProductName').innerText = productName;
+                document.getElementById('modalProductImage').src = productImage;
+
+                // Set the initial IsRead value and toggle button state
+                const modalIsRead = document.getElementById('modalIsRead');
+                modalIsRead.innerText = isRead ? 'Yes' : 'No';
+
+                const toggleButton = document.getElementById('toggleIsRead');
+                toggleButton.checked = isRead;
+                toggleButton.onclick = async function () {
+                    try {
+                        const response = await fetch(`/Admin/Home/ToggleIsRead/${contactId}`, {
+                            method: 'PUT',
+                        });
+
+                        if (response.ok) {
+                            // Toggle the IsRead status without refreshing the page
+                            isRead = !isRead;  // Toggle the boolean value
+                            modalIsRead.innerText = isRead ? 'Yes' : 'No';  // Update modal text
+                            toggleButton.checked = isRead;  // Ensure the toggle button reflects the status
+                        } else {
+                            console.error('Error updating IsRead status');
+                        }
+                    } catch (error) {
+                        console.error('Error updating IsRead status:', error);
+                    }
+                };
+
+                // Show the modal
+                const myModal = new bootstrap.Modal(document.getElementById('contactModal'));
+                myModal.show();
+
+                document.getElementById('contactModal').addEventListener('hidden.bs.modal', function () {
+                    // This will refresh the page when the modal is closed
+                    window.location.reload();
+                });
+            });
+        });
+    });
+
+</script>
 <script>
     const orderReportData = JSON.parse('@Html.Raw(Json.Serialize(orderReport))');
 
@@ -709,9 +730,6 @@
         }
     });
 </script>
-
-
-
 <style>
    :root {
   scroll-behavior: smooth;
