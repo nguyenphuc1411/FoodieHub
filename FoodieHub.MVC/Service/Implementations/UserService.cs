@@ -31,6 +31,7 @@ namespace FoodieHub.MVC.Service.Implementations
                 content.Add(new StringContent(user.IsActive.ToString()), "IsActive");
                 content.Add(new StringContent(user.Role), "Role");
                 content.Add(new StringContent(user.Password), "Password");
+                content.Add(new StringContent(user.ConfirmPassword), "ConfirmPassword");
 
                 if (user.File != null && user.File.Length > 0)
                 {

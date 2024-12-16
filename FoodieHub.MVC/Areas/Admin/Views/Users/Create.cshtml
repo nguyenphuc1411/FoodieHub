@@ -52,6 +52,11 @@
             <input type="password" class="form-control" asp-for="Password" />
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
+        <div class="mb-3">
+            <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" asp-for="ConfirmPassword" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
 
         @* IsActive *@
         <div class="form-check mb-3">
