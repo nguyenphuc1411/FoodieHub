@@ -211,18 +211,7 @@
         @foreach (var item in latestProducts)
         {
 
-            var listReviewOrther = await _reviewService.GetListReview(item.ProductID);
-
-
-            int averageRatingOther = 0;
-            if (listReviewOrther.Data!=null)
-            {
-                double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
-                double avgRate = totalRate / listReviewOrther.Data.Count;  // Trung bình rate
-
-                // Làm tròn: nếu avgRate >= 3.5, làm tròn lên, nếu < 3.5, làm tròn xuống
-                averageRatingOther = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
-            }
+           
 
             <div class="card d-flex position-relative">
                 <!-- Nhãn "New" -->
@@ -264,6 +253,17 @@
                             </div>
                         }
                         <div class="col-sm-6 text-end">
+                              @{
+                                    var listReviewOrther = await _reviewService.GetListReview(item.ProductID);
+                                    int averageRatingOther = 0;
+                                    if (listReviewOrther.Data!=null&& listReviewOrther.Data.Any())
+                                    {
+                                        double totalRate = listReviewOrther.Data.Sum(x => x.RatingValue); // Tổng tất cả rate
+                                        double avgRate = totalRate / listReviewOrther.Data.Count;  // Trung bình rate
+
+                                        averageRatingOther = avgRate >= 3.5 ? (int)Math.Ceiling(avgRate) : (int)Math.Floor(avgRate);
+                                    }
+                                }
                             <div class="product-rating">@averageRatingOther ★</div>
                         </div>
                     </div>
