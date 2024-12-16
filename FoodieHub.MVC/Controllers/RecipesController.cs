@@ -98,7 +98,6 @@ namespace FoodieHub.MVC.Controllers
 
         public async Task<IActionResult> Index(QueryRecipeModel query)
         {
-            // Lấy danh sách công thức
             query.IsActive = true;
             var recipes = await _recipeService.GetAll(query);
             ViewBag.Query = query;
