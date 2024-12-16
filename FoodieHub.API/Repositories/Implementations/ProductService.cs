@@ -85,6 +85,19 @@ namespace FoodieHub.API.Repositories.Implementations
         {
             var obj = _mapper.Map<Product>(product);
 
+            var existName = _appDbContext.Products.Any(x => x.ProductName == product.ProductName);
+
+            if (existName) {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.ProductID,
+                    StatusCode = 201
+                };
+            }
+         
+
 
             var uploadResult = await _uploadImageHelper.UploadImage(product.MainImage, "Products");
 
@@ -138,6 +151,19 @@ namespace FoodieHub.API.Repositories.Implementations
                     Success = false,
                     Message = $"Can't find product with ID {productDto.ProductID}",
                     StatusCode = 404
+                };
+            }
+
+            var existName = _appDbContext.Products.Any(x => x.ProductName == obj.ProductName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.ProductID,
+                    StatusCode = 201
                 };
             }
 
@@ -243,6 +269,19 @@ namespace FoodieHub.API.Repositories.Implementations
                 };
             }
 
+            var existName = _appDbContext.Products.Any(x => x.ProductName == product.ProductName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.ProductID,
+                    StatusCode = 201
+                };
+            }
+
             obj.ProductName = product.ProductName;
             obj.Price = product.Price;
             obj.Description = product.Description;
@@ -290,6 +329,19 @@ namespace FoodieHub.API.Repositories.Implementations
                     StatusCode = 404
                 };
             }
+            var existName = _appDbContext.Products.Any(x => x.ProductName == product.ProductName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.ProductID,
+                    StatusCode = 201
+                };
+            }
+
 
             obj.ProductName = product.ProductName;
             obj.Price = product.Price;

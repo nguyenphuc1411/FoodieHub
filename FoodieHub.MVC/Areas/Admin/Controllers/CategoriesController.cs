@@ -3,6 +3,7 @@ using FoodieHub.MVC.Models;
 using FoodieHub.MVC.Models.Categories;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using FoodieHub.MVC.Helpers;
 
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
@@ -31,7 +32,18 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _categoryProductService.AddNewProductCategory(category);
+                var response = await _categoryProductService.AddNewProductCategory(category);
+
+                if (!response.Success)
+                {
+                    NotificationHelper.SetErrorNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    NotificationHelper.SetSuccessNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
             }
             return RedirectToAction("Index");
         }
@@ -40,17 +52,35 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteProductCategory(string id)
         {
-            await _categoryProductService.DeleteProductCategory(int.Parse(id));
-
-            return RedirectToAction("Index");
+            var response = await _categoryProductService.DeleteProductCategory(int.Parse(id));
+            if (!response.Success)
+            {
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
+            
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProductCategory(CategoryDTO category)
         {
-            var obj = await _categoryProductService.UpdateProductCategory(category);
-            return RedirectToAction("Index");
+            var response = await _categoryProductService.UpdateProductCategory(category);
+            if (!response.Success)
+            {
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
         }
 
 
@@ -63,7 +93,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                var obj = await _articleCategoryService.AddArticleCategory(articleCategoryDTO);
+                var response = await _articleCategoryService.AddArticleCategory(articleCategoryDTO);
+                if (!response.Success)
+                {
+                    NotificationHelper.SetErrorNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    NotificationHelper.SetSuccessNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
             }
             return RedirectToAction("Index");
         }
@@ -76,8 +116,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 CategoryID = articleCategoryDTO.CategoryID,
                 CategoryName = articleCategoryDTO.CategoryName
             };
-            var obj = await _articleCategoryService.UpdateArticleCategory(articleCategoryDTO);
-            return RedirectToAction("Index");
+            var response = await _articleCategoryService.UpdateArticleCategory(articleCategoryDTO);
+            if (!response.Success)
+            {
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -88,8 +137,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 CategoryID = articleCategoryDTO.CategoryID,
                 CategoryName = articleCategoryDTO.CategoryName
             };
-            var obj = await _articleCategoryService.UpdateArticleCategory(newCate);
-            return RedirectToAction("Index");
+            var response = await _articleCategoryService.UpdateArticleCategory(newCate);
+            if (!response.Success)
+            {
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
         }
 
         [HttpPost]
@@ -101,8 +159,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 CategoryID = articleCategoryDTO.CategoryID,
                 CategoryName = articleCategoryDTO.CategoryName
             };
-            var obj = await _articleCategoryService.UpdateArticleCategory(newCate);
-            return RedirectToAction("Index");
+            var response = await _articleCategoryService.UpdateArticleCategory(newCate);
+            if (!response.Success)
+            {
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
         }
 
 
@@ -116,8 +183,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
 
-                var result = await _recipeCategoryService.AddRecipeCategory(recipeCategoryDTO);
-
+                var response = await _recipeCategoryService.AddRecipeCategory(recipeCategoryDTO);
+                if (!response.Success)
+                {
+                    NotificationHelper.SetErrorNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    NotificationHelper.SetSuccessNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
             }
             return RedirectToAction("Index");
         }
@@ -129,8 +205,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             {
                 CategoryID = recipeCategoryDTO.CategoryID,
             };
-            var result = await _recipeCategoryService.UpdateRecipeStatus(obj);
-            return RedirectToAction("Index");
+            var response = await _recipeCategoryService.UpdateRecipeStatus(obj);
+            if (!response.Success)
+            {
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
         }
 
         [HttpPost]
@@ -141,8 +226,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             {
                 CategoryID = recipeCategoryDTO.CategoryID,
             };
-            var result = await _recipeCategoryService.UpdateRecipeStatus(obj);
-            return RedirectToAction("Index");
+            var response = await _recipeCategoryService.UpdateRecipeStatus(obj);
+            if (!response.Success)
+            {
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
         }
 
         [HttpPost]
@@ -158,7 +252,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                     CategoryName = recipeCategoryDTO.CategoryName
                 };
 
-                var result = _recipeCategoryService.UpdateRecipeCategoryNoneImg(obj);
+                var response = await _recipeCategoryService.UpdateRecipeCategoryNoneImg(obj);
+                if (!response.Success)
+                {
+                    NotificationHelper.SetErrorNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    NotificationHelper.SetSuccessNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
             }
             else if (recipeCategoryDTO.ImageURL != null)
             {
@@ -169,7 +273,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                     ImageURL = recipeCategoryDTO.ImageURL
                 };
 
-                var result = await _recipeCategoryService.UpdateRecipeCategoryWithImg(obj);
+                var response = await _recipeCategoryService.UpdateRecipeCategoryWithImg(obj);
+                if (!response.Success)
+                {
+                    NotificationHelper.SetErrorNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    NotificationHelper.SetSuccessNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
             }
 
             return RedirectToAction("Index");
