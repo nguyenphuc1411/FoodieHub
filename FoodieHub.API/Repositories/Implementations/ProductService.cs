@@ -154,6 +154,19 @@ namespace FoodieHub.API.Repositories.Implementations
                 };
             }
 
+            var existName = _appDbContext.Products.Any(x => x.ProductName == obj.ProductName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.ProductID,
+                    StatusCode = 201
+                };
+            }
+
             obj.ProductName = productDto.ProductName;
             obj.Price = productDto.Price;
             obj.Description = productDto.Description;
@@ -256,6 +269,19 @@ namespace FoodieHub.API.Repositories.Implementations
                 };
             }
 
+            var existName = _appDbContext.Products.Any(x => x.ProductName == product.ProductName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.ProductID,
+                    StatusCode = 201
+                };
+            }
+
             obj.ProductName = product.ProductName;
             obj.Price = product.Price;
             obj.Description = product.Description;
@@ -303,6 +329,19 @@ namespace FoodieHub.API.Repositories.Implementations
                     StatusCode = 404
                 };
             }
+            var existName = _appDbContext.Products.Any(x => x.ProductName == product.ProductName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.ProductID,
+                    StatusCode = 201
+                };
+            }
+
 
             obj.ProductName = product.ProductName;
             obj.Price = product.Price;

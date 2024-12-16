@@ -48,6 +48,19 @@ namespace FoodieHub.API.Repositories.Implementations
                 };
             }
             var obj = _mapper.Map<RecipeCategory>(category);
+
+            var existName = _appDbContext.RecipeCategories.Any(x => x.CategoryName == category.CategoryName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.CategoryName,
+                    StatusCode = 201
+                };
+            }
             obj.ImageURL = uploadImageResult.FilePath.ToString();
             _appDbContext.RecipeCategories.Add(obj);
             var result = await _appDbContext.SaveChangesAsync();
@@ -95,6 +108,20 @@ namespace FoodieHub.API.Repositories.Implementations
 
                 };
             }
+
+            var existName = _appDbContext.RecipeCategories.Any(x => x.CategoryName == category.CategoryName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.CategoryName,
+                    StatusCode = 201
+                };
+            }
+
             obj.CategoryName = category.CategoryName;
             obj.ImageURL = uploadImageResult.FilePath.ToString();
             _appDbContext.RecipeCategories.Update(obj);
@@ -130,6 +157,20 @@ namespace FoodieHub.API.Repositories.Implementations
                     StatusCode = 404
                 };
             }
+
+            var existName = _appDbContext.RecipeCategories.Any(x => x.CategoryName == category.CategoryName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.CategoryName,
+                    StatusCode = 201
+                };
+            }
+
             obj.CategoryName = category.CategoryName;
             _appDbContext.RecipeCategories.Update(obj);
             var result = await _appDbContext.SaveChangesAsync();
@@ -216,7 +257,7 @@ namespace FoodieHub.API.Repositories.Implementations
             return new ServiceResponse
             {
                 Success = false,
-                Message = "Failed to update category.",
+                Message = "Failed to updated category.",
                 StatusCode = 400
             };
         }

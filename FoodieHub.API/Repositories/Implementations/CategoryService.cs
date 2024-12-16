@@ -31,6 +31,19 @@ namespace FoodieHub.API.Repositories.Implementations
         public async Task<ServiceResponse> AddCategory(CategoryDTO category)
         {
             var obj = _mapper.Map<Category>(category);
+
+            var existName = _appDbContext.  Categories.Any(x => x.CategoryName == category.CategoryName);
+
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.CategoryName,
+                    StatusCode = 201
+                };
+            }
             _appDbContext.Categories.Add(obj);
             var result = await _appDbContext.SaveChangesAsync();
 
@@ -70,7 +83,18 @@ namespace FoodieHub.API.Repositories.Implementations
                     StatusCode = 404
                 };
             }
+            var existName = _appDbContext.Categories.Any(x => x.CategoryName == category.CategoryName);
 
+            if (existName)
+            {
+                return new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Name is already exist! Please choose another name.",
+                    Data = obj.CategoryName,
+                    StatusCode = 201
+                };
+            }
             obj.CategoryName = category.CategoryName;
             _appDbContext.Categories.Update(obj);
             var result = await _appDbContext.SaveChangesAsync();

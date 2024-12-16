@@ -90,6 +90,11 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 NotificationHelper.SetErrorNotification(this,response.Message);
                 return RedirectToAction("Index");
             }
+            else
+            {
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
 
             if (response.Success)
             {
@@ -150,6 +155,16 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
 
                 };
                 var response = await _productService.UpdateProductNoneImg(obj);
+                if (!response.Success)
+                {
+                    NotificationHelper.SetErrorNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    NotificationHelper.SetSuccessNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
             }
             else if(productDTO.ImgFileUpdate != null)
             {
@@ -167,6 +182,16 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
 
                 };
                 var response = await _productService.UpdateProductWithImg(obj);
+                if (!response.Success)
+                {
+                    NotificationHelper.SetErrorNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    NotificationHelper.SetSuccessNotification(this, response.Message);
+                    return RedirectToAction("Index");
+                }
             }
             
            
@@ -186,10 +211,16 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             }
 
             // Xóa sản phẩm
-            var productResponse = await _productService.DeleteProduct(id);
-            if (!productResponse.Success)
+            var response = await _productService.DeleteProduct(id);
+            if (!response.Success)
             {
-                return NotFound();
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
             }
 
             return RedirectToAction("Index");
@@ -206,16 +237,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 IsActive = true // Đặt IsActive là true
             };
 
-            var result = await _productService.SetProductStatusOn(productDTO);
+            var response = await _productService.SetProductStatusOn(productDTO);
 
-            if (result.Success)
+            if (!response.Success)
             {
-                return RedirectToAction("Index"); // hoặc hành động khác khi thành công
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
             }
             else
             {
-                ModelState.AddModelError("", "Failed to update product status.");
-                return View(getProductDTO);
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
             }
         }
         [HttpPost]
@@ -228,16 +260,17 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 IsActive = false // Đặt IsActive là true
             };
 
-            var result = await _productService.SetProductStatusOff(productDTO);
+            var response = await _productService.SetProductStatusOff(productDTO);
 
-            if (result.Success)
+            if (!response.Success)
             {
-                return RedirectToAction("Index"); // hoặc hành động khác khi thành công
+                NotificationHelper.SetErrorNotification(this, response.Message);
+                return RedirectToAction("Index");
             }
             else
             {
-                ModelState.AddModelError("", "Failed to update product status.");
-                return View(getProductDTO);
+                NotificationHelper.SetSuccessNotification(this, response.Message);
+                return RedirectToAction("Index");
             }
         }
 
