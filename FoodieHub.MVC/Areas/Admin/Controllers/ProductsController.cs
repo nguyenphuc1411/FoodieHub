@@ -6,7 +6,9 @@ using FoodieHub.MVC.Models.Response;
 using FoodieHub.MVC.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Globalization;
 using System.Net.Http;
+using System.Text;
 
 namespace FoodieHub.MVC.Areas.Admin.Controllers
 {
@@ -32,7 +34,10 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
 
             if (!string.IsNullOrEmpty(searchName))
             {
-                products = products.Where(p => p.ProductName.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
+                products = products
+                   .Where(p => RemoveDiacritics(p.ProductName)
+                   .Contains(RemoveDiacritics(searchName), StringComparison.OrdinalIgnoreCase))
+                   .ToList();
             }
 
             if (categoryId.HasValue && categoryId.Value > 0)
@@ -48,7 +53,25 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
 
             return View(products);
         }
+        public static string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return text;
 
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+        }
 
 
         // GET: Admin/Products/Details/5
