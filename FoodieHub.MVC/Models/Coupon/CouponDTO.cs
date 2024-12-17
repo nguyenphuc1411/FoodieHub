@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FoodieHub.MVC.Areas.Admin.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace FoodieHub.MVC.Models.Coupon
 {
@@ -8,7 +9,8 @@ namespace FoodieHub.MVC.Models.Coupon
         public string CouponCode { get; set; }
         [StringLength(10)]
         public string DiscountType { get; set; }
-        [Range(0, double.MaxValue,ErrorMessage = "The value must be a positive number.")]
+
+        [DiscountValidation]
         public decimal DiscountValue { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "The value must be a positive number.")]
