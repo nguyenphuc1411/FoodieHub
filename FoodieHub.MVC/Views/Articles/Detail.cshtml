@@ -51,11 +51,11 @@
                     <p class="mb-0"><strong>Recipe By: <br></strong>
                         @if (Model.Avatar != null)
                         {
-                            <img src="@($"{url}images/{Model.Avatar}")" alt="User Image" class="rounded-circle me-3" width="60">
+                            <img src="@($"{url}images/{Model.Avatar}")" alt="User Image" class="rounded-circle me-3" style="width:50px;height:50px">
                         }
                         else
                         {
-                            <img src="/images/profile.jpg" alt="User Image" class="rounded-circle me-3" width="60">
+                            <img src="/images/profile.jpg" alt="User Image" class="rounded-circle me-3" style="width:50px;height:50px">
                         }
                         @Model.FullName
                         </p>
@@ -85,11 +85,11 @@
                 <div class="d-flex align-items-center mb-4 bg-light p-3 rounded shadow-sm position-relative">
                     @if (comment.Avatar != null)
                     {
-                        <img src="@($"{url}images/{comment.Avatar}")" alt="Avatar" class="rounded-circle me-3" width="50">
+                        <img src="@($"{url}images/{comment.Avatar}")" alt="Avatar" class="rounded-circle me-3" style="width:50px;height:50px">
                     }
                     else
                     {
-                        <img src="/images/profile.jpg" alt="Avatar" class="rounded-circle me-3" width="50">
+                        <img src="/images/profile.jpg" alt="Avatar" class="rounded-circle me-3" style="width:50px;height:50px">
                     }
                     <div>
                         <p class="mb-1"><strong>@comment.FullName</strong> - @comment.CommentedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
