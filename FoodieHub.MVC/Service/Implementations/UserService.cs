@@ -74,5 +74,11 @@ namespace FoodieHub.MVC.Service.Implementations
             var response = await _httpClient.PatchAsync($"users/restore/{id}", null);
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> SetRole(SetRoleDTO roleDTO)
+        {
+            var response = await _httpClient.PutAsJsonAsync($"users", roleDTO);
+            return response.IsSuccessStatusCode;
+        }
     }
 }

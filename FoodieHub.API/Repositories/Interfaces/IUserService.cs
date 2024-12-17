@@ -13,5 +13,7 @@ namespace FoodieHub.API.Repositories.Interfaces
         Task<bool> Disable(string id);
         Task<bool> Restore(string id);
         Task<UserDTO?> GetByID(string id);
+
+        Task<bool> SetRole(SetRoleDTO setRoleDTO);
     }
 }

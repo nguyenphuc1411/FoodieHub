@@ -16,5 +16,6 @@ namespace FoodieHub.MVC.Service.Interfaces
         Task<UserDTO?> GetByID(string id);
 
         Task<IEnumerable<UserDTO>> GetAdmin();
+        Task<bool> SetRole(SetRoleDTO roleDTO);
     }
 }

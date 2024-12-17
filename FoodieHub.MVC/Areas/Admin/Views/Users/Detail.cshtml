@@ -32,7 +32,40 @@
 
 
     <div class="mt-4">
-        <a asp-action="Edit" class="btn btn-warning">Set Role</a>
+        <!-- Set Role Button -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#setRoleModal">
+            Set Role Admin
+        </button>
+
         <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<!-- Modal Structure -->
+<div class="modal fade" id="setRoleModal" tabindex="-1" aria-labelledby="setRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="setRoleModalLabel">Confirm Role Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-action="SetRole">
+                <div class="modal-body">
+                    <input type="hidden" name="UserID" value="@Model.Id" />
+
+                    <div>
+                        <b>New Role: </b>                                             
+                        <span class="text-danger">Admin</span>
+                        <input type="hidden" name="Role" value="Admin" />
+                    </div>
+
+                    <p>Are you sure you want to set this role?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>

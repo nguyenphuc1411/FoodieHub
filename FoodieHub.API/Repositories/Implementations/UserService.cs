@@ -189,5 +189,27 @@ namespace FoodieHub.API.Repositories.Implementations
             }
             return listAdmin;
         }
+
+        public async Task<bool> SetRole(SetRoleDTO setRoleDTO)
+        {
+            var user = await _userManager.FindByIdAsync(setRoleDTO.UserID);
+            if (user == null) return false;
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!removeResult.Succeeded)
+            {
+                return false;
+            }
+
+            var addRoleResult = await _userManager.AddToRoleAsync(user, setRoleDTO.Role);
+            if (!addRoleResult.Succeeded)
+            {
+                return false;
+            }
+
+            return true; 
+        }
+
     }
 }

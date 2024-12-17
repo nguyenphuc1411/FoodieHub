@@ -59,5 +59,12 @@ namespace FoodieHub.API.Controllers
             var result = await _service.GetAdmin();
             return Ok(result);
         }
+        [Authorize(Roles = "Admin")]
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] SetRoleDTO setRole)
+        {
+            var result = await _service.SetRole(setRole);
+            return result ? NoContent() : BadRequest();
+        }
     }
 }

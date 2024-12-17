@@ -69,5 +69,13 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             else NotificationHelper.SetErrorNotification(this);
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> SetRole(SetRoleDTO roleDTO)   
+        {
+            var result = await _userService.SetRole(roleDTO);
+            if(result) NotificationHelper.SetSuccessNotification(this);
+            else NotificationHelper.SetErrorNotification(this);
+            return RedirectToAction("Index");
+        }
     }
 }
