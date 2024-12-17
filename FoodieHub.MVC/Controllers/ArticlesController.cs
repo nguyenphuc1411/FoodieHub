@@ -44,8 +44,8 @@ namespace FoodieHub.MVC.Controllers
 
             var viewModel = new ArticleViewModel
             {
-                TopArticles = topArticles.Items,
-                LatestArticlesList = lastedArticle.Items,
+                TopArticles = topArticles.Items.Where(x=>x.IsActive),
+                LatestArticlesList = lastedArticle.Items.Where(x=>x.IsActive),
             };
             var result = await _articleService.GetByCategory();
             ViewBag.Data = result;
@@ -69,7 +69,7 @@ namespace FoodieHub.MVC.Controllers
         public async Task<IActionResult> Detail(int id, string order = "desc")
         {
             var data = await _articleService.GetByID(id);
-            if (data == null)
+            if (data == null || !data.IsActive)
             {
                 NotificationHelper.SetErrorNotification(this, "Not found this article");
             }
