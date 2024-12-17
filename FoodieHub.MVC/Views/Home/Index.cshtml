@@ -158,7 +158,7 @@
                                     <img src=@(apiUrl+"images/"+recipe.ImageURL) class="card-img-top" alt="Recipe Image">
                                     <div class="badges">
                                         <span class="badge time">
-                                            <i class="far fa-clock"></i> @recipe.CookTime min
+                                            <i class="far fa-clock"></i> @recipe.CookTime.ToString(@"HH\:mm") min
                                         </span>
                                         <span class="badge catename">
                                             @recipe.CategoryName
