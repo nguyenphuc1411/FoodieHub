@@ -362,7 +362,7 @@
                             r.ProductID == productID &&
                             r.Id == currentUserId.Result.Id &&
                             r.ReviewedAt >= order.OrderedAt && // Review sau khi đặt hàng
-                            r.ReviewedAt <= order.OrderedAt.AddDays(30) // Review trong vòng 30 ngày
+                            r.ReviewedAt <= order.OrderedAt.AddDays(30) // Review trong vòng 30 ngày da sua 
                             ) ?? false;
 
                             if (!hasReviewed)
