@@ -44,9 +44,9 @@ namespace FoodieHub.MVC.Controllers
             if (!string.IsNullOrEmpty(searchName))
             {
                 products = products
-    .Where(p => RemoveDiacritics(p.ProductName)
-    .Contains(RemoveDiacritics(searchName), StringComparison.OrdinalIgnoreCase))
-    .ToList();
+                    .Where(p => RemoveDiacritics(p.ProductName)
+                    .Contains(RemoveDiacritics(searchName), StringComparison.OrdinalIgnoreCase))
+                    .ToList();
             }
 
             // Sắp xếp
