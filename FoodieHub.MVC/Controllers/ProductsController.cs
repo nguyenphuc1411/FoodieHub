@@ -24,6 +24,9 @@ namespace FoodieHub.MVC.Controllers
         {
             var products = await _productService.GetAll();
 
+            // Chỉ lấy những sản phẩm có IsActive == true
+            products = products.Where(p => p.IsActive == true).ToList();
+
             // Lọc theo khoảng giá
             products = priceFilter switch
             {
@@ -44,9 +47,9 @@ namespace FoodieHub.MVC.Controllers
             if (!string.IsNullOrEmpty(searchName))
             {
                 products = products
-    .Where(p => RemoveDiacritics(p.ProductName)
-    .Contains(RemoveDiacritics(searchName), StringComparison.OrdinalIgnoreCase))
-    .ToList();
+                    .Where(p => RemoveDiacritics(p.ProductName)
+                    .Contains(RemoveDiacritics(searchName), StringComparison.OrdinalIgnoreCase))
+                    .ToList();
             }
 
             // Sắp xếp
@@ -68,6 +71,7 @@ namespace FoodieHub.MVC.Controllers
 
             return View(paginatedResult.Items); // Trả về chỉ danh sách sản phẩm của trang hiện tại
         }
+
 
 
 
