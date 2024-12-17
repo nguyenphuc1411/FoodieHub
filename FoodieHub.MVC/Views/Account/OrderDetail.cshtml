@@ -47,6 +47,17 @@
                                                     <small>Unit Price: @item.UnitPrice $</small><br>
                                                     <small>Discount: @item.Discount $</small>
                                                 </div>
+                                                @if (Model.Status == "COMPLETED")
+                                                {
+                                                    var completedStatus = Model.OrderStatues.FirstOrDefault(s => s.Status == "COMPLETED");
+                                                    var feedbackDeadline = completedStatus?.ChangeDate.AddDays(7) ?? DateTime.MinValue;
+                                                    var now = DateTime.Now;
+
+                                                    if (now <= feedbackDeadline)
+                                                    {
+                                                        <a class="button button-light rounded-2 ms-3" asp-controller="Products" asp-action="Detail" asp-route-id="@item.ProductID">Feedback now!</a>
+                                                    }
+                                                }
                                             </div>
                                         </td>
                                         <td class="text-end align-middle">@item.TotalPrice $</td>
@@ -105,11 +116,6 @@
                     @if (Model.Status == "CANCELED" || Model.Status == "COMPLETED")
                     {
                         <a class="button button-dark rounded-2" asp-controller="Cart" asp-action="AddOrderItemsToCart" asp-route-id="@Model.OrderID">Order Again</a>
-                    }
-                    @if (Model.Status == "COMPLETED")
-                    {
-                        <br>
-                        <span class="text-success mt-2 fw-bold">Remember feedback for us!</span>
                     }
                 </div>
             </div>
