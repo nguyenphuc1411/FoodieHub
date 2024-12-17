@@ -39,13 +39,13 @@
 <div class="container">
     <div class="row">
         <div class="col-md-3">
-            <a asp-action="Index" asp-controller="Products" class="text-dark">
+            <a asp-action="Index" asp-controller="Recipes" class="text-dark">
                 <div class="card mb-4" style="border: none">
                     <img src="images/background.png" class="card-img-top" alt="Điện tử sản phẩm ở đây">
                     <div class="card-body ">
                         <h5 class="card-title">Want to learn cooking but afraid it's hard? Visit our shop and grab your cooking secrets now!</h5>
                         <p class="card-text">Quick cooking tips for beginners</p>
-                        <a class="button button-dark mt-2" href="/recipes">
+                        <a class="button button-dark mt-2">
                             VIEW NOW
                             <i class="fas fa-hand-point-right animated-icon"></i>
                         </a>
@@ -170,20 +170,25 @@
                                 <h5 class="card-title">@recipe.Title</h5>
                                 <div class="card-more-delicious-item-footer">
                                     <div class="author">
-                                        @if (recipe.Avatar != null)
-                                        {
-                                            <img alt="@recipe.FullName" src="@($"{apiUrl}images/{recipe.Avatar}")" height="30" width="30" />
-                                        }
-                                        else
-                                        {
-                                            <img src="/images/profile.jpg" alt="User Image" height="30" width="30">
-                                        }
-                                        <span>@recipe.FullName</span>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            @if (recipe.Avatar != null)
+                                            {
+                                                <img alt="@recipe.FullName" src="@($"{apiUrl}images/{recipe.Avatar}")" class="rounded-circle" style="height:40px;width:40px" />
+                                            }
+                                            else
+                                            {
+                                                <img src="/images/profile.jpg" alt="User Image" class="rounded-circle" style="height:50px;width:50px">
+                                            }
+                                            <span>@recipe.FullName</span>
+
+                                            <div class="rating">
+                                                <span> @recipe.RatingAverage</span>
+                                                <i class="fas fa-star ms-1"></i>
+                                            </div>
+                                        </div>
+                               
                                     </div>
-                                    <div class="rating">
-                                        <span> @recipe.RatingAverage</span>
-                                        <i class="fas fa-star ms-1"></i>
-                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -308,11 +313,6 @@
             transform: scale(1.05); /* Tăng kích thước card khi hover */
         }
 
-    @* .card-img-top {
-        border-top-left-radius: 15px; /* Bo tròn góc trên bên trái */
-        border-top-right-radius: 15px; /* Bo tròn góc trên bên phải */
-    } *@
-
     .recipe-image {
         background-image: url('images/background.png');
         background-size: cover;
@@ -370,14 +370,7 @@
         margin-left: 10px;  /* Khoảng cách giữa button và icon */
         animation: bounce 1s infinite;  /* Tạo hiệu ứng chạy qua lại */
     }
-    @@keyframes bounce {
-    0%, 100% {
-        transform: translateX(0);
-    }
-    50% {
-        transform: translateX(10px);  /* Di chuyển sang phải */
-    }
-}
+
     /* Nhãn "New" */
     .badge-new {
         background-color: #28a745; /* Màu xanh lá nổi bật */
@@ -441,6 +434,104 @@
         padding: 10px 20px !important; /* Điều chỉnh padding cho vừa vặn */
     }
 
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .recipe-card {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .recipe-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .recipe-card .card-body {
+            padding: 10px;
+            position: relative;
+        }
+
+        .recipe-card .card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .recipe-card .card-text {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+    .image-container {
+        position: relative;
+        width: 100%;
+    }
+
+        .image-container img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+    .badges {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        gap: 8px; /* Khoảng cách giữa các badge */
+        align-items: center;
+    }
+
+    .badge {
+        color: #fff;
+        font-size: 12px;
+        border-radius: 10px;
+        padding: 5px 8px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .badge.time {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.catename {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+    .favorite {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background-color: #fff;
+        color: #333;
+        font-size: 15px;
+        border-radius: 15px;
+        padding: 5px 8px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .favorite i {
+            color: #ff6b6b;
+        }
 </style>
 
 

@@ -27,7 +27,7 @@ namespace FoodieHub.MVC.Models
         public int ShelfLife { get; set; }
 
         [NotMapped]
-        public List<IFormFile> Images { get; set; } 
+        public List<IFormFile>? Images { get; set; } 
 
         public bool IsActive { get; set; } = true;
 

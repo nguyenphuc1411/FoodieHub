@@ -52,8 +52,8 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Detail(string id)
         {
-           
-            return RedirectToAction("Index");
+           var user = await _userService.GetByID(id);
+            return View(user);
         }
         public async Task<IActionResult> Disable(string id)
         {

@@ -109,18 +109,7 @@ namespace FoodieHub.API.Repositories.Implementations
                 };
             }
 
-            var existName = _appDbContext.RecipeCategories.Any(x => x.CategoryName == category.CategoryName);
-
-            if (existName)
-            {
-                return new ServiceResponse
-                {
-                    Success = false,
-                    Message = "Name is already exist! Please choose another name.",
-                    Data = obj.CategoryName,
-                    StatusCode = 201
-                };
-            }
+           
 
             obj.CategoryName = category.CategoryName;
             obj.ImageURL = uploadImageResult.FilePath.ToString();
@@ -158,18 +147,7 @@ namespace FoodieHub.API.Repositories.Implementations
                 };
             }
 
-            var existName = _appDbContext.RecipeCategories.Any(x => x.CategoryName == category.CategoryName);
-
-            if (existName)
-            {
-                return new ServiceResponse
-                {
-                    Success = false,
-                    Message = "Name is already exist! Please choose another name.",
-                    Data = obj.CategoryName,
-                    StatusCode = 201
-                };
-            }
+          
 
             obj.CategoryName = category.CategoryName;
             _appDbContext.RecipeCategories.Update(obj);

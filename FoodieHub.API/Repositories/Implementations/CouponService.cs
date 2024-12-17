@@ -128,5 +128,13 @@ namespace FoodieHub.API.Repositories.Implementations
             _context.Coupons.Update(existCoupon);
             return await _context.SaveChangesAsync() > 0;
         }
+
+        public async Task<IEnumerable<GetCoupon>> GetForUser()
+        {
+            return await _context.Coupons
+                .Where(x => x.IsActive && !x.IsUsed && x.StartDate <= DateTime.Now && x.EndDate >= DateTime.Now)
+                .OrderByDescending(x => x.CreatedAt)
+               .ProjectTo<GetCoupon>(_mapper.ConfigurationProvider).ToListAsync();
+        }
     }
 }

@@ -82,18 +82,7 @@ namespace FoodieHub.API.Repositories.Implementations
                 };
             }
 
-            var existName = _appDbContext.ArticleCategories.Any(x => x.CategoryName == category.CategoryName);
-
-            if (existName)
-            {
-                return new ServiceResponse
-                {
-                    Success = false,
-                    Message = "Name is already exist! Please choose another name.",
-                    Data = obj.CategoryName,
-                    StatusCode = 201
-                };
-            }
+         
             obj.CategoryName = category.CategoryName;
             _appDbContext.ArticleCategories.Update(obj);
             var result = await _appDbContext.SaveChangesAsync();

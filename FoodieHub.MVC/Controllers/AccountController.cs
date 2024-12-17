@@ -392,5 +392,10 @@ namespace FoodieHub.MVC.Controllers
                 return RedirectToAction("Index", "Home");
             }          
         }
+
+        public async Task<IActionResult> Coupon()
+        {
+            return View();
+        }
     }
 }
