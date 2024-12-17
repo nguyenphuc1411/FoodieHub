@@ -63,5 +63,11 @@ namespace FoodieHub.API.Controllers
             var result = await _service.GetByCode(couponCode);
             return StatusCode(result.StatusCode, result);
         }
+        [HttpGet("users")]
+        public async Task<ActionResult<IEnumerable<GetCoupon>>> GetForUser()
+        {
+            var result = await _service.GetForUser();
+            return Ok(result);
+        }
     }
 }

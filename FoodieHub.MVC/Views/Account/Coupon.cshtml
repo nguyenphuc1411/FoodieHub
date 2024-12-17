@@ -1,0 +1,89 @@
+﻿@using FoodieHub.MVC.Models.Coupon
+@using FoodieHub.MVC.Service.Interfaces
+@inject ICouponService couponService
+@{
+    ViewData["Title"] = "Coupon";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var coupons = await couponService.GetForUser() ?? new List<GetCoupon>();
+}
+
+<link rel="stylesheet" href="~/css/profile.css">
+<div class="container py-5">
+    <div class="row align-items-start">
+        <div>
+            <h5>Account / Coupon</h5>
+        </div>
+        @await Html.PartialAsync("_NavigationForProfile")
+        <div class="col-md-1">
+        </div>
+        <!-- Main Content -->
+        <div class="col-md-8 Favorite-content mt-3">
+            <div class="container mt-5">
+                <h1 class="text-center mb-4">Available Coupons</h1>
+                <div class="row">
+
+                    @foreach (var item in coupons)
+                    {
+                        <!-- Coupon 1 -->
+                        <div class="col-md-4">
+                            <div class="coupon-card">
+                                <div class="coupon-code">@item.CouponCode</div>
+                                <div class="coupon-details">
+                                    @if(item.DiscountType=="FIXED"){
+                                        <p class="discount-type">Discount: @item.DiscountValue$</p>
+                                        <p class="note">Use this coupon to get @item.DiscountValue off your order over $@item.MinimumOrderAmount.</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="discount-type">Discount: @item.DiscountValue% Off</p>
+                                        <p class="note">Use this coupon to get 20% off your order over $@item.MinimumOrderAmount.</p>
+                                    }                                
+                                    <p>Minimum Order Amount: $@item.MinimumOrderAmount</p>
+                                   
+                                    <p>Valid from: @item.StartDate.ToString("dd/MM/yyyy") to @item.EndDate.ToString("dd/MM/yyyy")</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                                            
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .coupon-card {
+        border: 2px dashed #007bff;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: transform 0.3s;
+    }
+
+        .coupon-card:hover {
+            transform: scale(1.05);
+        }
+
+    .coupon-code {
+        font-size: 24px;
+        font-weight: bold;
+        color: #ff5722;
+    }
+
+    .coupon-details {
+        margin-top: 15px;
+    }
+
+    .discount-type {
+        font-size: 16px;
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    .note {
+        font-size: 14px;
+        color: #6c757d;
+    }
+</style>

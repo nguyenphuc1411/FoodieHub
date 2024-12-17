@@ -34,6 +34,11 @@ namespace FoodieHub.MVC.Service.Implementations
             return await _httpClient.GetFromJsonAsync<GetCoupon>($"coupons/{couponID}");
         }
 
+        public async Task<IEnumerable<GetCoupon>> GetForUser()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<GetCoupon>>("coupons/users")?? new List<GetCoupon>();
+        }
+
         public async Task<bool> Update(int couponID, CouponDTO coupon)
         {
             var response = await _httpClient.PutAsJsonAsync($"coupons/{couponID}", coupon);
