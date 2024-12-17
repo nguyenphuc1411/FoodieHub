@@ -221,6 +221,9 @@
                                                             @recipe.CategoryName
                                                         </span>
                                                     </div>
+                                                    <div class="favorite">
+                                                        <i class="fas fa-heart"></i> @recipe.TotalFavorites
+                                                    </div>
                                                     <h3>@recipe.Title</h3>
                                                 </div>
                                             </a>
@@ -758,9 +761,9 @@
             border-radius: 5px;
         }
 
-        .card-more-delicious-item-content h3 {
+        .card-more-delicious-item h3 {
             font-size: 15px;
-            margin: 10px 0;
+            margin: 10px 10px;
             color: #333;
         }
 
@@ -799,6 +802,23 @@
             color: #721c24;
         }
 
+    .favorite {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background-color: #fff;
+        color: #333;
+        font-size: 15px;
+        border-radius: 15px;
+        padding: 5px 8px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .favorite i {
+            color: #ff6b6b;
+        }
     .card-more-delicious-item-footer {
         display: flex;
         justify-content: space-between;
