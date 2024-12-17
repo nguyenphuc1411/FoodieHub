@@ -23,15 +23,16 @@
 
 
     var productSales = listOrderDetails?.Data
-        ?.GroupBy(od => od.ProductID)
-        .Select(group => new
-        {
-            ProductID = group.Key,
-            TotalSold = group.Sum(od => od.Quantity)
-        })
-        .OrderByDescending(ps => ps.TotalSold)
-        .Take(1)
-        .ToList();
+      ?.Where(od => od.Status == "COMPLETED") // Chỉ lấy hóa đơn đã hoàn thành
+      .GroupBy(od => od.ProductID)            // Nhóm theo ProductID
+      .Select(group => new
+      {
+          ProductID = group.Key,              // ID của sản phẩm
+          TotalSold = group.Sum(od => od.Quantity) // Tổng số lượng đã bán
+      })
+      .OrderByDescending(ps => ps.TotalSold)  // Sắp xếp giảm dần theo số lượng bán
+      .FirstOrDefault();                      // Lấy sản phẩm bán chạy nhất
+
 
 }
 
@@ -56,7 +57,7 @@
         </div>
 
         <div class="col-md-6">
-            @if (productSales?.Any() != true)
+            @if (productSales == null)
             {
                 <!-- Không có sản phẩm -->
                 <div class="d-flex flex-column align-items-center justify-content-center text-center" style="height: 500px; border: 2px dashed #ccc;">
@@ -66,7 +67,7 @@
             }
             else
             {
-                var topSellingProduct = listProduct?.FirstOrDefault(p => p.ProductID == productSales.First().ProductID);
+                var topSellingProduct = listProduct?.FirstOrDefault(p => p.ProductID == productSales.ProductID);
 
                 var listReviewOrther = await _reviewService.GetListReview(topSellingProduct.ProductID);
 
