@@ -342,37 +342,39 @@
     <h3>Reviews</h3>
     <div class="d-flex col-sm-7">
         <p class="text-muted mt-2">Filter Reviews</p>
-
+        @* da sua lan 1 *@
         @{
             bool showButtonFeedBack = false; // Kiểm soát hiển thị nút review
 
             if (listOrder?.Data != null && listOrderDetails?.Data != null)
             {
+                // Lặp qua danh sách đơn hàng hoàn thành của người dùng
                 foreach (var order in listOrder.Data.Where(o => o.Status == "COMPLETED" && o.UserID == currentUserId.Result.Id))
                 {
-                    // Kiểm tra nếu đơn hàng có sản phẩm và trong thời hạn review
+                    // Kiểm tra nếu đơn hàng này trong thời hạn review
                     if ((DateTime.Now - order.OrderedAt).TotalDays <= 30)
                     {
+                        // Kiểm tra các sản phẩm trong đơn hàng có khớp với productID không
                         var orderDetails = listOrderDetails.Data.Where(od => od.OrderID == order.OrderID && od.ProductID == productID);
 
                         foreach (var orderDt in orderDetails)
                         {
-                            // Kiểm tra xem đã review cho lần mua này chưa
+                            // Kiểm tra xem người dùng đã review sản phẩm này cho đơn hàng hiện tại chưa
                             bool hasReviewed = listReview?.Data.Any(r =>
                             r.ProductID == productID &&
                             r.Id == currentUserId.Result.Id &&
-                            r.ReviewedAt >= order.OrderedAt && // Review sau khi đặt hàng
-                            r.ReviewedAt <= order.OrderedAt.AddDays(30) // Review trong vòng 30 ngày da sua 
+                            r.ReviewedAt >= order.OrderedAt && // Review thuộc về lần mua này
+                            r.ReviewedAt <= order.OrderedAt.AddDays(30) // Trong thời gian 30 ngày kể từ khi đặt hàng
                             ) ?? false;
 
                             if (!hasReviewed)
                             {
-                                showButtonFeedBack = true; // Chỉ hiển thị nút nếu chưa review
+                                showButtonFeedBack = true; // Hiển thị nút review nếu chưa có review
                                 break;
                             }
                         }
 
-                        if (showButtonFeedBack) break; // Dừng ngay khi tìm thấy nút cần hiển thị
+                        if (showButtonFeedBack) break; // Thoát ngay khi nút cần hiển thị
                     }
                 }
             }
