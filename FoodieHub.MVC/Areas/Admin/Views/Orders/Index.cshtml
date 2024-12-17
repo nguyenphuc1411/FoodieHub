@@ -147,13 +147,19 @@ else
 
     <div class="d-flex justify-content-center">
         <!-- Pagination -->
-        <form method="get" class="d-flex justify-content-between align-items-center mt-3">
+        <form method="get" class="form-pagination d-flex justify-content-between align-items-center mt-3">
+            <!-- Hidden input to keep the current query values -->
+            <input type="hidden" name="SearchItem" value="@query.SearchItem" />
+            <input type="hidden" name="CategoryID" value="@query.Status" />
+            <input type="hidden" name="SortBy" value="@query.SortBy" />
+            <input type="hidden" name="OrderDate" value="@query.OrderDate" />
+            <input type="hidden" name="Page" value="@Model.Page" /> <!-- Hidden input to track the current page -->
             <!-- Select box for page size -->
             <div>
-                <select name="pageSize" class="form-select form-select-sm" style="width: 70px;" onchange="this.form.submit()">
+                <select name="PageSize" class="form-select form-select-sm" style="width: 70px;" onchange="this.form.submit()">
                     @for (int i = 2; i <= 20; i += 2)
                     {
-                        if (Model.PageSize == i)
+                        @if (Model.PageSize == i)
                         {
                             <option value="@i" selected>@i</option>
                         }
@@ -161,7 +167,6 @@ else
                         {
                             <option value="@i">@i</option>
                         }
-
                     }
                 </select>
             </div>
@@ -169,25 +174,34 @@ else
             <!-- Pagination navigation -->
             <nav aria-label="Page navigation example">
                 <ul class="pagination pagination-sm mb-0">
-                    <!-- Nút Previous (ẩn nếu đang ở trang đầu tiên) -->
                     <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
-                        <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page - 1)">Previous</a>
+                        <button type="button" class="page-link" onclick="changePage(@(Model.Page - 1))" @(Model.Page == 1 ? "disabled" : "")>
+                            Previous
+                        </button>
                     </li>
 
-                    <!-- Tạo danh sách các trang -->
                     @for (int i = 1; i <= Model.TotalPages; i++)
                     {
                         <li class="page-item @(i == Model.Page ? "active" : "")">
-                            <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@i">@i</a>
+                            <button type="button" class="page-link" onclick="changePage(@i)">@i</button>
                         </li>
                     }
 
-                    <!-- Nút Next (ẩn nếu đang ở trang cuối) -->
                     <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
-                        <a class="page-link" asp-route-pageSize="@Model.PageSize" asp-route-currentPage="@(Model.Page + 1)">Next</a>
+                        <button type="button" class="page-link" onclick="changePage(@(Model.Page + 1))" @(Model.Page == Model.TotalPages ? "disabled" : "")>
+                            Next
+                        </button>
                     </li>
                 </ul>
             </nav>
         </form>
     </div>
 }
+
+<script>
+    function changePage(page) {
+        const form = document.querySelector('.form-pagination'); // Select the pagination form by its class
+        form.querySelector('input[name="Page"]').value = page; // Set the page value
+        form.submit(); // Submit the form
+    }
+</script>

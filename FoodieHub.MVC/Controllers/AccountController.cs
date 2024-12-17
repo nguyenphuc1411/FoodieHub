@@ -160,7 +160,7 @@ namespace FoodieHub.MVC.Controllers
             {
                 if (jsonObject.Success)
                 {
-                    Response.SetCookie("TokenUser", jsonObject.Token);
+                    Response.SetCookie("TokenUser", jsonObject.Data);
                     Response.DeleteCookie("TokenAdmin");
                     NotificationHelper.SetSuccessNotification(this,jsonObject.Message);
                     return RedirectToAction("Index", "Home");

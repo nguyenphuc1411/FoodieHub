@@ -63,7 +63,6 @@ namespace FoodieHub.MVC.Models.Recipe
         public IFormFile? FileStep { get; set; }
 
         [Required(ErrorMessage = "Directions are required.")]
-        [StringLength(1000, ErrorMessage = "Directions cannot be longer than 1000 characters.")]
         public string Directions { get; set; } = default!;
     }
 }

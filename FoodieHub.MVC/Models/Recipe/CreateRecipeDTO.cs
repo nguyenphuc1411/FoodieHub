@@ -26,7 +26,6 @@ namespace FoodieHub.MVC.Models.Recipe
         [MaxLength(255, ErrorMessage = "Title cannot exceed 255 characters.")]
         public string Title { get; set; } = default!;
 
-        [MaxLength(255, ErrorMessage = "Description cannot exceed 1000 characters.")]
         public string? Description { get; set; }
 
         [Required(ErrorMessage = "File is required.")]
@@ -76,7 +75,6 @@ namespace FoodieHub.MVC.Models.Recipe
         public IFormFile? ImageStep { get; set; }
 
         [Required(ErrorMessage = "Directions are required.")]
-        [MaxLength(1000, ErrorMessage = "Directions cannot exceed 1000 characters.")]
         public string Directions { get; set; } = default!;
     }
 }

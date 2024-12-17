@@ -10,8 +10,6 @@ namespace FoodieHub.API.Models.DTOs.Recipe
         [Required(ErrorMessage = "Title is required.")]
         [StringLength(255, ErrorMessage = "Title cannot be longer than 100 characters.")]
         public string Title { get; set; } = default!;
-
-        [StringLength(500, ErrorMessage = "Description cannot be longer than 500 characters.")]
         public string? Description { get; set; }
 
         [Required(ErrorMessage = "Cook time is required.")]
