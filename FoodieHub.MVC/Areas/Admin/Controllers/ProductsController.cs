@@ -95,26 +95,6 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 NotificationHelper.SetSuccessNotification(this, response.Message);
                 return RedirectToAction("Index");
             }
-
-            if (response.Success)
-            {
-                if (productDTO.Images != null && productDTO.Images.Count > 0)
-                {
-                    foreach (var image in productDTO.Images)
-                    {
-                        var imageDTO = new ProductImageDTO
-                        {
-                            ProductID = int.Parse(response.Data.ToString()),
-                            ImageURL = image
-                        };
-                        await _productImageService.AddImageProduct(imageDTO);
-                    }
-                }
-                return RedirectToAction("Index");
-            }
-
-            ModelState.AddModelError(string.Empty, response.Message);
-            return View(productDTO);
         }
 
 
