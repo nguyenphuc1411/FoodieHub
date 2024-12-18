@@ -135,11 +135,14 @@
                 </div>
             </div>
 
-            @if (Model.PaymentMethod && !Model.PaymentStatus)
+            @if (Model.Status != "CANCELED")
             {
-                <a href=@("/payment/orders/"+Model.OrderID) class="button button-dark">PAYMENT</a>
+                @if (Model.PaymentMethod && !Model.PaymentStatus)
+                {
+                    <a href=@("/payment/orders/"+Model.OrderID) class="button button-dark">PAYMENT</a>
 
-                <a class="button button-light">CANCEL</a>
+                    <button class="button button-light" onclick="setOrderId(@Model.OrderID)" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">Cancel</button>
+                }
             }
 
             @if (!Model.PaymentMethod && Model.Status.ToUpperInvariant()== "PENDING")

@@ -112,9 +112,11 @@ namespace FoodieHub.MVC.Controllers
             var data = await _recipeService.GetByID(id);
             if (data == null || !data.IsActive)
             {
-                NotificationHelper.SetErrorNotification(this,"Not found this recipe");
+                NotificationHelper.SetErrorNotification(this, "Not found this recipe");
                 return RedirectToAction("Index");
             }
+
+            // Lấy danh sách bài viết liên quan
             var relatedRecipesResult = await _recipeService.GetAll(new QueryRecipeModel
             {
                 CategoryID = data.CategoryID,
@@ -133,7 +135,8 @@ namespace FoodieHub.MVC.Controllers
                     r.CategoryName,
                     r.Avatar,
                     r.FullName,
-                    r.RatingAverage
+                    r.RatingAverage,
+                    r.TotalFavorites // Thêm thuộc tính TotalFavorites vào đây
                 })
                 .ToList();
 
@@ -141,6 +144,7 @@ namespace FoodieHub.MVC.Controllers
             ViewBag.UserID = Request.GetCookie("UserID");
             return View(data);
         }
+
 
         [ValidateTokenForUser]
         public async Task<IActionResult> Favorite(int id)
