@@ -111,10 +111,24 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
             if (!response.Success)
             {
                 NotificationHelper.SetErrorNotification(this,response.Message);
+                
                 return RedirectToAction("Index");
             }
             else
             {
+                if (productDTO.Images != null)
+                {
+                    foreach (var item in productDTO.Images)
+                    {
+                        var img= new ProductImageDTO
+                        {
+                            ImageURL = item,
+                            ProductID = int.Parse(response.Data.ToString()),
+                        };
+                        var response1 = await _productImageService.AddImageProduct(img);
+                    }
+                }
+
                 NotificationHelper.SetSuccessNotification(this, response.Message);
                 return RedirectToAction("Index");
             }
@@ -226,7 +240,6 @@ namespace FoodieHub.MVC.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            return RedirectToAction("Index");
         }
 
 

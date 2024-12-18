@@ -47,7 +47,7 @@
                                     </a>
                                     <div class="card-body">
                                         <h5 class="card-title">@item.Title</h5>
-                                        <p class="card-text">@item.Description</p>
+                                
                                         <div class="recipe-stats">
                                             <span>Created on: @item.CreatedAt</span>
                                             <span>Likes: @item.TotalFavorites</span>
@@ -89,8 +89,7 @@
                                 <div class="card recipe-card shadow-sm">
                                     <img src="@($"{url}images/{item.ImageURL}")" class="card-img-top" alt="Recipe Image">
                                     <div class="card-body">
-                                        <h5 class="card-title">@item.Title</h5>
-                                        <p class="card-text">@item.Description</p>
+                                        <h5 class="card-title">@item.Title</h5>      
                                         <div class="recipe-stats">
                                             <span>Created on: @item.CreatedAt</span>
                                             <span>Likes: @item.TotalFavorites</span>

@@ -24,7 +24,7 @@ namespace FoodieHub.API.Repositories.Implementations
 
         public async Task<ServiceResponse> AddImage(ProductImageDTO img)
         {
-            var uploadImageResult = await _uploadImageHelper.UploadImage(img.ImageURL, "Images");
+            var uploadImageResult = await _uploadImageHelper.UploadImage(img.ImageURL, "Products");
 
             if (!uploadImageResult.Success)
             {
@@ -70,7 +70,7 @@ namespace FoodieHub.API.Repositories.Implementations
             foreach (var img in imgs)
             {
                 
-                var uploadImageResult = await _uploadImageHelper.UploadMutipleImages((List<IFormFile>)img.ImageURL, "Images");
+                var uploadImageResult = await _uploadImageHelper.UploadMutipleImages((List<IFormFile>)img.ImageURL, "Products");
 
                 if (!uploadImageResult.Success)
                 {
