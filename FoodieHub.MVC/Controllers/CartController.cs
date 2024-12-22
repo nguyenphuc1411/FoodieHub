@@ -148,6 +148,7 @@ namespace FoodieHub.MVC.Controllers
             var cartItemsJson = Request.Cookies["cart"] ?? "[]";
             var cartItems = System.Text.Json.JsonSerializer.Deserialize<List<CartItem>>(cartItemsJson) ?? new List<CartItem>();
 
+            // Thêm các sản phẩm từ đơn hàng vào giỏ
             foreach (var detail in orderDetails.ProductForOrder)
             {
                 // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
@@ -159,7 +160,7 @@ namespace FoodieHub.MVC.Controllers
                 }
                 else
                 {
-                    // Nếu chưa có, thêm sản phẩm mới
+                    // Nếu chưa có, thêm sản phẩm mới vào giỏ
                     cartItems.Add(new CartItem
                     {
                         ProductID = detail.ProductID,
@@ -170,14 +171,8 @@ namespace FoodieHub.MVC.Controllers
 
             // Lưu lại giỏ hàng vào cookie
             var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                Expires = DateTime.UtcNow.AddDays(30)
-            };
 
-            Response.Cookies.Append("cart", newCartItemsJson, cookieOptions);
+            Response.Cookies.Append("cart", newCartItemsJson);
             NotificationHelper.SetSuccessNotification(this, "All products from the order have been added to the cart successfully!");
 
             return RedirectToAction("Checkout");
@@ -194,6 +189,7 @@ namespace FoodieHub.MVC.Controllers
 
             var hasProduct = false;
 
+            // Thêm các sản phẩm từ công thức vào giỏ
             foreach (var ingredient in recipeDetails.Ingredients)
             {
                 if (ingredient.ProductID.HasValue)
@@ -204,10 +200,12 @@ namespace FoodieHub.MVC.Controllers
                     var existingItem = cartItems.FirstOrDefault(item => item.ProductID == ingredient.ProductID);
                     if (existingItem != null)
                     {
+                        // Nếu đã có, tăng số lượng
                         existingItem.Quantity += 1;
                     }
                     else
                     {
+                        // Nếu chưa có, thêm sản phẩm mới vào giỏ
                         cartItems.Add(new CartItem
                         {
                             ProductID = (int)ingredient.ProductID,
@@ -225,18 +223,12 @@ namespace FoodieHub.MVC.Controllers
 
             // Lưu lại giỏ hàng vào cookie
             var newCartItemsJson = System.Text.Json.JsonSerializer.Serialize(cartItems);
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                Expires = DateTime.UtcNow.AddDays(30)
-            };
 
-            Response.Cookies.Append("cart", newCartItemsJson, cookieOptions);
+            Response.Cookies.Append("cart", newCartItemsJson);
 
-            TempData["SuccessMessage"] = "All products from the order have been added to the cart successfully!";
-
-            return RedirectToAction("Checkout");
+            TempData["SuccessMessage"] = "All products from the recipe have been added to the cart successfully!";
+            var refererUrl = Request.Headers["Referer"].ToString();
+            return Redirect(refererUrl ?? Url.Action("Checkout", "Cart"));
         }
 
         [HttpPost]

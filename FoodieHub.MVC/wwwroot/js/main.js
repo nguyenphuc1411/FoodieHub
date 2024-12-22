@@ -59,73 +59,88 @@ document.querySelectorAll('.increase-quantity').forEach(button => {
 const couponID = document.getElementById("couponID");
 const couponInput = document.getElementById("couponInput");
 const message = document.getElementById("Message");
-const subTotal = parseFloat(document.getElementById("subTotal").innerText);
-var baseUrl = document.getElementById("baseApiUrl").value;
-couponInput.addEventListener("blur", () => {
-    const couponCode = couponInput.value.trim();
+const subTotalElement = document.getElementById("subTotal");
+const baseUrlElement = document.getElementById("baseApiUrl");
 
-   
-    if (!couponCode) {
-        message.innerText = "Please enter a valid coupon code.";
-        return;
-    }
+if (couponID && couponInput && message && subTotalElement && baseUrlElement) {
+    const subTotal = parseFloat(subTotalElement.innerText);
+    const baseUrl = baseUrlElement.value;
 
-    
-    fetch(`${baseUrl}api/coupons/couponcode/${couponCode}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const coupon = data.data;
-                const couponDiscount = document.getElementById("CouponDiscount");
-                const totalAmountElement = document.getElementById("TotalAmount");
+    couponInput.addEventListener("blur", () => {
+        const couponCode = couponInput.value.trim();
 
+        if (!couponCode) {
+            message.innerText = "Please enter a valid coupon code.";
+            return;
+        }
 
-             
-                if (parseFloat(coupon.minimumOrderAmount) > subTotal) {
-                    couponInput.value = "";
-                    couponID.value = "";
-                    message.innerText = `The order must be at least $${coupon.minimumOrderAmount} to apply this coupon.`;
-                } else {
-                    let discountOfCoupon = 0;
+        fetch(`${baseUrl}api/coupons/couponcode/${couponCode}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const coupon = data.data;
+                    const couponDiscount = document.getElementById("CouponDiscount");
+                    const totalAmountElement = document.getElementById("TotalAmount");
 
-                    
-                    if (coupon.discountType === "Fixed") {
-                        discountOfCoupon = coupon.discountValue;
-                    } else {
-                        discountOfCoupon = subTotal * (coupon.discountValue / 100);
+                    if (couponDiscount && totalAmountElement) {
+                        if (parseFloat(coupon.minimumOrderAmount) > subTotal) {
+                            couponInput.value = "";
+                            couponID.value = "";
+                            message.innerText = `The order must be at least $${coupon.minimumOrderAmount} to apply this coupon.`;
+                        } else {
+                            let discountOfCoupon = 0;
+
+                            if (coupon.discountType === "Fixed") {
+                                discountOfCoupon = coupon.discountValue;
+                            } else {
+                                discountOfCoupon = subTotal * (coupon.discountValue / 100);
+                            }
+
+                            couponDiscount.innerHTML = `
+                                <span>Coupon Discount</span>
+                                <span>- $${discountOfCoupon.toFixed(2)}</span>
+                            `;
+
+                            let totalAmount = subTotal - discountOfCoupon;
+                            totalAmountElement.innerText = `$${totalAmount.toFixed(2)}`;
+
+                            message.innerText = "Coupon applied successfully.";
+
+                            couponID.value = coupon.couponID;
+                        }
                     }
-
-                   
-                    couponDiscount.innerHTML = `
-                                                        <span>Coupon Discount</span>
-                                                        <span>- $${discountOfCoupon.toFixed(2)}</span>
-                                                    `;
-
-                    
-                    let totalAmount = subTotal - discountOfCoupon;
-                    totalAmountElement.innerText = `$${totalAmount.toFixed(2)}`;
-
-                    message.innerText = "Coupon applied successfully.";
-
-                   
-                    couponID.value = coupon.couponID;
+                } else {
+                    resetCouponInfo();
+                    message.innerText = data.message || "Coupon not found or invalid.";
                 }
-            } else {
-               
+            })
+            .catch(error => {
+                console.error(error);
                 resetCouponInfo();
-                message.innerText = data.message || "Coupon not found or invalid.";
-            }
-        })
-        .catch(error => {
-            
-            console.error(error);
-            resetCouponInfo();
-            message.innerText = "Error occurred while applying the coupon. Please try again later.";
-        });
-});
+                message.innerText = "Error occurred while applying the coupon. Please try again later.";
+            });
+    });
+
+    // Hàm reset thông tin coupon khi có lỗi hoặc không hợp lệ
+    function resetCouponInfo() {
+        const couponDiscount = document.getElementById("CouponDiscount");
+        const totalAmountElement = document.getElementById("TotalAmount");
+
+        if (couponDiscount && totalAmountElement) {
+            couponDiscount.innerHTML = "";
+            totalAmountElement.innerText = `$${subTotal.toFixed(2)}`;
+        }
+
+        couponInput.value = "";
+        couponID.value = "";
+    }
+} else {
+    console.error("One or more required elements are missing in the DOM.");
+}
+
                         
 
-// Hàm reset thông tin coupon khi có l?i ho?c không h?p l?
+/*// Hàm reset thông tin coupon khi có l?i ho?c không h?p l?
 function resetCouponInfo() {
     const couponDiscount = document.getElementById("CouponDiscount");
     const totalAmountElement = document.getElementById("TotalAmount");
@@ -136,7 +151,7 @@ function resetCouponInfo() {
 
     couponInput.value = "";
     couponID.value = "";
-}
+}*/
 
 
 

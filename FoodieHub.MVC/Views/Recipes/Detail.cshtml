@@ -152,14 +152,16 @@
                             <div class="image-container">
                                 <img src="@(url + "images/" + item.value.ImageURL)" class="img-fluid mb-2 rounded shadow-sm " alt="Step Image" height="400" width="600">
                             </div>
-                            <div class="description">
+                            <div>
                                 <p>@Html.Raw(item.value.Directions)</p>
                             </div>
                             
                         }
                         else
                         {
-                            <p>@Html.Raw(item.value.Directions)</p>
+                            <div>
+                                <p>@Html.Raw(item.value.Directions)</p>
+                            </div>
                         }
                     </div>
                 }

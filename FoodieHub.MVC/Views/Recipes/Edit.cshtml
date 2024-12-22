@@ -53,7 +53,7 @@
 
         <div class="form-group">
             <label asp-for="Description" class="font-weight-bold">Description</label>
-            <textarea asp-for="Description" class="form-control" placeholder="Enter the recipe description"></textarea>
+            <textarea asp-for="Description" class="form-control exclude" placeholder="Enter the recipe description"></textarea>
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
         <div class="row">
@@ -227,10 +227,15 @@
 </style>
 
 @section Scripts {
-    <script src="https://cdn.tiny.cloud/1/9f10nl2sixdjnsjgfzvjpzp47s6ffwrlzte370p7cbbhk682/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-
+    @* <script src="https://cdn.tiny.cloud/1/9f10nl2sixdjnsjgfzvjpzp47s6ffwrlzte370p7cbbhk682/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js"></script>
     <script>
-
+        //Summernote
+        $(document).ready(function () {
+            $('textarea:not(.exclude)').summernote();
+        });
+        //tinymce
         tinymce.init({
             selector: 'textarea',
             plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
@@ -246,6 +251,8 @@
                 <td><textarea name="RecipeSteps[${rowCount}].Directions" class="form-control"></textarea></td>
                 <td><input name="RecipeSteps[${rowCount}].FileStep" type="file" class="form-control" /></td>
                 <td><button type="button" class="btn btn-danger" onclick="removeStep(this)">Delete</button></td>`;
+
+            $(`textarea[name='RecipeSteps[${rowCount}].Directions']`).summernote();
         }
 
         function removeStep(button) {
